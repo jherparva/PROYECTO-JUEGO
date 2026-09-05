@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://oavsmh5tpxyn"
+path="res://.godot/imported/tower-top.obj-a51b88ac754918c935dc2f6494d11b4d.mesh"
+
+[deps]
+
+files=["res://.godot/imported/tower-top.obj-a51b88ac754918c935dc2f6494d11b4d.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/tower-top.obj"
+dest_files=["res://.godot/imported/tower-top.obj-a51b88ac754918c935dc2f6494d11b4d.mesh", "res://.godot/imported/tower-top.obj-a51b88ac754918c935dc2f6494d11b4d.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

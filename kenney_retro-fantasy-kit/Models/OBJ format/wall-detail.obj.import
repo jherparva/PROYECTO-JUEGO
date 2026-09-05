@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://5qr7jn5kljdt"
+path="res://.godot/imported/wall-detail.obj-b4397b33f60ed4993f0e4becc05e5a53.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-detail.obj-b4397b33f60ed4993f0e4becc05e5a53.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/wall-detail.obj"
+dest_files=["res://.godot/imported/wall-detail.obj-b4397b33f60ed4993f0e4becc05e5a53.mesh", "res://.godot/imported/wall-detail.obj-b4397b33f60ed4993f0e4becc05e5a53.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

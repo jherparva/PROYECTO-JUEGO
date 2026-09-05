@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bgwlkg0xf57wm"
+path="res://.godot/imported/structure-pole.obj-cc3f73263bfb4bb1330bbe5a3b1e7dda.mesh"
+
+[deps]
+
+files=["res://.godot/imported/structure-pole.obj-cc3f73263bfb4bb1330bbe5a3b1e7dda.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/structure-pole.obj"
+dest_files=["res://.godot/imported/structure-pole.obj-cc3f73263bfb4bb1330bbe5a3b1e7dda.mesh", "res://.godot/imported/structure-pole.obj-cc3f73263bfb4bb1330bbe5a3b1e7dda.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

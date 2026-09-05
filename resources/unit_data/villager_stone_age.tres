@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="UnitData" load_steps=2 format=3 uid="uid://villager_stone_age"]
+
+[ext_resource type="Script" path="res://scripts/resources/unit_data.gd" id="1_unitdata"]
+
+[resource]
+script = ExtResource("1_unitdata")
+unit_name = "Aldeano"
+description = "Recolecta recursos y construye edificios. Edad de Piedra."
+scene_path = "res://scenes/units/villager.tscn"
+cost = {
+	"wood": 50,
+	"food": 30
+}
+production_time = 12.0
+era_requirement = 0
+base_hp = 60
+base_speed = 90.0
+base_attack_damage = 3
+base_attack_range = 25.0
+base_attack_cooldown = 1.5

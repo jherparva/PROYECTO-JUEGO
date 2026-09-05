@@ -1,0 +1,25 @@
+[gd_scene load_steps=6 format=3 uid="uid://rts_unit_base"]
+
+[ext_resource type="Script" path="res://scripts/units/fsm/state_machine.gd" id="1_fsm"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_idle.gd" id="2_idle"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_move.gd" id="3_move"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_attacking.gd" id="4_attack"]
+
+[node name="UnitBase" type="CharacterBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+
+[node name="SelectionIndicator" type="Node2D" parent="."]
+visible = false
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("1_fsm")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("2_idle")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("3_move")
+
+[node name="Attacking" type="Node" parent="StateMachine"]
+script = ExtResource("4_attack")

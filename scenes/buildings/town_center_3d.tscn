@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://town_center_3d_scene"]
+
+[ext_resource type="Script" path="res://scripts/buildings/town_center_3d.gd" id="1_tc3d"]
+[ext_resource type="PackedScene" uid="uid://bjihaojjdludr" path="res://IMAGENES/EDAD PREHISTORICA/CASAS DE CONSTRUIR/capitolio edad prehistorica.glb" id="2_capitolio_prehistoria"]
+[ext_resource type="PackedScene" path="res://assets/survival_kit/campfire-pit.glb" id="3_campfire"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tc"]
+size = Vector3(6.8, 3.8, 6.2)
+
+[node name="TownCenter3D" type="StaticBody3D"]
+script = ExtResource("1_tc3d")
+building_name = "Centro Urbano"
+radio_vision = 28.0
+salud_maxima = 1200.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 0)
+shape = SubResource("BoxShape3D_tc")
+
+[node name="CapitolioPrehistorico" parent="." instance=ExtResource("2_capitolio_prehistoria")]
+transform = Transform3D(3.8, 0, 0, 0, 3.8, 0, 0, 0, 3.8, 0, 0, 0)
+
+[node name="Campfire" parent="." instance=ExtResource("3_campfire")]
+transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 4.8, 0, 0)
+
+[node name="FireLight" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.8, 1.2, 0)
+light_color = Color(1, 0.55, 0.15, 1)
+light_energy = 2.8
+omni_range = 8.0

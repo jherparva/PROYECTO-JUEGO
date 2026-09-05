@@ -1,0 +1,63 @@
+[gd_scene load_steps=10 format=3 uid="uid://prophet_3d_scene"]
+
+[ext_resource type="Script" path="res://scripts/units/prophet_3d.gd" id="1_prophet3d"]
+[ext_resource type="PackedScene" uid="uid://b4wrkelyayfn3" path="res://IMAGENES/EDAD PREHISTORICA/PERSONAJES/modelo+3D+de+hombre+de+las+cavernas.glb" id="2_model"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_machine_3d.gd" id="3_fsm3d"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_idle_3d.gd" id="4_idle3d"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_move_3d.gd" id="5_move3d"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_attacking_3d.gd" id="6_atk3d"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_proph"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring_proph"]
+inner_radius = 0.6
+outer_radius = 0.72
+
+[sub_resource type="StandardMaterial3D" id="Mat_ring_proph"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.75, 0.15, 1)
+
+[node name="Prophet3D" type="CharacterBody3D"]
+script = ExtResource("1_prophet3d")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_proph")
+
+[node name="ProphetModel" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1.6, 0, 0, 0, 1.6, 0, 0, 0, 1.6, 0, 0, 0)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+target_desired_distance = 0.5
+
+[node name="RightHandAttachment" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.9, 0.2)
+
+[node name="SelectionIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+visible = false
+mesh = SubResource("TorusMesh_ring_proph")
+surface_material_override/0 = SubResource("Mat_ring_proph")
+
+[node name="StatusLabel" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.3, 0)
+billboard = 1
+no_depth_test = true
+font_size = 26
+outline_size = 5
+outline_modulate = Color(0, 0, 0, 0.85)
+text = ""
+
+[node name="StateMachine3D" type="Node" parent="."]
+script = ExtResource("3_fsm3d")
+
+[node name="Idle" type="Node" parent="StateMachine3D"]
+script = ExtResource("4_idle3d")
+
+[node name="Move" type="Node" parent="StateMachine3D"]
+script = ExtResource("5_move3d")
+
+[node name="Attacking" type="Node" parent="StateMachine3D"]
+script = ExtResource("6_atk3d")

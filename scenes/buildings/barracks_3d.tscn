@@ -1,0 +1,20 @@
+[gd_scene load_steps=4 format=3 uid="uid://barracks_3d_scene"]
+
+[ext_resource type="Script" path="res://scripts/buildings/barracks_3d.gd" id="1_barracks"]
+[ext_resource type="PackedScene" path="res://IMAGENES/EDAD PREHISTORICA/CASAS DE CONSTRUIR/cuartel prehistorico.glb" id="2_cuartel_prehistoria"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_barracks"]
+size = Vector3(5, 3.5, 5)
+
+[node name="Barracks3D" type="StaticBody3D"]
+script = ExtResource("1_barracks")
+building_name = "Cuartel Prehistórico"
+radio_vision = 20.0
+salud_maxima = 650.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.75, 0)
+shape = SubResource("BoxShape3D_barracks")
+
+[node name="CuartelPrehistorico" parent="." instance=ExtResource("2_cuartel_prehistoria")]
+transform = Transform3D(3.8, 0, 0, 0, 3.8, 0, 0, 0, 3.8, 0, 0, 0)

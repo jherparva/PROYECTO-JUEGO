@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bq0suvpubbjnk"
+path="res://.godot/imported/battlement-half.obj-5fb2764db9856e97ba57f84c35457786.mesh"
+
+[deps]
+
+files=["res://.godot/imported/battlement-half.obj-5fb2764db9856e97ba57f84c35457786.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/battlement-half.obj"
+dest_files=["res://.godot/imported/battlement-half.obj-5fb2764db9856e97ba57f84c35457786.mesh", "res://.godot/imported/battlement-half.obj-5fb2764db9856e97ba57f84c35457786.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

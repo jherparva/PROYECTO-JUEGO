@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://c4buk3dyd4mf6"
+path="res://.godot/imported/overhang-round.obj-cde1deda3775160c59aaa9763c09742f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/overhang-round.obj-cde1deda3775160c59aaa9763c09742f.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/overhang-round.obj"
+dest_files=["res://.godot/imported/overhang-round.obj-cde1deda3775160c59aaa9763c09742f.mesh", "res://.godot/imported/overhang-round.obj-cde1deda3775160c59aaa9763c09742f.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

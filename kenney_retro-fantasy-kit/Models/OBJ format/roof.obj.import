@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://bvearsg180gu1"
+path="res://.godot/imported/roof.obj-d70b6a8277e9c5ee63c0ebf37e735eff.mesh"
+
+[deps]
+
+files=["res://.godot/imported/roof.obj-d70b6a8277e9c5ee63c0ebf37e735eff.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/roof.obj"
+dest_files=["res://.godot/imported/roof.obj-d70b6a8277e9c5ee63c0ebf37e735eff.mesh", "res://.godot/imported/roof.obj-d70b6a8277e9c5ee63c0ebf37e735eff.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

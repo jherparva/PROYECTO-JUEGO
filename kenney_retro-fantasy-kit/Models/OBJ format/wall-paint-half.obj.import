@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://cgcdrink6x4l5"
+path="res://.godot/imported/wall-paint-half.obj-32cc317f01fbc64b3294b1b477f35c79.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-paint-half.obj-32cc317f01fbc64b3294b1b477f35c79.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/wall-paint-half.obj"
+dest_files=["res://.godot/imported/wall-paint-half.obj-32cc317f01fbc64b3294b1b477f35c79.mesh", "res://.godot/imported/wall-paint-half.obj-32cc317f01fbc64b3294b1b477f35c79.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dasocsmqnp57x"
+path="res://.godot/imported/detail-crate.obj-1e5c2b8496eab21b83f731ba906d08d0.mesh"
+
+[deps]
+
+files=["res://.godot/imported/detail-crate.obj-1e5c2b8496eab21b83f731ba906d08d0.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/detail-crate.obj"
+dest_files=["res://.godot/imported/detail-crate.obj-1e5c2b8496eab21b83f731ba906d08d0.mesh", "res://.godot/imported/detail-crate.obj-1e5c2b8496eab21b83f731ba906d08d0.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

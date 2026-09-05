@@ -1,0 +1,163 @@
+[gd_scene load_steps=3 format=3 uid="uid://match_setup_menu_scene"]
+
+[ext_resource type="Script" path="res://scripts/ui/match_setup_menu.gd" id="1_script"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.109804, 0.129412, 0.156863, 0.960784)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.85098, 0.678431, 0.243137, 0.95)
+corner_radius_top_left = 10
+corner_radius_top_right = 10
+corner_radius_bottom_right = 10
+corner_radius_bottom_left = 10
+shadow_color = Color(0, 0, 0, 0.7)
+shadow_size = 12
+
+[node name="MatchSetupMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Dimmer" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.02, 0.03, 0.05, 0.72)
+
+[node name="CenterContainer" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelContainer" type="PanelContainer" parent="CenterContainer"]
+custom_minimum_size = Vector2(560, 440)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="MarginContainer" type="MarginContainer" parent="CenterContainer/PanelContainer"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_bottom = 20
+
+[node name="VBox" type="VBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.84, 0.45, 1)
+theme_override_font_sizes/font_size = 20
+text = "⚔️ CONFIGURACIÓN DE LA PARTIDA"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.85, 0.85)
+theme_override_font_sizes/font_size = 12
+text = "Personaliza los parámetros tácticos antes de marchar al combate"
+horizontal_alignment = 1
+
+[node name="HSeparator" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="Grid" type="GridContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/h_separation = 16
+theme_override_constants/v_separation = 12
+columns = 2
+
+[node name="LblPlayers" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+layout_mode = 2
+text = "👥 Cantidad de Jugadores:"
+
+[node name="OptPlayers" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 32)
+layout_mode = 2
+
+[node name="LblVillagers" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+layout_mode = 2
+text = "🧔 Aldeanos Iniciales:"
+
+[node name="OptVillagers" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 32)
+layout_mode = 2
+
+[node name="LblResources" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+layout_mode = 2
+text = "🪙 Recursos Iniciales:"
+
+[node name="OptResources" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 32)
+layout_mode = 2
+
+[node name="LblSpeed" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+layout_mode = 2
+text = "⚡ Velocidad de Partida:"
+
+[node name="OptGameSpeed" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 32)
+layout_mode = 2
+
+[node name="LblDifficulty" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+layout_mode = 2
+text = "🧠 Dificultad de la IA:"
+
+[node name="OptDifficulty" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 32)
+layout_mode = 2
+
+[node name="LblFOW" type="Label" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+layout_mode = 2
+text = "🌫️ Niebla de Guerra:"
+
+[node name="OptFOW" type="OptionButton" parent="CenterContainer/PanelContainer/MarginContainer/VBox/Grid"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(280, 32)
+layout_mode = 2
+
+[node name="HSeparator2" type="HSeparator" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+
+[node name="ButtonsHBox" type="HBoxContainer" parent="CenterContainer/PanelContainer/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="BtnDefaults" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBox/ButtonsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(170, 36)
+layout_mode = 2
+text = "🔄 Predeterminado"
+
+[node name="BtnClose" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBox/ButtonsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(90, 36)
+layout_mode = 2
+text = "✖️ Cerrar"
+
+[node name="BtnApply" type="Button" parent="CenterContainer/PanelContainer/MarginContainer/VBox/ButtonsHBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(210, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.96, 0.9, 0.5, 1)
+text = "⚔️ APLICAR AJUSTES"

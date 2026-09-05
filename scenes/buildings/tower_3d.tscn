@@ -1,0 +1,42 @@
+[gd_scene load_steps=7 format=3 uid="uid://tower_3d_scene"]
+
+[ext_resource type="Script" path="res://scripts/buildings/tower_3d.gd" id="1_tower"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_tower"]
+size = Vector3(3, 6, 3)
+
+[sub_resource type="CylinderMesh" id="CylMesh_base"]
+top_radius = 1.3
+bottom_radius = 1.5
+height = 4.5
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone"]
+albedo_color = Color(0.55, 0.55, 0.52, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_parapet"]
+size = Vector3(2.8, 0.6, 2.8)
+
+[sub_resource type="StandardMaterial3D" id="Mat_stone_dark"]
+albedo_color = Color(0.40, 0.40, 0.38, 1)
+roughness = 0.90
+
+[node name="Tower3D" type="StaticBody3D"]
+script = ExtResource("1_tower")
+building_name = "Torre de Guardia"
+radio_vision = 30.0
+salud_maxima = 800.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("BoxShape3D_tower")
+
+[node name="BaseMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.25, 0)
+mesh = SubResource("CylMesh_base")
+surface_material_override/0 = SubResource("Mat_stone")
+
+[node name="ParapetMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.8, 0)
+mesh = SubResource("BoxMesh_parapet")
+surface_material_override/0 = SubResource("Mat_stone_dark")

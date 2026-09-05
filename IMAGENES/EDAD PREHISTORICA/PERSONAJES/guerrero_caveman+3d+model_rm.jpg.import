@@ -1,0 +1,38 @@
+[remap]
+
+importer="texture"
+type="CompressedTexture2D"
+uid="uid://g4e4fgcyx6wi"
+path.s3tc="res://.godot/imported/guerrero_caveman+3d+model_rm.jpg-68fe78535d1ad8026cfda89ca326158a.s3tc.ctex"
+metadata={
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
+}
+generator_parameters={
+"md5": "107bf08dc205f05f1d817ea99478300a"
+}
+
+[deps]
+
+source_file="res://IMAGENES/EDAD PREHISTORICA/PERSONAJES/guerrero_caveman+3d+model_rm.jpg"
+dest_files=["res://.godot/imported/guerrero_caveman+3d+model_rm.jpg-68fe78535d1ad8026cfda89ca326158a.s3tc.ctex"]
+
+[params]
+
+compress/mode=2
+compress/high_quality=false
+compress/lossy_quality=0.7
+compress/hdr_compression=1
+compress/normal_map=0
+compress/channel_pack=0
+mipmaps/generate=true
+mipmaps/limit=-1
+roughness/mode=0
+roughness/src_normal=""
+process/fix_alpha_border=true
+process/premult_alpha=false
+process/normal_map_invert_y=false
+process/hdr_as_srgb=false
+process/hdr_clamp_exposure=false
+process/size_limit=0
+detect_3d/compress_to=0

@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://c3ee_test_suite_001"]
+
+[ext_resource type="Script" path="res://scripts/tests/test_ee_integration.gd" id="1_test_script"]
+
+[node name="TestEEIntegration" type="Node"]
+script = ExtResource("1_test_script")

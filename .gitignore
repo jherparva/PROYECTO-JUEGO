@@ -1,0 +1,15 @@
+# Godot 4+ engine .gitignore
+.godot/
+*.translation
+
+# OS and Temporary files
+.DS_Store
+Thumbs.db
+*.tmp
+*.log
+*.zip
+docx_temp.txt
+build_check*.txt
+test_output.log
+scratch/
+read_docx*.ps1

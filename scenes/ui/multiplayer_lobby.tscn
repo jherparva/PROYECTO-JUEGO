@@ -1,0 +1,207 @@
+[gd_scene load_steps=3 format=3 uid="uid://multiplayer_lobby"]
+
+[ext_resource type="Script" path="res://scripts/ui/multiplayer_lobby.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/main_menu_bg.jpg" id="2_bg"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.08, 0.04, 0.02, 0.92)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.831, 0.686, 0.216, 1.0)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.0, 0.0, 0.0, 0.85)
+shadow_size = 16
+
+[node name="MultiplayerLobby" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="LobbyBackground" type="TextureRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="DarkOverlay" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.04, 0.02, 0.01, 0.75)
+
+[node name="CenterPanel" type="PanelContainer" parent="."]
+custom_minimum_size = Vector2(1240, 720)
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -620.0
+offset_top = -360.0
+offset_right = 620.0
+offset_bottom = 360.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Margin" type="MarginContainer" parent="CenterPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="CenterPanel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LblTitle" type="Label" parent="CenterPanel/Margin/VBox"]
+layout_mode = 2
+text = "⚔️  EMPIRE TACTICS — LOBBY MULTIJUGADOR DE PARTIDA  ⚔️"
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(1.0, 0.88, 0.28, 1.0)
+
+[node name="HBoxConn" type="HBoxContainer" parent="CenterPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="LblIP" type="Label" parent="CenterPanel/Margin/VBox/HBoxConn"]
+layout_mode = 2
+text = "IP Host:"
+theme_override_colors/font_color = Color(0.9, 0.85, 0.7, 1.0)
+
+[node name="InputIP" type="LineEdit" parent="CenterPanel/Margin/VBox/HBoxConn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(160, 34)
+layout_mode = 2
+text = "127.0.0.1"
+
+[node name="LblPort" type="Label" parent="CenterPanel/Margin/VBox/HBoxConn"]
+layout_mode = 2
+text = "Puerto:"
+theme_override_colors/font_color = Color(0.9, 0.85, 0.7, 1.0)
+
+[node name="InputPort" type="LineEdit" parent="CenterPanel/Margin/VBox/HBoxConn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(80, 34)
+layout_mode = 2
+text = "4242"
+
+[node name="BtnHost" type="Button" parent="CenterPanel/Margin/VBox/HBoxConn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(130, 34)
+layout_mode = 2
+text = "CREAR HOST"
+
+[node name="BtnJoin" type="Button" parent="CenterPanel/Margin/VBox/HBoxConn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 34)
+layout_mode = 2
+text = "UNIRSE"
+
+[node name="LblStatus" type="Label" parent="CenterPanel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "🟡 Ingresa los datos de conexión o crea un Host para configurar las 8 ranuras y reglas."
+autowrap_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.7, 1.0)
+theme_override_font_sizes/font_size = 14
+
+[node name="HSeparator1" type="HSeparator" parent="CenterPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HBoxMainBody" type="HBoxContainer" parent="CenterPanel/Margin/VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="LeftCol" type="VBoxContainer" parent="CenterPanel/Margin/VBox/HBoxMainBody"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="LblSlotsTitle" type="Label" parent="CenterPanel/Margin/VBox/HBoxMainBody/LeftCol"]
+layout_mode = 2
+text = "👥 GESTIÓN DE 8 RANURAS (JUGADORES & BOTS)"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1.0, 0.88, 0.28, 1.0)
+
+[node name="ScrollSlots" type="ScrollContainer" parent="CenterPanel/Margin/VBox/HBoxMainBody/LeftCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="SlotsContainer" type="VBoxContainer" parent="CenterPanel/Margin/VBox/HBoxMainBody/LeftCol/ScrollSlots"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="RightCol" type="VBoxContainer" parent="CenterPanel/Margin/VBox/HBoxMainBody"]
+custom_minimum_size = Vector2(520, 0)
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="LblRulesTitle" type="Label" parent="CenterPanel/Margin/VBox/HBoxMainBody/RightCol"]
+layout_mode = 2
+text = "⚙️ OPCIONES GLOBALES DE PARTIDA (ESTILO EMPIRE EARTH)"
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(1.0, 0.88, 0.28, 1.0)
+
+[node name="ScrollRules" type="ScrollContainer" parent="CenterPanel/Margin/VBox/HBoxMainBody/RightCol"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RulesVBox" type="VBoxContainer" parent="CenterPanel/Margin/VBox/HBoxMainBody/RightCol/ScrollRules"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="HSeparator2" type="HSeparator" parent="CenterPanel/Margin/VBox"]
+layout_mode = 2
+
+[node name="HBoxActions" type="HBoxContainer" parent="CenterPanel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="BtnBack" type="Button" parent="CenterPanel/Margin/VBox/HBoxActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(140, 44)
+layout_mode = 2
+text = "VOLVER"
+
+[node name="BtnLoadSave" type="Button" parent="CenterPanel/Margin/VBox/HBoxActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(200, 44)
+layout_mode = 2
+text = "CARGAR GUARDADO"
+
+[node name="BtnStart" type="Button" parent="CenterPanel/Margin/VBox/HBoxActions"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "⚔️ INICIAR PARTIDA"

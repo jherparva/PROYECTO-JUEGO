@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dxhpyuj4aptcc"
+path="res://.godot/imported/battlement.obj-09eb2e3c9d367acda7367074737199bc.mesh"
+
+[deps]
+
+files=["res://.godot/imported/battlement.obj-09eb2e3c9d367acda7367074737199bc.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/battlement.obj"
+dest_files=["res://.godot/imported/battlement.obj-09eb2e3c9d367acda7367074737199bc.mesh", "res://.godot/imported/battlement.obj-09eb2e3c9d367acda7367074737199bc.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

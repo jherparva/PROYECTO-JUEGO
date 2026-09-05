@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://ec0laladl4jg"
+path="res://.godot/imported/fence-wood.obj-482597bbf1047d74a32ecf178be0291c.mesh"
+
+[deps]
+
+files=["res://.godot/imported/fence-wood.obj-482597bbf1047d74a32ecf178be0291c.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/fence-wood.obj"
+dest_files=["res://.godot/imported/fence-wood.obj-482597bbf1047d74a32ecf178be0291c.mesh", "res://.godot/imported/fence-wood.obj-482597bbf1047d74a32ecf178be0291c.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

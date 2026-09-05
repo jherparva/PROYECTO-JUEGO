@@ -1,0 +1,34 @@
+[gd_scene load_steps=3 format=3 uid="uid://minimap_scene_rts"]
+
+[ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="1_minimap"]
+
+[sub_resource type="ViewportTexture" id="ViewportTex_minimap"]
+viewport_path = NodePath("../MinimapSubViewport")
+
+[node name="Minimap" type="Control"]
+custom_minimum_size = Vector2(220, 220)
+script = ExtResource("1_minimap")
+map_bounds = Vector2(400, 400)
+
+[node name="MinimapSubViewport" type="SubViewport" parent="."]
+size = Vector2i(256, 256)
+render_target_update_mode = 3
+
+[node name="OverviewCamera" type="Camera3D" parent="MinimapSubViewport"]
+projection = 1
+size = 400.0
+position = Vector3(0, 350, 0)
+rotation_degrees = Vector3(-90, 0, 0)
+near = 0.1
+far = 875.0
+
+[node name="ViewportTextureRect" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = SubResource("ViewportTex_minimap")
+expand_mode = 1
+stretch_mode = 5

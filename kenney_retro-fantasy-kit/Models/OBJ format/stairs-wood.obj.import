@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://86j5nsxusro0"
+path="res://.godot/imported/stairs-wood.obj-970238f823c2733cc68a4dbb1601d6a0.mesh"
+
+[deps]
+
+files=["res://.godot/imported/stairs-wood.obj-970238f823c2733cc68a4dbb1601d6a0.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/stairs-wood.obj"
+dest_files=["res://.godot/imported/stairs-wood.obj-970238f823c2733cc68a4dbb1601d6a0.mesh", "res://.godot/imported/stairs-wood.obj-970238f823c2733cc68a4dbb1601d6a0.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

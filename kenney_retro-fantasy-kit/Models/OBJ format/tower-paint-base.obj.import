@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://b16b5t5bhckrs"
+path="res://.godot/imported/tower-paint-base.obj-19c9d0bd57fc556620dd0c803e7ad19e.mesh"
+
+[deps]
+
+files=["res://.godot/imported/tower-paint-base.obj-19c9d0bd57fc556620dd0c803e7ad19e.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/tower-paint-base.obj"
+dest_files=["res://.godot/imported/tower-paint-base.obj-19c9d0bd57fc556620dd0c803e7ad19e.mesh", "res://.godot/imported/tower-paint-base.obj-19c9d0bd57fc556620dd0c803e7ad19e.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

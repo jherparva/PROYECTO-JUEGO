@@ -1,0 +1,271 @@
+[gd_scene load_steps=23 format=3 uid="uid://be1l18ub111qn"]
+
+[ext_resource type="Script" path="res://scripts/core/camera_rts_3d.gd" id="1_cam3d"]
+[ext_resource type="Script" path="res://scripts/core/rts_input_controller.gd" id="2_input"]
+[ext_resource type="Script" path="res://scripts/core/building_placer.gd" id="3_placer"]
+[ext_resource type="Script" path="res://scripts/core/fog_of_war_manager.gd" id="4_fow"]
+[ext_resource type="Script" path="res://scripts/ui/hud_rts.gd" id="5_hud"]
+[ext_resource type="Script" path="res://scripts/ui/minimap.gd" id="6_minimap"]
+[ext_resource type="Script" path="res://scripts/ui/selection_box.gd" id="7_selbox"]
+[ext_resource type="PackedScene" path="res://scenes/units/villager_3d.tscn" id="8_vil3d"]
+[ext_resource type="Script" path="res://scripts/ai/rts_enemy_ai.gd" id="9_ai"]
+[ext_resource type="Script" path="res://scripts/ui/rts_notification_manager.gd" id="10_notif"]
+[ext_resource type="Script" path="res://scripts/world/rts_resource_spawner.gd" id="11_spawner"]
+[ext_resource type="PackedScene" path="res://scenes/buildings/town_center_3d.tscn" id="12_tc3d"]
+[ext_resource type="Script" path="res://scripts/world/rts_navigation_region.gd" id="13_navreg"]
+[ext_resource type="Script" path="res://scripts/ui/rts_action_panel.gd" id="14_actpanel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/pause_menu.tscn" id="15_pause"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_sky"]
+sky_top_color = Color(0.35, 0.58, 0.82, 1)
+sky_horizon_color = Color(0.68, 0.78, 0.86, 1)
+ground_bottom_color = Color(0.2, 0.25, 0.18, 1)
+ground_horizon_color = Color(0.55, 0.65, 0.55, 1)
+
+[sub_resource type="Sky" id="Sky_rts"]
+sky_material = SubResource("ProceduralSkyMaterial_sky")
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+sky = SubResource("Sky_rts")
+ambient_light_source = 3
+ambient_light_color = Color(0.65, 0.72, 0.8, 1)
+ambient_light_energy = 0.8
+reflected_light_source = 2
+tonemap_mode = 2
+
+[sub_resource type="NavigationMesh" id="NavMesh3D_main"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_terrain"]
+size = Vector3(400, 0.2, 400)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_terrain"]
+size = Vector2(400, 400)
+
+[sub_resource type="StandardMaterial3D" id="Mat_terrain_grass"]
+albedo_color = Color(0.22, 0.36, 0.18, 1)
+roughness = 0.9
+
+[node name="Main3D" type="Node3D"]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, -0.5, 0.5, 0, 0.707107, 0.707107, -0.707107, -0.5, 0.5, 0, 40, 0)
+light_color = Color(1, 0.96, 0.88, 1)
+light_energy = 1.05
+shadow_enabled = true
+
+[node name="World" type="Node3D" parent="."]
+
+[node name="Terrain" type="Node3D" parent="World"]
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="World/Terrain"]
+navigation_mesh = SubResource("NavMesh3D_main")
+script = ExtResource("13_navreg")
+
+[node name="TerrainBody" type="StaticBody3D" parent="World/Terrain"]
+
+[node name="TerrainCollision" type="CollisionShape3D" parent="World/Terrain/TerrainBody"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.1, 0)
+shape = SubResource("BoxShape3D_terrain")
+
+[node name="TerrainMesh" type="MeshInstance3D" parent="World/Terrain/TerrainBody"]
+mesh = SubResource("PlaneMesh_terrain")
+surface_material_override/0 = SubResource("Mat_terrain_grass")
+
+[node name="Units" type="Node3D" parent="World"]
+
+[node name="Villager3D_1" parent="World/Units" instance=ExtResource("8_vil3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 2)
+
+[node name="Villager3D_2" parent="World/Units" instance=ExtResource("8_vil3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4, 0, 5)
+
+[node name="Villager3D_3" parent="World/Units" instance=ExtResource("8_vil3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2, 0, 6)
+
+[node name="Villager3D_4" parent="World/Units" instance=ExtResource("8_vil3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 3)
+
+[node name="Villager3D_5" parent="World/Units" instance=ExtResource("8_vil3d")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5, 0, -4)
+
+[node name="Buildings" type="Node3D" parent="World"]
+
+[node name="TownCenter3D" parent="World/Buildings" instance=ExtResource("12_tc3d")]
+
+[node name="Resources" type="Node3D" parent="World"]
+
+[node name="RTSResourceSpawner" type="Node3D" parent="World"]
+script = ExtResource("11_spawner")
+
+[node name="FogOfWarManager" type="Node3D" parent="."]
+script = ExtResource("4_fow")
+
+[node name="CameraRTS3D" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+script = ExtResource("1_cam3d")
+
+[node name="Camera3D" type="Camera3D" parent="CameraRTS3D"]
+
+[node name="RTSInputController" type="Node3D" parent="."]
+script = ExtResource("2_input")
+
+[node name="BuildingPlacer" type="Node3D" parent="."]
+script = ExtResource("3_placer")
+
+[node name="HUD" type="CanvasLayer" parent="."]
+layer = 5
+script = ExtResource("5_hud")
+
+[node name="PanelTop" type="Panel" parent="HUD"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 720.0
+offset_bottom = 44.0
+
+[node name="LabelMadera" type="Label" parent="HUD/PanelTop"]
+layout_mode = 0
+offset_left = 14.0
+offset_top = 6.0
+offset_right = 140.0
+offset_bottom = 32.0
+text = "🪵 200"
+
+[node name="LabelComida" type="Label" parent="HUD/PanelTop"]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 6.0
+offset_right = 276.0
+offset_bottom = 32.0
+text = "🍖 200"
+
+[node name="LabelPiedra" type="Label" parent="HUD/PanelTop"]
+layout_mode = 0
+offset_left = 286.0
+offset_top = 6.0
+offset_right = 412.0
+offset_bottom = 32.0
+text = "🪨 150"
+
+[node name="LabelHierro" type="Label" parent="HUD/PanelTop"]
+layout_mode = 0
+offset_left = 422.0
+offset_top = 6.0
+offset_right = 548.0
+offset_bottom = 32.0
+text = "⚙️ 0"
+
+[node name="LabelOro" type="Label" parent="HUD/PanelTop"]
+layout_mode = 0
+offset_left = 558.0
+offset_top = 6.0
+offset_right = 684.0
+offset_bottom = 32.0
+text = "🪙 0"
+
+[node name="BtnConfig" type="Button" parent="HUD/PanelTop"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 6
+anchor_left = 1.0
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = -175.0
+offset_top = -15.0
+offset_right = -10.0
+offset_bottom = 15.0
+grow_horizontal = 0
+grow_vertical = 2
+text = "Menú"
+
+[node name="ActionPanel" type="PanelContainer" parent="HUD"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -390.0
+offset_top = -125.0
+offset_right = 390.0
+offset_bottom = -15.0
+grow_horizontal = 2
+grow_vertical = 0
+script = ExtResource("14_actpanel")
+
+[node name="MinimapLayer" type="CanvasLayer" parent="."]
+layer = 6
+
+[node name="MinimapPanel" type="Panel" parent="MinimapLayer"]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -230.0
+offset_top = -230.0
+offset_right = -5.0
+offset_bottom = -5.0
+grow_horizontal = 0
+grow_vertical = 0
+
+[node name="Minimap" type="Control" parent="MinimapLayer/MinimapPanel"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("6_minimap")
+
+[node name="MinimapSubViewport" type="SubViewport" parent="MinimapLayer/MinimapPanel/Minimap"]
+size = Vector2i(256, 256)
+render_target_update_mode = 3
+
+[node name="OverviewCamera" type="Camera3D" parent="MinimapLayer/MinimapPanel/Minimap/MinimapSubViewport"]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 350, 0)
+projection = 1
+size = 400.0
+near = 0.1
+far = 875.0
+
+[node name="ViewportTextureRect" type="TextureRect" parent="MinimapLayer/MinimapPanel/Minimap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SelectionUI" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="SelectionBox" type="Control" parent="SelectionUI"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("7_selbox")
+
+[node name="EnemyAI" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 150, 0, 150)
+script = ExtResource("9_ai")
+
+[node name="RTSNotificationManager" type="CanvasLayer" parent="."]
+layer = 20
+script = ExtResource("10_notif")
+
+[node name="PauseMenuLayer" type="CanvasLayer" parent="."]
+layer = 25
+
+[node name="PauseMenu" parent="PauseMenuLayer" instance=ExtResource("15_pause")]
+unique_name_in_owner = true
+visible = false

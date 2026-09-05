@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://shkopecm6p88"
+path="res://.godot/imported/roof-high-side-corner.obj-cff56d943ea154d2bba9506b59c3859d.mesh"
+
+[deps]
+
+files=["res://.godot/imported/roof-high-side-corner.obj-cff56d943ea154d2bba9506b59c3859d.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/roof-high-side-corner.obj"
+dest_files=["res://.godot/imported/roof-high-side-corner.obj-cff56d943ea154d2bba9506b59c3859d.mesh", "res://.godot/imported/roof-high-side-corner.obj-cff56d943ea154d2bba9506b59c3859d.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

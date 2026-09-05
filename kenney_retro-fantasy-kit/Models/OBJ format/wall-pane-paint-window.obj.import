@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://csfkm0doek5p1"
+path="res://.godot/imported/wall-pane-paint-window.obj-dc00789348d84eb1a263c30d3b05c2c8.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-pane-paint-window.obj-dc00789348d84eb1a263c30d3b05c2c8.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/wall-pane-paint-window.obj"
+dest_files=["res://.godot/imported/wall-pane-paint-window.obj-dc00789348d84eb1a263c30d3b05c2c8.mesh", "res://.godot/imported/wall-pane-paint-window.obj-dc00789348d84eb1a263c30d3b05c2c8.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

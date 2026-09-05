@@ -1,0 +1,43 @@
+[gd_scene load_steps=9 format=3 uid="uid://bwysimsm1x0mk"]
+
+[ext_resource type="Script" path="res://scripts/units/villager.gd" id="1_villager"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_machine.gd" id="2_fsm"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_idle.gd" id="3_idle"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_move.gd" id="4_move"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_attacking.gd" id="5_attack"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_gathering.gd" id="6_gather"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_repairing.gd" id="7_repair"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_vil"]
+radius = 12.0
+height = 32.0
+
+[node name="Villager" type="CharacterBody2D"]
+script = ExtResource("1_villager")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CapsuleShape2D_vil")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(7, 6)
+
+[node name="SelectionIndicator" type="Node2D" parent="."]
+visible = false
+
+[node name="StateMachine" type="Node" parent="."]
+script = ExtResource("2_fsm")
+
+[node name="Idle" type="Node" parent="StateMachine"]
+script = ExtResource("3_idle")
+
+[node name="Move" type="Node" parent="StateMachine"]
+script = ExtResource("4_move")
+
+[node name="Attacking" type="Node" parent="StateMachine"]
+script = ExtResource("5_attack")
+
+[node name="Gathering" type="Node" parent="StateMachine"]
+script = ExtResource("6_gather")
+
+[node name="Repairing" type="Node" parent="StateMachine"]
+script = ExtResource("7_repair")

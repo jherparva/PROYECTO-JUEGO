@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://7vghpupmgo4h"
+path="res://.godot/imported/wall-fortified-gate-half.obj-1a0d9acba6dd4e44b2e9ef54c63a237f.mesh"
+
+[deps]
+
+files=["res://.godot/imported/wall-fortified-gate-half.obj-1a0d9acba6dd4e44b2e9ef54c63a237f.mesh"]
+
+source_file="res://kenney_retro-fantasy-kit/Models/OBJ format/wall-fortified-gate-half.obj"
+dest_files=["res://.godot/imported/wall-fortified-gate-half.obj-1a0d9acba6dd4e44b2e9ef54c63a237f.mesh", "res://.godot/imported/wall-fortified-gate-half.obj-1a0d9acba6dd4e44b2e9ef54c63a237f.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

@@ -105,8 +105,9 @@ func physics_update(delta: float) -> void:
 		if _stuck_timer >= 0.35:
 			_stuck_timer = 0.0
 			if is_instance_valid(_target_node):
-				var dist_col := unit.global_position.distance_to(_target_node.global_position)
-				if dist_col <= 6.0:
+				var arrive_limit := 1.2 if _has_custom_target_pos else (_stopping_distance + 0.5)
+				var dist_col := unit.global_position.distance_to(_target_position)
+				if dist_col <= arrive_limit:
 					_on_arrived()
 					return
 	else:

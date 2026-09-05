@@ -32,14 +32,17 @@ func _process(delta: float) -> void:
 
 	if wonder_time_left <= 0.0:
 		is_wonder_active = false
-		_trigger_wonder_victory()
+		declarar_victoria_match()
 
 func _on_wonder_completed() -> void:
-	if multiplayer.is_server() or not multiplayer.has_multiplayer_peer():
-		rpc("rpc_iniciar_cuenta_regresiva_maravilla", 600.0)
+	if is_inside_tree() and multiplayer and multiplayer.has_multiplayer_peer():
+		if multiplayer.is_server():
+			rpc("rpc_iniciar_cronometro_maravilla", 600.0)
+	else:
+		rpc_iniciar_cronometro_maravilla(600.0)
 
-@rpc("authority", "call_local", "reliable")
-func rpc_iniciar_cuenta_regresiva_maravilla(duracion: float = 600.0) -> void:
+@rpc("call_local", "reliable")
+func rpc_iniciar_cronometro_maravilla(duracion: float = 600.0) -> void:
 	wonder_time_left = duracion
 	is_wonder_active = true
 
@@ -53,13 +56,17 @@ func rpc_iniciar_cuenta_regresiva_maravilla(duracion: float = 600.0) -> void:
 
 	print("Wonder3D '%s': Cronómetro de victoria iniciado (%.0fs)." % [name, wonder_time_left])
 
+@rpc("call_local", "reliable")
+func rpc_iniciar_cuenta_regresiva_maravilla(duracion: float = 600.0) -> void:
+	rpc_iniciar_cronometro_maravilla(duracion)
+
 func _on_wonder_destroyed() -> void:
 	is_wonder_active = false
 	var ncm: Node = get_node_or_null("/root/NetworkChatManager")
 	if is_instance_valid(ncm) and ncm.has_method("enviar_mensaje_local"):
 		ncm.call("enviar_mensaje_local", "💥 ¡LA MARAVILLA HA SIDO DESTRUIDA! El cronómetro de victoria se ha cancelado.")
 
-func _trigger_wonder_victory() -> void:
+func declarar_victoria_match() -> void:
 	print("Wonder3D '%s': ¡Tiempo agotado! Victoria de Maravilla." % name)
 	var mem: Node = get_node_or_null("/root/MatchEndManager")
 	if is_instance_valid(mem):
@@ -68,3 +75,6 @@ func _trigger_wonder_victory() -> void:
 			mem.call("forzar_fin_partida", is_player_win, "Victoria por Maravilla")
 		elif mem.has_method("trigger_match_end"):
 			mem.call("trigger_match_end", is_player_win)
+
+func _trigger_wonder_victory() -> void:
+	declarar_victoria_match()

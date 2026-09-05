@@ -62,10 +62,30 @@ func _on_wonder_completed() -> void:
 
 	print("WonderZigurat3D '%s': Construcción completada. RPC de cronómetro enviado a todos los slots." % name)
 
-# ─── RPC fiable: Iniciar Cronómetro de Victoria (heredado de Wonder3D) ───────
-# El RPC 'rpc_iniciar_cuenta_regresiva_maravilla' ya está declarado en Wonder3D
-# con @rpc("authority", "call_local", "reliable") y duracion=600.0.
-# No se necesita redeclarar — herencia total.
+# ─── RPC fiable: Iniciar Cronómetro de Victoria ──────────────────────────────
+@rpc("call_local", "reliable")
+func rpc_iniciar_cronometro_maravilla(duracion: float = 600.0) -> void:
+	wonder_time_left = duracion
+	is_wonder_active = true
+
+	var ncm: Node = get_node_or_null("/root/NetworkChatManager")
+	if is_instance_valid(ncm) and ncm.has_method("enviar_mensaje_local"):
+		ncm.call("enviar_mensaje_local",
+			"🏛️ ¡EL ZIGURAT SAGRADO HA SIDO COMPLETADO! Era del Cobre — Cronómetro de Victoria: 10 Minutos."
+		)
+
+	print("WonderZigurat3D '%s': Cronómetro de 10 minutos iniciado vía RPC síncrono (%.0fs)." % [name, wonder_time_left])
+
+func declarar_victoria_match() -> void:
+	print("WonderZigurat3D '%s': ¡Tiempo del Zigurat completado! Victoria de Maravilla." % name)
+	is_wonder_active = false
+	var is_player_win: bool = (bando == Bando.PLAYER)
+	var mem: Node = get_node_or_null("/root/MatchEndManager")
+	if is_instance_valid(mem):
+		if mem.has_method("forzar_fin_partida"):
+			mem.call("forzar_fin_partida", is_player_win, "Victoria por Maravilla (Zigurat Era 2)")
+		elif mem.has_method("trigger_match_end"):
+			mem.call("trigger_match_end", is_player_win)
 
 ## Verifica si el costo está disponible antes de permitir la construcción.
 static func puede_construirse(rm: Node) -> bool:

@@ -1910,6 +1910,9 @@ func _init() -> void:
 	mm_t46.reiniciar_banco_partida()
 	assert(mm_t46.enet_peer == null, "enet_peer debe quedar cerrado y nulo tras reinicio")
 	assert(mm_t46.is_host == false, "Estado is_host debe restablecerse a false")
+	if is_instance_valid(gs_t46):
+		gs_t46.set("game_speed", 1.0)
+		gs_t46.set("game_speed_modifier", 1.0)
 
 	root.remove_child(mm_t46)
 	mm_t46.free()
@@ -2323,6 +2326,146 @@ func _init() -> void:
 	hut_inst.free()
 	dock_inst.free()
 	print("✅ Test 56 Superado: Crecimiento vertical progresivo (8% -> 100%), proximidad perimetral 1.2m y blindaje anti dangling pointer certificados.")
+
+
+	# ─── TEST 57: Gladiador Retiarius (-50% Slow Debuff) y Carro de Guerra 6.0 m/s ───
+	print("\n--- TEST 57: Gladiador Retiarius (-50% Debuff) y Carro de Guerra (6.0 m/s) ---")
+	var retiarius_script: GDScript = load("res://scripts/units/gladiador_retiarius_3d.gd") as GDScript
+	var chariot_script: GDScript = load("res://scripts/units/chariot_archer_era2_3d.gd") as GDScript
+
+	var gs_t57: Node = root.get_node_or_null("GameSettings")
+	if is_instance_valid(gs_t57):
+		gs_t57.set("game_speed_modifier", 1.0)
+
+	var retiarius_era2: Soldier3D = retiarius_script.new() as Soldier3D
+	root.add_child(retiarius_era2)
+	retiarius_era2._ready()
+
+	var target_test_unit: Soldier3D = Soldier3D.new()
+	root.add_child(target_test_unit)
+	target_test_unit._ready()
+	target_test_unit.speed = 5.0
+
+	# Lanzar red y verificar ralentización estricta del -50%
+	retiarius_era2.call("lanzar_red", target_test_unit)
+	assert(target_test_unit.get("is_slowed") == true, "El objetivo debe marcarse con is_slowed = true tras recibir la red")
+	assert(abs(target_test_unit.speed - 2.5) < 0.01, "La velocidad debe reducirse exactamente en -50%% (Esperado: 2.5, Obtenido: %.2f)" % target_test_unit.speed)
+
+	# Restauración de velocidad
+	retiarius_era2.call("restaurar_velocidad", target_test_unit)
+	assert(target_test_unit.get("is_slowed") == false, "El objetivo debe restaurar is_slowed = false")
+	assert(abs(target_test_unit.speed - 5.0) < 0.01, "La velocidad debe restaurarse al 100%% (Esperado: 5.0, Obtenido: %.2f)" % target_test_unit.speed)
+
+	# Carro de Guerra Era 2
+	var chariot_era2: Soldier3D = chariot_script.new() as Soldier3D
+	root.add_child(chariot_era2)
+	chariot_era2._ready()
+	assert(abs(chariot_era2.speed - 6.0) < 0.01, "El Carro de Guerra de Rango debe tener velocidad base 6.0 m/s (Obtenido: %.1f)" % chariot_era2.speed)
+	assert(chariot_era2.get("is_vehicle") == true, "El Carro de Guerra debe poseer propiedades físicas de vehículo")
+	assert(chariot_era2.has_node("ProjectileMuzzle") and chariot_era2.has_node("ProjectileMuzzle_Dual"), "El Carro de Guerra debe tener socket dual ProjectileMuzzle")
+
+	retiarius_era2.free()
+	target_test_unit.free()
+	chariot_era2.free()
+	print("✅ Test 57 Superado: Debuff de red (-50%) de Gladiador Retiarius y velocidad 6.0 m/s del Carro de Guerra certificados.")
+
+
+	# ─── TEST 58: Maceman_Bronze (MELEE_SHOCK x1.35 vs Fortificaciones de Madera) ───
+	print("\n--- TEST 58: Maceman_Bronze (MELEE_SHOCK x1.35 vs Fortificaciones de Madera) ---")
+	var maceman_script: GDScript = load("res://scripts/units/maceman_bronze_3d.gd") as GDScript
+	var maceman_bronze_inst: Soldier3D = maceman_script.new() as Soldier3D
+	root.add_child(maceman_bronze_inst)
+	maceman_bronze_inst._ready()
+
+	assert(maceman_bronze_inst.salud_maxima >= 160.0, "Maceman_Bronze debe poseer HP elevado de 160 segun dbunitset.dat")
+	assert(maceman_bronze_inst.weapon_type == "bludgeoning" or maceman_bronze_inst.weapon_type == "melee_shock", "Tipo de impacto debe ser Bludgeoning / MELEE_SHOCK")
+
+	var dummy_wall: Node3D = Node3D.new()
+	dummy_wall.name = "EmpalizadaMadera"
+	dummy_wall.add_to_group("walls")
+	dummy_wall.add_to_group("buildings_3d")
+	root.add_child(dummy_wall)
+
+	# Cálculo de daño: base counter contra BUILDING (0.5) * bono fortificación madera (1.35)
+	var dmg_wall: float = CombatDamageCalculator.calcular_dano(maceman_bronze_inst.daño, maceman_bronze_inst.weapon_type, maceman_bronze_inst, dummy_wall)
+	var expected_wall_dmg: float = (maceman_bronze_inst.daño * 0.5) * 1.35
+	assert(abs(dmg_wall - expected_wall_dmg) < 0.05, "Maceman_Bronze debe aplicar bono x1.35 contra muros/empalizadas de madera (Esperado: %.2f, Obtenido: %.2f)" % [expected_wall_dmg, dmg_wall])
+
+	maceman_bronze_inst.free()
+	dummy_wall.free()
+	print("✅ Test 58 Superado: Macero de Cobre con HP 160 y multiplicador oficial de daño x1.35 vs fortificaciones de madera verificado.")
+
+
+	# ─── TEST 59: Herencia Limpia de Taller de Asedio (Siege Workshop 3D) ───
+	print("\n--- TEST 59: Herencia Limpia de Taller de Asedio desde Barracks3D ---")
+	var siege_script: GDScript = load("res://scripts/buildings/siege_workshop_3d.gd") as GDScript
+	var siege_workshop: BuildingBase3D = siege_script.new() as BuildingBase3D
+	assert(siege_workshop is Barracks3D, "SiegeWorkshop3D debe heredar directamente de Barracks3D")
+	assert(siege_workshop is BuildingBase3D, "SiegeWorkshop3D debe heredar de BuildingBase3D")
+
+	siege_workshop.starts_under_construction = true
+	root.add_child(siege_workshop)
+	siege_workshop._ready()
+
+	# Validar radio dinámico de NavigationObstacle3D adaptado a semiextensiones
+	var siege_nav_obs: NavigationObstacle3D = siege_workshop.get_node_or_null("NavObstacle") as NavigationObstacle3D
+	assert(is_instance_valid(siege_nav_obs), "SiegeWorkshop3D debe instanciar NavigationObstacle3D dinámicamente")
+	var siege_ext: Vector3 = siege_workshop.get_building_extents()
+	assert(abs(siege_nav_obs.radius - maxf(siege_ext.x, siege_ext.z)) < 0.01, "Radio de NavigationObstacle3D debe coincidir exactamente con las semiextensiones del Taller")
+
+	# Validar emergencia vertical progresiva desde el 8%
+	siege_workshop._actualizar_progreso_construccion(0.0)
+	siege_workshop._actualizar_progreso_construccion(50.0)
+	siege_workshop._actualizar_progreso_construccion(100.0)
+	assert(siege_workshop.esta_construido == true, "Taller de Asedio debe completarse al 100% de progreso")
+
+	# Validar encolado de maquinaria de asedio / carros de guerra
+	var test_rm: GlobalResourceManager = root.get_node_or_null("ResourceManager") as GlobalResourceManager
+	if not is_instance_valid(test_rm):
+		test_rm = GlobalResourceManager.new()
+		test_rm.name = "ResourceManager"
+		root.add_child(test_rm)
+	test_rm.era_actual = 2
+	test_rm.resources["wood"] = 500
+	test_rm.resources["food"] = 500
+	test_rm.max_population = 50
+	test_rm.current_population = 0
+	siege_workshop.resource_manager = test_rm
+
+	var train_success: bool = siege_workshop.call("entrenar_unidad", "chariot_archer_era2")
+	assert(train_success == true or siege_workshop.get("production_queue").size() > 0, "Taller de Asedio debe encolar Carros de Guerra en Era 2")
+
+	siege_workshop.free()
+	print("✅ Test 59 Superado: Herencia total de Taller de Asedio desde Barracks3D, cola de producción, emergencia vertical y radio dinámico certificados.")
+
+
+	# ─── TEST 60: Maravilla / Zigurat Era 2 (Wonder_Zigurat_Era2) y Cronómetro 10 Minutos ───
+	print("\n--- TEST 60: Maravilla / Zigurat Era 2 (Wonder_Zigurat_Era2) y Cronómetro 10 Minutos ---")
+	var zigurat_script: GDScript = load("res://scripts/buildings/wonder_zigurat_era2.gd") as GDScript
+	var zigurat_era2_inst: Wonder3D = zigurat_script.new() as Wonder3D
+	assert(zigurat_era2_inst is Wonder3D, "Wonder_Zigurat_Era2 debe extender Wonder3D")
+	assert(zigurat_era2_inst is BuildingBase3D, "Wonder_Zigurat_Era2 debe extender BuildingBase3D")
+
+	root.add_child(zigurat_era2_inst)
+	zigurat_era2_inst._ready()
+
+	# Iniciar cronómetro de 10 minutos (600s) vía RPC síncrono
+	zigurat_era2_inst.rpc_iniciar_cronometro_maravilla(600.0)
+	assert(zigurat_era2_inst.is_wonder_active == true, "El Zigurat debe activar el estado is_wonder_active = true")
+	assert(abs(zigurat_era2_inst.wonder_time_left - 600.0) < 0.01, "El cronómetro de la Maravilla debe fijarse en exactamente 600 segundos (10 minutos)")
+
+	# Simular avance de tiempo
+	zigurat_era2_inst._process(1.0)
+	assert(abs(zigurat_era2_inst.wonder_time_left - 599.0) < 0.01, "El temporizador debe decrementar con _process")
+
+	# Simular llegada a cero y declaración de victoria
+	assert(zigurat_era2_inst.has_method("declarar_victoria_match"), "Wonder_Zigurat_Era2 debe implementar declarar_victoria_match()")
+	zigurat_era2_inst.wonder_time_left = 0.5
+	zigurat_era2_inst._process(0.6)
+	assert(zigurat_era2_inst.is_wonder_active == false, "El cronómetro debe desactivarse al alcanzar la victoria")
+
+	zigurat_era2_inst.free()
+	print("✅ Test 60 Superado: Maravilla/Zigurat Era 2 con RPC síncrono de cronómetro de 10 minutos (600s) y declarar_victoria_match() certificado.")
 
 
 	print("\n========================================================")

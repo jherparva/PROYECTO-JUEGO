@@ -43,6 +43,7 @@ var _speed: float = 4.5
 var salud_actual: float = 100.0
 var is_dead: bool = false
 var is_selected: bool = false
+var is_slowed: bool = false
 
 # Property Aliases
 var max_hp: int:
@@ -114,7 +115,7 @@ func _ready() -> void:
 			rm.era_evolucionada.connect(_on_era_evolucionada)
 		
 	# Sincronizar autoridad de red con el propietario si aplica
-	if owner_peer_id == 1 and multiplayer.has_multiplayer_peer() and get_multiplayer_authority() != 1:
+	if owner_peer_id == 1 and multiplayer != null and multiplayer.has_multiplayer_peer() and get_multiplayer_authority() != 1:
 		owner_peer_id = get_multiplayer_authority()
 
 	input_ray_pickable = true

@@ -98,7 +98,8 @@ func _ready() -> void:
 	# Añadir obstáculo de navegación para que las unidades no choquen con las paredes
 	var nav_obs := NavigationObstacle3D.new()
 	nav_obs.name = "NavObstacle"
-	nav_obs.radius = 5.2 if (self is TownCenter3D or is_in_group("town_centers")) else 3.8
+	var b_ext := get_building_extents()
+	nav_obs.radius = maxf(b_ext.x, b_ext.z)
 	nav_obs.avoidance_enabled = true
 	add_child(nav_obs)
 

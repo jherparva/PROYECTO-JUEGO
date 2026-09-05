@@ -1,0 +1,54 @@
+[gd_scene load_steps=10 format=3 uid="uid://gladiador_retiarius_3d_scene"]
+
+[ext_resource type="Script" path="res://scripts/units/gladiador_retiarius_3d.gd" id="1_retiarius"]
+[ext_resource type="PackedScene" uid="uid://b4wrkelyayfn3" path="res://IMAGENES/EDAD PREHISTORICA/PERSONAJES/modelo+3D+de+hombre+de+las+cavernas.glb" id="2_model"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_machine_3d.gd" id="3_fsm"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_idle_3d.gd" id="4_idle"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_move_3d.gd" id="5_move"]
+[ext_resource type="Script" path="res://scripts/units/fsm/state_attacking_3d.gd" id="6_attack"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_retiarius"]
+radius = 0.45
+height = 1.8
+
+[sub_resource type="TorusMesh" id="TorusMesh_ring"]
+inner_radius = 0.6
+outer_radius = 0.72
+
+[sub_resource type="StandardMaterial3D" id="Mat_ring"]
+shading_mode = 0
+albedo_color = Color(0.2, 0.7, 0.9, 1)
+
+[node name="Gladiador_Retiarius" type="CharacterBody3D"]
+script = ExtResource("1_retiarius")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_retiarius")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(1.8, 0, 0, 0, 1.8, 0, 0, 0, 1.8, 0, 0, 0)
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+target_desired_distance = 0.5
+
+[node name="RightHandAttachment" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.9, 0.2)
+
+[node name="SelectionIndicator" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.05, 0)
+visible = false
+mesh = SubResource("TorusMesh_ring")
+surface_material_override/0 = SubResource("Mat_ring")
+
+[node name="StateMachine3D" type="Node" parent="."]
+script = ExtResource("3_fsm")
+
+[node name="Idle" type="Node" parent="StateMachine3D"]
+script = ExtResource("4_idle")
+
+[node name="Move" type="Node" parent="StateMachine3D"]
+script = ExtResource("5_move")
+
+[node name="Attacking" type="Node" parent="StateMachine3D"]
+script = ExtResource("6_attack")

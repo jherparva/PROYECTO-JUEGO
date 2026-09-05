@@ -46,12 +46,12 @@ func entrenar_unidad(unit_id: String) -> bool:
 			print("SiegeWorkshop3D: Taller de Asedio bloqueado. Requiere Era 2 (Edad del Cobre). Era actual: %d" % cur_era)
 			return false
 
-	# Validar que la unidad pertenezca al tipo "siege_workshop" del catálogo
+	# Validar que la unidad pertenezca al tipo "siege_workshop" o maquinaria de asedio/carros
 	if CATALOGO_UNIDADES.has(unit_id):
 		var udata: Dictionary = CATALOGO_UNIDADES[unit_id]
 		var btype: String = str(udata.get("building_type", ""))
-		if btype != BUILDING_TYPE:
-			print("SiegeWorkshop3D: La unidad '%s' no es de tipo asedio (tipo: %s)." % [unit_id, btype])
+		if btype != BUILDING_TYPE and btype != "siege" and not ("carro" in unit_id or "chariot" in unit_id or "ram" in unit_id or "ariete" in unit_id):
+			print("SiegeWorkshop3D: La unidad '%s' no es de tipo asedio o vehículo (tipo: %s)." % [unit_id, btype])
 			return false
 
 	# Delegar toda la lógica al padre (cola, recursos, timer, spawn, era-scaling)

@@ -47,14 +47,20 @@ func enter(context: Dictionary = {}) -> void:
 		state_machine.change_state(&"Idle")
 		return
 
-	# Si está fuera del rango cercano, cambiar a Move con parada adaptable perimetral
+	# Si no está físicamente pegado al perímetro exterior, caminar hasta el borde de la pared
 	var stop_dist: float = _target_building.get_perimeter_stop_distance() if _target_building.has_method("get_perimeter_stop_distance") else (_get_building_extent() + 1.2)
-	var max_range := _get_effective_build_range()
 	var dist := _get_pos(unit).distance_to(_get_pos(_target_building))
-	if dist > max_range:
+	if dist > stop_dist + 0.35:
+		var dir_to_unit: Vector3 = (_get_pos(unit) - _get_pos(_target_building))
+		dir_to_unit.y = 0.0
+		if dir_to_unit.length_squared() < 0.001:
+			dir_to_unit = Vector3.FORWARD
+		dir_to_unit = dir_to_unit.normalized()
+		var perimeter_pos: Vector3 = _get_pos(_target_building) + dir_to_unit * stop_dist
 		state_machine.change_state(&"Move", {
 			"target_node": _target_building,
-			"stopping_distance": stop_dist,
+			"target_position": perimeter_pos,
+			"stopping_distance": 0.6,
 			"on_arrival_state": &"Building",
 			"on_arrival_context": {"target_node": _target_building}
 		})
@@ -72,14 +78,20 @@ func physics_update(delta: float) -> void:
 		_finish_building()
 		return
 
-	# Verificar si se alejó del edificio (con margen perimetral pegado)
+	# Verificar si se alejó del perímetro exterior (margen de tolerancia pegado)
 	var stop_dist: float = _target_building.get_perimeter_stop_distance() if _target_building.has_method("get_perimeter_stop_distance") else (_get_building_extent() + 1.2)
-	var max_range := _get_effective_build_range()
 	var dist := _get_pos(unit).distance_to(_get_pos(_target_building))
-	if dist > max_range + 0.5:
+	if dist > stop_dist + 0.65:
+		var dir_to_unit: Vector3 = (_get_pos(unit) - _get_pos(_target_building))
+		dir_to_unit.y = 0.0
+		if dir_to_unit.length_squared() < 0.001:
+			dir_to_unit = Vector3.FORWARD
+		dir_to_unit = dir_to_unit.normalized()
+		var perimeter_pos: Vector3 = _get_pos(_target_building) + dir_to_unit * stop_dist
 		state_machine.change_state(&"Move", {
 			"target_node": _target_building,
-			"stopping_distance": stop_dist,
+			"target_position": perimeter_pos,
+			"stopping_distance": 0.6,
 			"on_arrival_state": &"Building",
 			"on_arrival_context": {"target_node": _target_building}
 		})

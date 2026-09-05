@@ -39,6 +39,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 5.5, "era_min": 2, "era_max": 4,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
 	},
+	"maceman_bronze": {
+		"name": "Macero de Cobre", "building_type": "barracks",
+		"type": "melee", "cost": {"food": 65, "wood": 35},
+		"train_time": 6.0, "era_min": 2, "era_max": 3,
+		"scene_path": "res://scenes/units/soldier_3d.tscn"
+	},
 	"retiarius_gladiador": {
 		"name": "Gladiador Lanzador de Redes", "building_type": "barracks",
 		"type": "melee", "cost": {"food": 70, "wood": 30},
@@ -177,6 +183,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 	},
 
 	# ══ TALLER DE ASEDIO (building_type: "siege_workshop") ═════════════════
+	"chariot_archer_era2": {
+		"name": "Carro de Guerra de Rango", "building_type": "siege_workshop",
+		"type": "cavalry", "cost": {"wood": 90, "food": 70},
+		"train_time": 8.0, "era_min": 2, "era_max": 4,
+		"scene_path": "res://scenes/units/soldier_3d.tscn"
+	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",
 		"type": "siege", "cost": {"wood": 80, "food": 40},

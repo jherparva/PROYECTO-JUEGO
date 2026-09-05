@@ -140,6 +140,7 @@ const VISION_BONUS_METROS:  float  = 2.0
 # --- Conversion de Strings a Enums --------------------------------------------
 const WEAPON_STRING_MAP: Dictionary = {
 	"melee":       WeaponType.MELEE_SHOCK,
+	"melee_shock": WeaponType.MELEE_SHOCK,
 	"bludgeoning": WeaponType.MELEE_SHOCK,
 	"piercing":    WeaponType.MELEE_PIERCE,
 	"fist":        WeaponType.MELEE_SHOCK,
@@ -219,6 +220,21 @@ static func calcular_dano(
 
 	var height_mult: float = calcular_modificador_altura(attacker, target)
 	var final_damage := damage_after_counter * height_mult
+
+	# Multiplicador oficial dbunitset.dat Era 2: Maceman_Bronze (x1.35) contra fortificaciones de madera y empalizadas modulares
+	if is_instance_valid(attacker) and is_instance_valid(target):
+		var att_id: String = str(attacker.get("unit_id")).to_lower() if "unit_id" in attacker else ""
+		var att_name: String = attacker.name.to_lower()
+		var is_maceman: bool = (att_id == "maceman_bronze" or "maceman_bronze" in att_name or attacker.is_in_group("maceman_bronze") or (attacker.has_method("is_maceman_bronze") and attacker.call("is_maceman_bronze")))
+		if is_maceman:
+			var is_wood_fort: bool = (
+				target.is_in_group("walls") or target.is_in_group("walls_3d") or
+				target.is_in_group("palisades") or target.is_in_group("wooden_fortifications") or
+				"wall" in target.name.to_lower() or "palisade" in target.name.to_lower() or
+				"empalizada" in target.name.to_lower() or "muralla" in target.name.to_lower()
+			)
+			if is_wood_fort:
+				final_damage *= 1.35
 
 	return maxf(1.0, final_damage)
 

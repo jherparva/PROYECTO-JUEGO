@@ -118,6 +118,9 @@ const REQUIRED_ERAS: Dictionary = {
 	"Market3D": 2,
 	"Dock3D": 2,
 	"Wonder3D": 5,
+	"Wonder_Zigurat_Era2": 2,
+	"WonderZigurat3D": 2,
+	"Zigurat": 2,
 	"Satellite3D": 8,
 	"WeatherController3D": 9   # Era 9 — Nano-Futurista. Costo: 300 Hierro, 300 Oro.
 }

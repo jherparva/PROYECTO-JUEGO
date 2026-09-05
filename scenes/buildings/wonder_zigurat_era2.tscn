@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3 uid="uid://wonder_zigurat_era2_scene"]
+
+[ext_resource type="Script" path="res://scripts/buildings/wonder_zigurat_era2.gd" id="1_zigurat"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_zigurat"]
+size = Vector3(10, 6, 10)
+
+[sub_resource type="BoxMesh" id="BoxMesh_zigurat_base"]
+size = Vector3(9.5, 5.5, 9.5)
+
+[sub_resource type="StandardMaterial3D" id="Mat_sandstone"]
+albedo_color = Color(0.78, 0.65, 0.42, 1)
+roughness = 0.85
+
+[node name="Wonder_Zigurat_Era2" type="StaticBody3D"]
+script = ExtResource("1_zigurat")
+building_name = "Zigurat Sagrado"
+radio_vision = 55.0
+salud_maxima = 3500.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 0)
+shape = SubResource("BoxShape3D_zigurat")
+
+[node name="BuildingPrimitive" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.75, 0)
+mesh = SubResource("BoxMesh_zigurat_base")
+surface_material_override/0 = SubResource("Mat_sandstone")
+
+[node name="SpawnPoint" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 6)

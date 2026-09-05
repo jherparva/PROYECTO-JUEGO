@@ -365,6 +365,40 @@ func _actualizar_progreso_construccion(porcentaje: float) -> void:
 func set_construction_progress(percent: float) -> void:
 	_actualizar_progreso_construccion(percent)
 
+## Extrae dinámicamente las semiextensiones (half-extents) de la estructura inspeccionando CollisionShape3D o AABB.
+func get_building_extents() -> Vector3:
+	var col: CollisionShape3D = find_child("CollisionShape3D", true, false) as CollisionShape3D
+	if is_instance_valid(col) and col.shape:
+		if col.shape is BoxShape3D:
+			return (col.shape as BoxShape3D).size * 0.5
+		elif col.shape is CylinderShape3D:
+			var cyl := col.shape as CylinderShape3D
+			return Vector3(cyl.radius, cyl.height * 0.5, cyl.radius)
+		elif col.shape is SphereShape3D:
+			var r := (col.shape as SphereShape3D).radius
+			return Vector3(r, r, r)
+
+	# Fallback a AABB de mallas visuales si no hay colisión explícita
+	for child in get_children():
+		if child is MeshInstance3D and is_instance_valid(child.mesh):
+			var aabb: AABB = child.mesh.get_aabb()
+			var s: Vector3 = child.scale
+			return aabb.size * 0.5 * s
+
+	# Dimensiones canónicas estándar por defecto según tipo de edificio
+	if is_in_group("town_centers") or "TownCenter" in name:
+		return Vector3(3.0, 2.0, 3.0)
+	elif is_in_group("barracks") or "arracks" in building_name:
+		return Vector3(2.5, 1.75, 2.5)
+	return Vector3(2.0, 1.5, 2.0)
+
+## Retorna la distancia de parada perimetral pegada dual (extents.x + 1.2m, máximo 1.4m extra según volumen).
+func get_perimeter_stop_distance() -> float:
+	var extents := get_building_extents()
+	var base_ext: float = maxf(extents.x, extents.z)
+	var margin: float = clampf(1.2 + (base_ext * 0.04), 1.2, 1.4)
+	return base_ext + margin
+
 ## Despliega notificación crítica roja flotante en el HUD cuando no hay espacio demográfico.
 func _mostrar_alerta_poblacion(msg: String) -> void:
 	var tree_inst: SceneTree = get_tree() if is_inside_tree() else Engine.get_main_loop() as SceneTree

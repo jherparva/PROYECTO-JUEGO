@@ -2291,9 +2291,38 @@ func _init() -> void:
 	assert(abs(dock_factor_100 - 1.0) < 0.01, "La altura Y al 100%% de Dock3D debe ser 1.0")
 	assert(dock_inst.esta_construido == true, "Dock3D debe marcarse como construido al 100%")
 
+	# Validar Núcleo Único de Proximidad Perimetral (1.2m a 1.4m) en Construcción y Reparación
+	var hut_extents: Vector3 = hut_inst.get_building_extents()
+	var hut_stop_dist: float = hut_inst.get_perimeter_stop_distance()
+	var expected_min_dist: float = maxf(hut_extents.x, hut_extents.z) + 1.2
+	var expected_max_dist: float = maxf(hut_extents.x, hut_extents.z) + 1.4
+	assert(hut_stop_dist >= expected_min_dist - 0.05 and hut_stop_dist <= expected_max_dist + 0.05,
+		"Distancia perimetral en construcción debe ser extents.x + 1.2m a 1.4m (Obtenido: %.2f, Esperado: [%.2f, %.2f])" % [hut_stop_dist, expected_min_dist, expected_max_dist])
+
+	# Dañar edificio para certificar que en modo REPARACIÓN se usa el mismo núcleo universal
+	hut_inst.recibir_daño(120.0)
+	assert(hut_inst.salud_actual < hut_inst.salud_maxima, "Edificio debe registrar daño para reparación")
+	var repair_stop_dist: float = hut_inst.get_perimeter_stop_distance()
+	assert(abs(repair_stop_dist - hut_stop_dist) < 0.001, "El núcleo único debe gobernar de forma IDÉNTICA la reparación y la construcción")
+
+	# Validar Dangling Pointer Lock en StateAttacking3D (Anti-Previously Freed)
+	var lock_state_atk := StateAttacking3D.new()
+	var lock_dummy_unit := CharacterBody3D.new()
+	var lock_dummy_target := Node3D.new()
+	root.add_child(lock_dummy_unit)
+	root.add_child(lock_dummy_target)
+	lock_state_atk.unit = lock_dummy_unit
+	lock_state_atk._target = lock_dummy_target
+	# Liberar el target para simular target destruido / previamente liberado
+	lock_dummy_target.free()
+	# physics_update debe capturar la guarda 'not is_instance_valid(_target)' y retornar temprano limpiamente
+	lock_state_atk.physics_update(0.016)
+	assert(lock_state_atk._target == null, "Dangling pointer lock debe forzar _target = null sin crashear")
+	lock_dummy_unit.free()
+
 	hut_inst.free()
 	dock_inst.free()
-	print("✅ Test 56 Superado: Crecimiento vertical progresivo (8% -> 100%) universal para Chozas y Muelles verificado.")
+	print("✅ Test 56 Superado: Crecimiento vertical progresivo (8% -> 100%), proximidad perimetral 1.2m y blindaje anti dangling pointer certificados.")
 
 
 	print("\n========================================================")

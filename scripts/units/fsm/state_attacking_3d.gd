@@ -82,9 +82,30 @@ func physics_update(delta: float) -> void:
 			state_machine.change_state(&"Moving", move_ctx)
 		return
 
+	# Inyección de guarda de seguridad de instancia anti-previously freed (Dangling Pointer Lock)
+	if not is_instance_valid(_target) or _target.is_queued_for_deletion():
+		_target = null
+		if is_instance_valid(unit):
+			unit.velocity = Vector3.ZERO
+			if "is_attacking" in unit:
+				unit.is_attacking = false
+		if is_instance_valid(state_machine):
+			state_machine.change_state(&"Idle")
+		return
+
 	# Si el objetivo murió o dejó de ser válido en la escena
 	if not _is_valid_enemy_target(_target):
 		_on_target_lost_or_dead(_target)
+		return
+
+	if not is_instance_valid(_target) or _target.is_queued_for_deletion():
+		_target = null
+		if is_instance_valid(unit):
+			unit.velocity = Vector3.ZERO
+			if "is_attacking" in unit:
+				unit.is_attacking = false
+		if is_instance_valid(state_machine):
+			state_machine.change_state(&"Idle")
 		return
 
 	# a) Calcular distancia 3D hacia el objetivo
@@ -109,12 +130,24 @@ func exit() -> void:
 	_manual_move_override = false
 	if unit:
 		unit.velocity = Vector3.ZERO
+		if "is_attacking" in unit:
+			unit.is_attacking = false
 		if unit is Villager3D:
 			(unit as Villager3D).set_gathering_animation(false)
 
 # ─── Comportamientos de Combate ────────────────────────────────────────────────
 
 func _pursue_target(delta: float, effective_range: float = 3.0) -> void:
+	if not is_instance_valid(_target) or _target.is_queued_for_deletion():
+		_target = null
+		if is_instance_valid(unit):
+			unit.velocity = Vector3.ZERO
+			if "is_attacking" in unit:
+				unit.is_attacking = false
+		if is_instance_valid(state_machine):
+			state_machine.change_state(&"Idle")
+		return
+
 	unit.play_animation("walk")
 
 	# Si ya estamos al alcance efectivo, pasar directo a atacar
@@ -143,6 +176,16 @@ func _pursue_target(delta: float, effective_range: float = 3.0) -> void:
 	unit.move_and_slide()
 
 func _move_direct_towards_target(delta: float) -> void:
+	if not is_instance_valid(_target) or _target.is_queued_for_deletion():
+		_target = null
+		if is_instance_valid(unit):
+			unit.velocity = Vector3.ZERO
+			if "is_attacking" in unit:
+				unit.is_attacking = false
+		if is_instance_valid(state_machine):
+			state_machine.change_state(&"Idle")
+		return
+
 	var move_dir := (_target.global_position - unit.global_position)
 	move_dir.y = 0.0
 	if move_dir.length_squared() > 0.001:
@@ -153,6 +196,16 @@ func _move_direct_towards_target(delta: float) -> void:
 		unit.velocity = Vector3.ZERO
 
 func _execute_attack(delta: float) -> void:
+	if not is_instance_valid(_target) or _target.is_queued_for_deletion():
+		_target = null
+		if is_instance_valid(unit):
+			unit.velocity = Vector3.ZERO
+			if "is_attacking" in unit:
+				unit.is_attacking = false
+		if is_instance_valid(state_machine):
+			state_machine.change_state(&"Idle")
+		return
+
 	unit.velocity = Vector3.ZERO
 
 	# Orientar al guerrero hacia la víctima en plano horizontal
@@ -198,8 +251,18 @@ func _execute_attack(delta: float) -> void:
 			return
 
 func _on_target_lost_or_dead(dead_target: Node3D = null) -> void:
+	if not is_instance_valid(dead_target) or dead_target.is_queued_for_deletion():
+		_target = null
+		if is_instance_valid(unit):
+			unit.velocity = Vector3.ZERO
+			if "is_attacking" in unit:
+				unit.is_attacking = false
+		if is_instance_valid(state_machine):
+			state_machine.change_state(&"Idle")
+		return
+
 	# Si un aldeano estaba cazando y el animal murió, saltar inmediatamente a faenar la carne
-	if unit is Villager3D and is_instance_valid(dead_target):
+	if unit is Villager3D and is_instance_valid(dead_target) and not dead_target.is_queued_for_deletion():
 		var is_fauna: bool = dead_target is FaunaAnimal3D or dead_target.is_in_group("fauna") or dead_target.is_in_group("animals_3d")
 		if is_fauna:
 			_target = null
@@ -210,11 +273,14 @@ func _on_target_lost_or_dead(dead_target: Node3D = null) -> void:
 			return
 
 	_target = null
-	unit.velocity = Vector3.ZERO
+	if is_instance_valid(unit):
+		unit.velocity = Vector3.ZERO
+		if "is_attacking" in unit:
+			unit.is_attacking = false
 	
 	# Buscar un nuevo objetivo enemigo en las cercanías
 	var next_enemy := _find_nearest_enemy()
-	if is_instance_valid(next_enemy):
+	if is_instance_valid(next_enemy) and not next_enemy.is_queued_for_deletion():
 		_target = next_enemy
 	else:
 		state_machine.change_state(&"Idle")

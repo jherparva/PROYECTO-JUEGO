@@ -47,13 +47,14 @@ func enter(context: Dictionary = {}) -> void:
 		state_machine.change_state(&"Idle")
 		return
 
-	# Si está fuera del rango cercano, cambiar a Move con parada adaptable
+	# Si está fuera del rango cercano, cambiar a Move con parada adaptable perimetral
+	var stop_dist: float = _target_building.get_perimeter_stop_distance() if _target_building.has_method("get_perimeter_stop_distance") else (_get_building_extent() + 1.2)
 	var max_range := _get_effective_build_range()
 	var dist := _get_pos(unit).distance_to(_get_pos(_target_building))
 	if dist > max_range:
 		state_machine.change_state(&"Move", {
 			"target_node": _target_building,
-			"stopping_distance": _get_building_extent() + 1.2,
+			"stopping_distance": stop_dist,
 			"on_arrival_state": &"Building",
 			"on_arrival_context": {"target_node": _target_building}
 		})
@@ -71,13 +72,14 @@ func physics_update(delta: float) -> void:
 		_finish_building()
 		return
 
-	# Verificar si se alejó del edificio (con margen de tolerancia)
+	# Verificar si se alejó del edificio (con margen perimetral pegado)
+	var stop_dist: float = _target_building.get_perimeter_stop_distance() if _target_building.has_method("get_perimeter_stop_distance") else (_get_building_extent() + 1.2)
 	var max_range := _get_effective_build_range()
 	var dist := _get_pos(unit).distance_to(_get_pos(_target_building))
-	if dist > max_range + 0.8:
+	if dist > max_range + 0.5:
 		state_machine.change_state(&"Move", {
 			"target_node": _target_building,
-			"stopping_distance": _get_building_extent() + 1.2,
+			"stopping_distance": stop_dist,
 			"on_arrival_state": &"Building",
 			"on_arrival_context": {"target_node": _target_building}
 		})
@@ -97,6 +99,9 @@ func physics_update(delta: float) -> void:
 func _get_building_extent() -> float:
 	if not is_instance_valid(_target_building):
 		return 2.5
+	if _target_building.has_method("get_building_extents"):
+		var ext: Vector3 = _target_building.get_building_extents()
+		return maxf(ext.x, ext.z)
 	var base_extent: float = 2.5
 	var col: CollisionShape3D = _target_building.find_child("CollisionShape3D", true, false) as CollisionShape3D
 	if col and col.shape:

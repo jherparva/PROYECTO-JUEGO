@@ -41,12 +41,15 @@ func enter(context: Dictionary = {}) -> void:
 	elif is_instance_valid(_target_node):
 		_target_position = _target_node.global_position
 		_has_custom_target_pos = false
-		if _target_node is BuildingBase3D or _target_node.is_in_group("buildings"):
-			var is_tc := (_target_node is TownCenter3D or _target_node.is_in_group("town_centers"))
-			# TC: 3.8m para que sea coherente con deposit_range=4.0 (antes 5.5 causaba que el aldeano nunca «llegara»)
-			_stopping_distance = maxf(_stopping_distance, 3.8 if is_tc else 4.0)
-		elif _target_node is ResourceNode3D or _target_node.is_in_group("resources"):
-			_stopping_distance = maxf(_stopping_distance, 1.6)
+		if not context.has("stopping_distance"):
+			if _target_node is BuildingBase3D or _target_node.is_in_group("buildings"):
+				if _target_node.has_method("get_perimeter_stop_distance"):
+					_stopping_distance = _target_node.get_perimeter_stop_distance()
+				else:
+					var is_tc := (_target_node is TownCenter3D or _target_node.is_in_group("town_centers"))
+					_stopping_distance = 3.8 if is_tc else 4.0
+			elif _target_node is ResourceNode3D or _target_node.is_in_group("resources"):
+				_stopping_distance = 1.6
 	else:
 		_target_position = unit.global_position if unit else Vector3.ZERO
 		_has_custom_target_pos = false
@@ -55,6 +58,7 @@ func enter(context: Dictionary = {}) -> void:
 		unit.play_animation("walk")
 		if unit.nav_agent:
 			unit.nav_agent.target_position = _target_position
+			unit.nav_agent.target_desired_distance = _stopping_distance
 
 func physics_update(delta: float) -> void:
 	if not is_instance_valid(unit):
@@ -81,11 +85,15 @@ func physics_update(delta: float) -> void:
 	# Si se definió una posición personalizada explícita (ranura exacta de granja o recurso), se respeta sin corte prematuro
 	if is_instance_valid(_target_node) and not _has_custom_target_pos:
 		var dist_to_node := unit.global_position.distance_to(_target_node.global_position)
-		var node_stop_dist: float = 1.6
-		if _target_node is BuildingBase3D or _target_node.is_in_group("buildings"):
-			node_stop_dist = 3.8 if (_target_node is TownCenter3D or _target_node.is_in_group("town_centers")) else 4.0
-		elif _target_node is ResourceNode3D or _target_node.is_in_group("resources"):
-			node_stop_dist = 1.6
+		var node_stop_dist: float = _stopping_distance
+		if not _context.has("stopping_distance"):
+			if _target_node is BuildingBase3D or _target_node.is_in_group("buildings"):
+				if _target_node.has_method("get_perimeter_stop_distance"):
+					node_stop_dist = _target_node.get_perimeter_stop_distance()
+				else:
+					node_stop_dist = 3.8 if (_target_node is TownCenter3D or _target_node.is_in_group("town_centers")) else 4.0
+			elif _target_node is ResourceNode3D or _target_node.is_in_group("resources"):
+				node_stop_dist = 1.6
 
 		if dist_to_node <= node_stop_dist:
 			_on_arrived()

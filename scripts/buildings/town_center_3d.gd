@@ -237,8 +237,14 @@ func _spawn_initial_units_authority() -> void:
 		_initial_units_spawned = true
 		print("TownCenter3D '%s': Capitolio de IA configurado en su esquina (Bando.ENEMY)." % name)
 
+var resource_manager: Node = null
+
 func _get_resource_manager() -> Node:
+
+	if is_instance_valid(resource_manager):
+		return resource_manager
 	if is_inside_tree() and get_tree() and get_tree().root:
+
 		var rm := get_tree().root.get_node_or_null("ResourceManager")
 		if is_instance_valid(rm):
 			return rm
@@ -356,7 +362,10 @@ func _spawn_unit(order: Dictionary) -> void:
 		units_parent = get_parent()
 
 	# Añadir al árbol de nodos primero
+	if is_instance_valid(unit_inst):
+		unit_inst.set_meta("pop_counted", true)
 	units_parent.add_child(unit_inst)
+
 	unit_inst.global_position = spawn_pos
 
 	unit_inst.add_to_group("unidades")
@@ -421,9 +430,20 @@ func crear_aldeano() -> void:
 		return
 
 	var rm: Node = _get_resource_manager()
-	if is_instance_valid(rm) and rm.has_method("has_population_room") and not rm.has_population_room(1):
-		push_warning("TownCenter3D: Límite de población alcanzado.")
-		return
+	if is_instance_valid(rm):
+		var cur_pop: int = int(rm.current_population) if "current_population" in rm else 0
+		var max_pop: int = int(rm.max_population) if "max_population" in rm else 0
+		var pop_locked: bool = false
+		if rm.has_method("has_population_room"):
+			pop_locked = not rm.has_population_room(1)
+		elif max_pop > 0 and cur_pop + 1 > max_pop:
+			pop_locked = true
+
+		if pop_locked:
+			var msg := "⚠️ Límite de población alcanzado (" + str(cur_pop) + "/" + str(max_pop) + ")"
+			_mostrar_alerta_poblacion(msg)
+			push_warning("TownCenter3D: " + msg)
+			return
 
 	var success := false
 	if is_instance_valid(rm):
@@ -436,6 +456,9 @@ func crear_aldeano() -> void:
 		print("TownCenter3D: Recursos insuficientes.")
 		return
 
+	if is_instance_valid(rm) and rm.has_method("change_current_population"):
+		rm.change_current_population(1)
+
 	var order: Dictionary = {
 		"unit_type": "villager",
 		"train_time": villager_train_time,
@@ -443,6 +466,7 @@ func crear_aldeano() -> void:
 	}
 	production_queue.append(order)
 	unit_queued.emit("villager", production_queue.size())
+
 
 # ─── API de Depósito de Recursos ───────────────────────────────────────────────
 

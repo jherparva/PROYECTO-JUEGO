@@ -52,19 +52,28 @@ var rally_target_node: Node3D = null
 var _salud_maxima_base: float = 600.0
 var rally_flag_indicator: Node3D = null
 
-# ─── Ciclo de Vida ─────────────────────────────────────────────────────────────
+
 
 func _ready() -> void:
+	input_ray_pickable = true
+	if not input_event.is_connected(_on_input_event):
+		input_event.connect(_on_input_event)
+
+
+	# Asegurar malla 3D base de forma síncrona para inicialización exacta de escala
+	_ensure_building_primitive_mesh()
+
 	is_under_construction = starts_under_construction
 	if is_under_construction:
 		esta_construido = false
 		progreso_construccion = 0.0
 		salud_actual = 1.0
-		call_deferred("_update_construction_scaffold_visual")
+		_update_construction_scaffold_visual()
 	else:
 		esta_construido = true
 		progreso_construccion = 100.0
 		salud_actual = salud_maxima
+		_update_construction_scaffold_visual()
 
 	rally_point = global_position + Vector3(4.0, 0.0, 4.0)
 
@@ -76,14 +85,11 @@ func _ready() -> void:
 	else:
 		add_to_group("enemy_buildings")
 
-	if owner_peer_id == 1 and multiplayer.has_multiplayer_peer() and get_multiplayer_authority() != 1:
+	if is_inside_tree() and multiplayer and owner_peer_id == 1 and multiplayer.has_multiplayer_peer() and get_multiplayer_authority() != 1:
 		owner_peer_id = get_multiplayer_authority()
 
-	input_ray_pickable = true
-	if not input_event.is_connected(_on_input_event):
-		input_event.connect(_on_input_event)
+
 	call_deferred("_setup_rally_flag_visual")
-	call_deferred("_ensure_building_primitive_mesh")
 	call_deferred("_ensure_building_label3d")
 
 	# Guardar el HP máximo base para escalar con multiplicadores de era
@@ -339,6 +345,39 @@ func aplicar_progreso_construccion(incremento: float) -> void:
 		_update_construction_billboard()
 		_update_construction_scaffold_visual()
 		construction_completed.emit()
+
+## Actualiza el porcentaje directo de construcción (0.0 a 100.0) y escala visualmente el modelo 3D.
+func _actualizar_progreso_construccion(porcentaje: float) -> void:
+	progreso_construccion = clampf(porcentaje, 0.0, 100.0)
+	salud_actual = (progreso_construccion / 100.0) * salud_maxima
+	hp_changed.emit(salud_actual, salud_maxima)
+	_update_construction_billboard()
+	_update_construction_scaffold_visual()
+
+	if progreso_construccion >= 100.0:
+		esta_construido = true
+		is_under_construction = false
+		salud_actual = salud_maxima
+		_update_construction_billboard()
+		_update_construction_scaffold_visual()
+		construction_completed.emit()
+
+func set_construction_progress(percent: float) -> void:
+	_actualizar_progreso_construccion(percent)
+
+## Despliega notificación crítica roja flotante en el HUD cuando no hay espacio demográfico.
+func _mostrar_alerta_poblacion(msg: String) -> void:
+	var tree_inst: SceneTree = get_tree() if is_inside_tree() else Engine.get_main_loop() as SceneTree
+	if is_instance_valid(tree_inst):
+		var notif: Node = tree_inst.get_first_node_in_group("rts_notification_manager")
+		if is_instance_valid(notif):
+			if notif.has_method("critica"):
+				notif.call("critica", msg, 4.0)
+			elif notif.has_method("add_notification"):
+				notif.call("add_notification", msg)
+			elif notif.has_method("show_notification"):
+				notif.call("show_notification", msg, 2)
+
 
 var _base_visual_scales: Dictionary = {}
 

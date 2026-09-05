@@ -396,19 +396,30 @@ func _navigate_to_resource(res_node: Node3D) -> void:
 		res_type = res_node.get_resource_type()
 		_last_resource_type = res_type
 
-	var target_pos: Vector3 = _get_pos(res_node)
+	# Cálculo dinámico equidistante de abanico radial (Radial Fan Gathering TAU / 8.0 a 1.6m)
+	var unit_id: int = abs(villager.get_instance_id()) if is_instance_valid(villager) else 0
+	if is_instance_valid(villager):
+		if villager.has_meta("unit_id"):
+			unit_id = int(villager.get_meta("unit_id"))
+		elif villager.name.contains("_"):
+			var slice_str := villager.name.get_slice("_", -1)
+			if slice_str.is_valid_int():
+				unit_id = int(slice_str)
+	var angle: float = float(unit_id % 8) * (TAU / 8.0)
+	var target_position: Vector3 = _get_pos(res_node) + Vector3(cos(angle), 0.0, sin(angle)) * 1.6
 	var is_waiting := false
 
-	if res_node.has_method("request_gather_slot") and villager:
+	var is_bld_target: bool = (res_node is Farm3D or res_node is BuildingBase3D or res_node.is_in_group("farms") or res_node.is_in_group("buildings"))
+
+	if res_node.has_method("request_gather_slot") and villager and not is_bld_target:
 		var slot_data: Dictionary = res_node.request_gather_slot(villager)
 		if slot_data.get("has_slot", false):
-			target_pos = slot_data.get("slot_pos", _get_pos(res_node))
+			target_position = slot_data.get("slot_pos", target_position)
 		else:
-			target_pos = slot_data.get("wait_pos", _get_pos(res_node) + Vector3(6.5, 0.0, 0.0))
+			target_position = slot_data.get("wait_pos", _get_pos(res_node) + Vector3(6.5, 0.0, 0.0))
 			is_waiting = true
-	else:
-		var angle := randf() * TAU
-		target_pos = _get_pos(res_node) + Vector3(cos(angle), 0.0, sin(angle)) * 3.0
+	elif is_bld_target:
+		target_position = _get_pos(res_node) + Vector3(cos(angle), 0.0, sin(angle)) * 3.5
 
 	if villager:
 		if is_waiting:
@@ -417,12 +428,11 @@ func _navigate_to_resource(res_node: Node3D) -> void:
 			var icon: String = _get_icon_for_resource(res_type)
 			villager.set_status_text("🚶 %s..." % icon)
 
-	var is_bld_target: bool = (res_node is Farm3D or res_node is BuildingBase3D or res_node.is_in_group("farms") or res_node.is_in_group("buildings"))
 	var stop_dist: float = 1.2 if is_waiting else (0.8 if is_bld_target else 0.45)
 
 	state_machine.change_state(&"Move", {
 		"target_node": res_node,
-		"target_position": target_pos,
+		"target_position": target_position,
 		"stopping_distance": stop_dist,
 		"on_arrival_state": &"Gathering",
 		"on_arrival_context": {
@@ -431,6 +441,7 @@ func _navigate_to_resource(res_node: Node3D) -> void:
 			"arrived": true
 		}
 	})
+
 
 func _get_icon_for_resource(res_type: String) -> String:
 	match res_type.to_lower():

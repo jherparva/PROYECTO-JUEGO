@@ -128,9 +128,21 @@ func entrenar_unidad(unit_key: String) -> bool:
 	# Validación y consumo de población y recursos
 	var rm: Node = get_node_or_null("/root/ResourceManager")
 	if is_instance_valid(rm):
-		if rm.has_method("has_population_room") and not rm.has_population_room(1):
-			print("ArcheryRange3D: Límite de población alcanzado.")
+		var cur_pop: int = int(rm.current_population) if "current_population" in rm else 0
+
+		var max_pop: int = int(rm.max_population) if "max_population" in rm else 0
+		var pop_locked: bool = false
+		if rm.has_method("has_population_room"):
+			pop_locked = not rm.has_population_room(1)
+		elif max_pop > 0 and cur_pop + 1 > max_pop:
+			pop_locked = true
+
+		if pop_locked:
+			var msg := "⚠️ Límite de población alcanzado (" + str(cur_pop) + "/" + str(max_pop) + ")"
+			_mostrar_alerta_poblacion(msg)
+			print("ArcheryRange3D: " + msg)
 			return false
+
 
 		var cost: Dictionary = unit_info.get("cost", {})
 		var success: bool = false

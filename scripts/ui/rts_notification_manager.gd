@@ -215,11 +215,19 @@ func show_notification(texto: String, tipo: TipoNotificacion = TipoNotificacion.
 	var dur: float = duracion if duracion > 0.0 else float(DURACION_POR_TIPO.get(int(tipo), 4.0))
 	_crear_notificacion_estandar(texto, tipo, dur)
 
-## Shortcuts tipados para cada tipo de alerta.
 func info(texto: String, duracion: float = 0.0)        -> void: show_notification(texto, TipoNotificacion.INFO, duracion)
 func exito(texto: String, duracion: float = 0.0)       -> void: show_notification(texto, TipoNotificacion.EXITO, duracion)
 func advertencia(texto: String, duracion: float = 0.0) -> void: show_notification(texto, TipoNotificacion.ADVERTENCIA, duracion)
 func critica(texto: String, duracion: float = 0.0)     -> void: show_notification(texto, TipoNotificacion.CRITICA, duracion)
+
+func add_notification(texto: String, tipo: int = -1, duracion: float = 0.0) -> void:
+	var notif_tipo := TipoNotificacion.INFO
+	if tipo >= 0:
+		notif_tipo = tipo as TipoNotificacion
+	elif texto.contains("⚠️") or texto.contains("⚔") or texto.to_lower().contains("población"):
+		notif_tipo = TipoNotificacion.CRITICA
+	show_notification(texto, notif_tipo, duracion)
+
 
 # ──────────────────────────────────────────────────────────────────────────────
 # CONSTRUCCIÓN DE NOTIFICACIÓN — BANNER DE ERA (estilo especial centrado)

@@ -94,7 +94,10 @@ func _ready() -> void:
 
 	var rm: Node = get_node_or_null("/root/ResourceManager")
 	if is_instance_valid(rm) and rm.has_method("change_current_population") and bando == Bando.PLAYER:
-		rm.change_current_population(1)
+		if not get_meta("pop_counted", false):
+			rm.change_current_population(1)
+			set_meta("pop_counted", true)
+
 
 	# Registrar la era de nacimiento de la unidad
 	if era_entrenada == 0 and is_instance_valid(rm) and "era_actual" in rm:

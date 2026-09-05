@@ -524,6 +524,23 @@ func command_gather(resource_node: Node) -> void:
 	if state_machine:
 		state_machine.change_state(&"Gathering", {"target_node": resource_node})
 
+## Calcula la posición radial equidistante (TAU/8 a 1.6m) para evitar solapamiento en el centroide
+func get_radial_gather_target(resource_node: Node3D) -> Vector3:
+	var uid: int = abs(get_instance_id())
+	if has_meta("unit_id"):
+		uid = int(get_meta("unit_id"))
+	elif name.contains("_"):
+		var slice_str := name.get_slice("_", -1)
+		if slice_str.is_valid_int():
+			uid = int(slice_str)
+	var angle: float = float(uid % 8) * (TAU / 8.0)
+	var rpos: Vector3 = resource_node.global_position if resource_node.global_position.length_squared() > 0.001 else resource_node.position
+	return rpos + Vector3(cos(angle), 0.0, sin(angle)) * 1.6
+
+func calculate_radial_gather_position(resource_node: Node3D) -> Vector3:
+	return get_radial_gather_target(resource_node)
+
+
 ## Ordena cazar un animal salvaje equipando lanza y atacándolo hasta abatirlo.
 func command_hunt(animal: Node) -> void:
 	if not is_instance_valid(animal):

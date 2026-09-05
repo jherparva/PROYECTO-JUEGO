@@ -89,9 +89,11 @@ func release_gather_slot(villager: Node) -> void:
 		assigned_gatherers.erase(villager)
 
 func get_slot_position(slot_idx: int) -> Vector3:
-	var angle := float(slot_idx) * (TAU / float(MAX_GATHERERS))
-	var slot_radius := 1.45 # Distancia justa y cercana (máximo 1.8m del nodo real para erradicar tala flotante)
-	return global_position + Vector3(cos(angle), 0.0, sin(angle)) * slot_radius
+	var angle := float(slot_idx % 8) * (TAU / 8.0)
+	var slot_radius := 1.6
+	var rpos := global_position if global_position.length_squared() > 0.001 else position
+	return rpos + Vector3(cos(angle), 0.0, sin(angle)) * slot_radius
+
 
 func _clean_assigned_gatherers() -> void:
 	var valid: Array[Node] = []

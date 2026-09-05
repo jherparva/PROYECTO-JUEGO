@@ -2132,9 +2132,174 @@ func _init() -> void:
 	input_ctrl_t52.free()
 	print("✅ Test 52 Superado: Building Raycast Bypass prioriza unidades ocultas tras edificios.")
 
+	# ─── TEST 53: Candado de Población Previo a Deducción de Recursos ───────────
+	print("\n--- TEST 53: Candado de Población Previo a Deducción de Recursos ---")
+	var rm_t53 := GlobalResourceManager.new()
+	rm_t53.resources["food"] = 500
+	rm_t53.resources["wood"] = 500
+	rm_t53.max_population = 5
+	rm_t53.current_population = 5 # Límite estricto alcanzado (5/5)
+	assert(rm_t53.has_population_room(1) == false, "No debe haber cupo poblacional")
+
+	var tc_t53 := TownCenter3DClass.new()
+	tc_t53.resource_manager = rm_t53
+	tc_t53.esta_construido = true
+	tc_t53.is_under_construction = false
+	root.add_child(tc_t53)
+
+	var barracks_t53 := Barracks3DClass.new()
+	barracks_t53.resource_manager = rm_t53
+	barracks_t53.esta_construido = true
+	barracks_t53.is_under_construction = false
+	root.add_child(barracks_t53)
+
+	# Intento de crear aldeano con población al tope
+	tc_t53.crear_aldeano()
+	assert(rm_t53.resources["food"] == 500, "La comida NO debe descontarse si la población está al límite")
+	assert(tc_t53.production_queue.size() == 0, "La cola del Capitolio debe permanecer vacía")
+
+	# Intento de entrenar brawler_primitivo con población al tope
+	var ret_brawler: bool = barracks_t53.entrenar_unidad("brawler_primitivo")
+	assert(ret_brawler == false, "entrenar_unidad debe retornar false sin espacio poblacional")
+	assert(rm_t53.resources["food"] == 500, "Los recursos del Cuartel no deben descontarse si la población está saturada")
+	assert(barracks_t53.production_queue.size() == 0, "La cola del Cuartel debe permanecer vacía")
+
+	tc_t53.free()
+	barracks_t53.free()
+	rm_t53.free()
+	print("✅ Test 53 Superado: Candado de población bloquea deducción de recursos al 100%.")
+
+	# ─── TEST 54: Reanudación de Entrenamiento al Liberar Espacio Poblacional ────
+	print("\n--- TEST 54: Reanudación de Entrenamiento con Espacio Libre ---")
+	var rm_t54 := GlobalResourceManager.new()
+	rm_t54.resources["food"] = 500
+	rm_t54.resources["wood"] = 500
+	rm_t54.max_population = 10
+	rm_t54.current_population = 5 # Hay 5 cupos libres
+	assert(rm_t54.has_population_room(1) == true, "Debe haber espacio de población")
+
+	var tc_t54 := TownCenter3DClass.new()
+	tc_t54.resource_manager = rm_t54
+	tc_t54.esta_construido = true
+	tc_t54.is_under_construction = false
+	root.add_child(tc_t54)
+
+	var barracks_t54 := Barracks3DClass.new()
+	barracks_t54.resource_manager = rm_t54
+	barracks_t54.esta_construido = true
+	barracks_t54.is_under_construction = false
+	root.add_child(barracks_t54)
+
+	# Con espacio disponible, crear aldeano debe consumir recursos y encolar
+	tc_t54.crear_aldeano()
+	assert(rm_t54.resources["food"] == 450, "Debe descontar exactamente 50 de comida por el aldeano")
+	assert(tc_t54.production_queue.size() == 1, "Debe haber 1 aldeano en la cola de producción")
+
+	# Entrenar Brawler Primitivo con espacio disponible
+	var brawler_ok: bool = barracks_t54.entrenar_unidad("brawler_primitivo")
+	assert(brawler_ok == true, "Brawler debe encolarse exitosamente al haber espacio")
+	assert(barracks_t54.production_queue.size() == 1, "Debe haber 1 brawler en la cola del Cuartel")
+
+	tc_t54.free()
+	barracks_t54.free()
+	rm_t54.free()
+	print("✅ Test 54 Superado: Brawler y Aldeano se encolan y consumen recursos fielmente con cupo libre.")
+
+	# ─── TEST 55: Abanico Radial de Recolección (Radial Fan Gathering) ───────────
+	print("\n--- TEST 55: Abanico Radial de Recolección (TAU / 8 * 1.6m) ---")
+	var root_3d_t55 := Node3D.new()
+	root.add_child(root_3d_t55)
+
+	var res_node_t55 := ResourceNode3DClass.new()
+	root_3d_t55.add_child(res_node_t55)
+	res_node_t55.position = Vector3(20.0, 0.0, 20.0)
+
+	# Probar los 8 sectores radiales con 8 aldeanos
+	for i in range(8):
+		var vil_t55 := Villager3DClass.new()
+		vil_t55.name = "Villager_%d" % i
+		vil_t55.set_meta("unit_id", i)
+		root_3d_t55.add_child(vil_t55)
+
+		var expected_angle: float = float(i % 8) * (TAU / 8.0)
+		var expected_offset: Vector3 = Vector3(cos(expected_angle), 0.0, sin(expected_angle)) * 1.6
+		var expected_pos: Vector3 = res_node_t55.position + expected_offset
+
+		var calculated_pos: Vector3 = vil_t55.get_radial_gather_target(res_node_t55)
+		assert(calculated_pos.distance_to(expected_pos) < 0.001, "Posición radial del aldeano %d debe coincidir con ángulo TAU/8 a 1.6m" % i)
+		assert(calculated_pos.distance_to(res_node_t55.position) > 1.59 and calculated_pos.distance_to(res_node_t55.position) < 1.61, "Distancia debe ser exactamente 1.6m del nodo")
+		vil_t55.free()
+
+	res_node_t55.free()
+	root_3d_t55.free()
+	print("✅ Test 55 Superado: Abanico radial de recolección equidistante (1.6m) verificado para 8 aldeanos.")
+
+
+
+	# ─── TEST 56: Crecimiento Progresivo Vertical Universal (Hut3D y Dock3D 8% -> 100%) ───
+	print("\n--- TEST 56: Crecimiento Progresivo Universal Y-Axis (Hut3D y Dock3D 8% -> 100%) ---")
+
+	var hut_class: GDScript = load("res://scripts/buildings/hut_3d.gd") as GDScript
+	var dock_class: GDScript = load("res://scripts/buildings/dock_3d.gd") as GDScript
+
+	var hut_scene: PackedScene = load("res://scenes/buildings/hut_3d.tscn") if ResourceLoader.exists("res://scenes/buildings/hut_3d.tscn") else null
+	var hut_inst: BuildingBase3D = (hut_scene.instantiate() as BuildingBase3D) if is_instance_valid(hut_scene) else (hut_class.new() as BuildingBase3D)
+	hut_inst.starts_under_construction = true
+	root.add_child(hut_inst)
+	hut_inst._ready()
+
+	# Al inicio (0% de progreso), la altura Y debe estar en su cimiento del 8% (factor 0.08)
+	var hut_visuals: Array[Node3D] = []
+	for c in hut_inst.get_children():
+		if c is Node3D and not (c is CollisionShape3D or c is NavigationObstacle3D or c is Marker3D or c is Label3D):
+			hut_visuals.append(c as Node3D)
+	assert(not hut_visuals.is_empty(), "Hut3D debe poseer nodos visuales 3D")
+
+	var hut_orig_scale: Vector3 = hut_inst._base_visual_scales.get(hut_visuals[0], Vector3.ONE)
+	var hut_factor_0: float = hut_visuals[0].scale.y / hut_orig_scale.y
+	assert(abs(hut_factor_0 - 0.08) < 0.01, "La altura Y inicial de Hut3D debe iniciar al 8%% (Obtenido: %.3f)" % hut_factor_0)
+
+	# A la mitad (50% de progreso)
+	hut_inst._actualizar_progreso_construccion(50.0)
+	var hut_factor_50: float = hut_visuals[0].scale.y / hut_orig_scale.y
+	assert(abs(hut_factor_50 - 0.50) < 0.01, "La altura Y al 50%% debe ser 0.50 (Obtenido: %.3f)" % hut_factor_50)
+
+	# Al 100% de progreso
+	hut_inst._actualizar_progreso_construccion(100.0)
+	var hut_factor_100: float = hut_visuals[0].scale.y / hut_orig_scale.y
+	assert(abs(hut_factor_100 - 1.0) < 0.01, "La altura Y al 100%% debe restaurarse al 100%% (Obtenido: %.3f)" % hut_factor_100)
+	assert(hut_inst.esta_construido == true, "Hut3D debe marcarse como construido al 100%")
+
+	# Validar Astillero Marítimo (Dock3D)
+	var dock_inst: BuildingBase3D = dock_class.new() as BuildingBase3D
+	dock_inst.starts_under_construction = true
+	root.add_child(dock_inst)
+	dock_inst._ready()
+
+	var dock_visuals: Array[Node3D] = []
+	for c in dock_inst.get_children():
+		if c is Node3D and not (c is CollisionShape3D or c is NavigationObstacle3D or c is Marker3D or c is Label3D):
+			dock_visuals.append(c as Node3D)
+	assert(not dock_visuals.is_empty(), "Dock3D debe poseer nodos visuales 3D")
+
+	var dock_orig_scale: Vector3 = dock_inst._base_visual_scales.get(dock_visuals[0], Vector3.ONE)
+	var dock_factor_0: float = dock_visuals[0].scale.y / dock_orig_scale.y
+	assert(abs(dock_factor_0 - 0.08) < 0.01, "La altura Y inicial de Dock3D debe iniciar al 8%% (Obtenido: %.3f)" % dock_factor_0)
+
+	dock_inst._actualizar_progreso_construccion(100.0)
+	var dock_factor_100: float = dock_visuals[0].scale.y / dock_orig_scale.y
+	assert(abs(dock_factor_100 - 1.0) < 0.01, "La altura Y al 100%% de Dock3D debe ser 1.0")
+	assert(dock_inst.esta_construido == true, "Dock3D debe marcarse como construido al 100%")
+
+	hut_inst.free()
+	dock_inst.free()
+	print("✅ Test 56 Superado: Crecimiento vertical progresivo (8% -> 100%) universal para Chozas y Muelles verificado.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")
 	quit(0)
+
 
 

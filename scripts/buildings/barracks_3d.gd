@@ -381,10 +381,21 @@ func entrenar_unidad(unit_id: String) -> bool:
 		print("Barracks3D: La unidad '%s' no está disponible en la Era %d (Requiere Era %d-%d)." % [unit_info.get("name", unit_id), cur_era, e_min, e_max])
 		return false
 
-	# Validar límite de población
-	if rm.has_method("has_population_room") and not rm.has_population_room(1):
-		print("Barracks3D: Límite de población alcanzado.")
+	# Validar límite de población antes de descontar recursos
+	var cur_pop: int = int(rm.current_population) if "current_population" in rm else 0
+	var max_pop: int = int(rm.max_population) if "max_population" in rm else 0
+	var pop_locked: bool = false
+	if rm.has_method("has_population_room"):
+		pop_locked = not rm.has_population_room(1)
+	elif max_pop > 0 and cur_pop + 1 > max_pop:
+		pop_locked = true
+
+	if pop_locked:
+		var msg := "⚠️ Límite de población alcanzado (" + str(cur_pop) + "/" + str(max_pop) + ")"
+		_mostrar_alerta_poblacion(msg)
+		print("Barracks3D: " + msg)
 		return false
+
 
 	# Validar y descontar recursos de la reserva global
 	var cost: Dictionary = unit_info.get("cost", {})
@@ -495,13 +506,21 @@ func _spawn_military_unit(unit_info: Dictionary) -> void:
 		spawn_pos = global_position + offset
 		_spawn_counter += 1
 
-	var parent: Node = get_tree().current_scene.get_node_or_null("World/Units")
+	var parent: Node = null
+	if get_tree() and get_tree().current_scene:
+		parent = get_tree().current_scene.get_node_or_null("World/Units")
+		if not parent:
+			parent = get_tree().current_scene.get_node_or_null("Units")
+		if not parent:
+			parent = get_tree().current_scene
 	if not parent:
-		parent = get_tree().current_scene.get_node_or_null("Units")
+		parent = get_parent()
 	if not parent:
-		parent = get_tree().current_scene
+		parent = self
 
+	inst.set_meta("pop_counted", true)
 	parent.add_child(inst)
+
 	inst.global_position = spawn_pos
 	inst.add_to_group("units")
 	inst.add_to_group("units_3d")

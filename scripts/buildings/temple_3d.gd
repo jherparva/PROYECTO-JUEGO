@@ -137,9 +137,20 @@ func entrenar_profeta() -> bool:
 	if not is_instance_valid(rm):
 		return false
 
-	if rm.has_method("has_population_room") and not rm.has_population_room(1):
-		print("Temple3D: Límite de población alcanzado.")
+	var cur_pop: int = int(rm.current_population) if "current_population" in rm else 0
+	var max_pop: int = int(rm.max_population) if "max_population" in rm else 0
+	var pop_locked: bool = false
+	if rm.has_method("has_population_room"):
+		pop_locked = not rm.has_population_room(1)
+	elif max_pop > 0 and cur_pop + 1 > max_pop:
+		pop_locked = true
+
+	if pop_locked:
+		var msg := "⚠️ Límite de población alcanzado (" + str(cur_pop) + "/" + str(max_pop) + ")"
+		_mostrar_alerta_poblacion(msg)
+		print("Temple3D: " + msg)
 		return false
+
 
 	if rm.has_method("gastar_recursos") and not rm.gastar_recursos(prophet_cost):
 		print("Temple3D: Recursos insuficientes para entrenar al Profeta.")

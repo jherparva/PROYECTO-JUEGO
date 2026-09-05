@@ -60,6 +60,7 @@ func _ready() -> void:
 		esta_construido = false
 		progreso_construccion = 0.0
 		salud_actual = 1.0
+		call_deferred("_update_construction_scaffold_visual")
 	else:
 		esta_construido = true
 		progreso_construccion = 100.0
@@ -339,64 +340,51 @@ func aplicar_progreso_construccion(incremento: float) -> void:
 		_update_construction_scaffold_visual()
 		construction_completed.emit()
 
+var _base_visual_scales: Dictionary = {}
+
 func _update_construction_scaffold_visual() -> void:
-	var scaffold_node := get_node_or_null("ConstructionScaffold") as MeshInstance3D
-	if not is_instance_valid(scaffold_node) and is_under_construction:
-		scaffold_node = MeshInstance3D.new()
-		scaffold_node.name = "ConstructionScaffold"
-		var cyl := CylinderMesh.new()
-		cyl.top_radius = 2.4
-		cyl.bottom_radius = 2.6
-		cyl.height = 3.0
-		scaffold_node.mesh = cyl
-		scaffold_node.position = Vector3(0.0, 1.5, 0.0)
-		add_child(scaffold_node)
+	# Eliminar andamio obsoleto si existe
+	var scaffold_node := get_node_or_null("ConstructionScaffold")
+	if is_instance_valid(scaffold_node):
+		scaffold_node.queue_free()
+
+	# Recopilar todos los nodos visuales 3D del edificio (ej: CuartelPrehistorico, BuildingPrimitive, etc.)
+	var visual_nodes: Array[Node3D] = []
+	for child in get_children():
+		if not (child is Node3D):
+			continue
+		if child is CollisionShape3D or child is NavigationObstacle3D or child is Marker3D or child is Label3D:
+			continue
+		if child.name == "ConstructionLabel3D" or child.name == "BuildingNameLabel3D" or child.name == "HealthBar3D" or child.name == "RallyFlagIndicator":
+			continue
+		visual_nodes.append(child as Node3D)
+
+	for v_node in visual_nodes:
+		if not _base_visual_scales.has(v_node):
+			var cur_s: Vector3 = v_node.scale
+			if cur_s.y <= 0.001:
+				cur_s.y = 1.0
+			_base_visual_scales[v_node] = cur_s
 
 	if is_under_construction and not esta_construido:
-		# Ocultar mallas finales
-		_toggle_building_final_meshes(false)
-
-		# Mostrar y escalar andamio según era actual
-		if is_instance_valid(scaffold_node):
-			scaffold_node.visible = true
-			var factor := clampf(progreso_construccion / 100.0, 0.1, 1.0)
-			scaffold_node.scale = Vector3(1.0, factor, 1.0)
-
-			var mat := StandardMaterial3D.new()
-			var era_val: int = 0
-			var rm: Node = get_node_or_null("/root/ResourceManager")
-			if is_instance_valid(rm) and "era_actual" in rm:
-				era_val = int(rm.era_actual)
-
-			match era_val:
-				0, 1, 2: # Primitive_Scaffold: Troncos y sogas
-					mat.albedo_color = Color(0.45, 0.32, 0.18)
-					mat.roughness = 0.95
-				3, 4, 5: # Historical_Scaffold: Madera gótica
-					mat.albedo_color = Color(0.55, 0.42, 0.25)
-				6, 7: # Industrial_Scaffold: Vigas de acero grises
-					mat.albedo_color = Color(0.35, 0.38, 0.42)
-					mat.metallic = 0.8
-				8, 9: # Futuristic_Scaffold: Proyección holográfica azul
-					mat.albedo_color = Color(0.0, 0.7, 1.0, 0.7)
-					mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-					mat.emission_enabled = true
-					mat.emission = Color(0.0, 0.8, 1.0)
-					mat.emission_energy_multiplier = 1.5
-
-			scaffold_node.material_override = mat
+		# Factor de elevación progresiva del modelo 3D real desde cimientos (8% de altura) hasta 100%
+		var factor := clampf(progreso_construccion / 100.0, 0.08, 1.0)
+		for v_node in visual_nodes:
+			if is_instance_valid(v_node):
+				v_node.visible = true
+				var orig_scale: Vector3 = _base_visual_scales.get(v_node, Vector3.ONE)
+				v_node.scale = Vector3(orig_scale.x, orig_scale.y * factor, orig_scale.z)
 	else:
-		if is_instance_valid(scaffold_node):
-			scaffold_node.visible = false
-		_toggle_building_final_meshes(true)
+		for v_node in visual_nodes:
+			if is_instance_valid(v_node):
+				v_node.visible = true
+				if _base_visual_scales.has(v_node):
+					v_node.scale = _base_visual_scales[v_node]
 
 func _toggle_building_final_meshes(show_state: bool) -> void:
 	for child in get_children():
-		if child is MeshInstance3D and child.name != "ConstructionScaffold" and child.name != "BuildingPrimitive":
-			if show_state:
-				child.visible = true
-			else:
-				child.visible = false
+		if child is MeshInstance3D and child.name != "BuildingPrimitive":
+			child.visible = show_state
 
 # ─── Daño y Destrucción ────────────────────────────────────────────────────────
 

@@ -118,8 +118,13 @@ func exit() -> void:
 
 func _move_with_nav_agent(delta: float) -> void:
 	if unit.nav_agent.is_navigation_finished():
-		_on_arrived()
-		return
+		if unit.global_position.distance_to(_target_position) <= _stopping_distance + 0.8:
+			_on_arrived()
+			return
+		else:
+			# Fallback a movimiento directo si el agente reporta completado prematuramente
+			_move_direct(delta)
+			return
 
 	var next_pos: Vector3 = unit.nav_agent.get_next_path_position()
 	var move_dir: Vector3 = (next_pos - unit.global_position)

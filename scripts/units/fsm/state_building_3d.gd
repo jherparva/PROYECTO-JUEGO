@@ -53,7 +53,7 @@ func enter(context: Dictionary = {}) -> void:
 	if dist > max_range:
 		state_machine.change_state(&"Move", {
 			"target_node": _target_building,
-			"stopping_distance": maxf(max_range - 1.5, 2.0),
+			"stopping_distance": _get_building_extent() + 1.2,
 			"on_arrival_state": &"Building",
 			"on_arrival_context": {"target_node": _target_building}
 		})
@@ -77,7 +77,7 @@ func physics_update(delta: float) -> void:
 	if dist > max_range + 0.8:
 		state_machine.change_state(&"Move", {
 			"target_node": _target_building,
-			"stopping_distance": maxf(max_range - 1.5, 2.0),
+			"stopping_distance": _get_building_extent() + 1.2,
 			"on_arrival_state": &"Building",
 			"on_arrival_context": {"target_node": _target_building}
 		})
@@ -94,25 +94,28 @@ func physics_update(delta: float) -> void:
 		_build_timer = 0.0
 		_perform_build_tick()
 
-func _get_effective_build_range() -> float:
-	if is_instance_valid(_target_building):
-		var base_extent: float = 3.0
-		var col: CollisionShape3D = _target_building.find_child("CollisionShape3D", true, false) as CollisionShape3D
-		if col and col.shape:
-			if col.shape is BoxShape3D:
-				var box: BoxShape3D = col.shape as BoxShape3D
-				base_extent = maxf(box.size.x, box.size.z) * 0.5
-			elif col.shape is CylinderShape3D:
-				base_extent = (col.shape as CylinderShape3D).radius
-			elif col.shape is SphereShape3D:
-				base_extent = (col.shape as SphereShape3D).radius
-		elif _target_building is TownCenter3D or _target_building.is_in_group("town_centers"):
-			base_extent = 4.5
-		elif _target_building.is_in_group("farms") or _target_building.is_in_group("temples"):
-			base_extent = 4.0
+func _get_building_extent() -> float:
+	if not is_instance_valid(_target_building):
+		return 2.5
+	var base_extent: float = 2.5
+	var col: CollisionShape3D = _target_building.find_child("CollisionShape3D", true, false) as CollisionShape3D
+	if col and col.shape:
+		if col.shape is BoxShape3D:
+			var box: BoxShape3D = col.shape as BoxShape3D
+			base_extent = maxf(box.size.x, box.size.z) * 0.5
+		elif col.shape is CylinderShape3D:
+			base_extent = (col.shape as CylinderShape3D).radius
+		elif col.shape is SphereShape3D:
+			base_extent = (col.shape as SphereShape3D).radius
+	elif _target_building is TownCenter3D or _target_building.is_in_group("town_centers"):
+		base_extent = 4.0
+	elif _target_building.is_in_group("farms") or _target_building.is_in_group("temples"):
+		base_extent = 3.5
+	return base_extent
 
-		return maxf(base_extent + 3.5, 6.5)
-	return build_range
+func _get_effective_build_range() -> float:
+	var extent := _get_building_extent()
+	return maxf(extent + 3.5, 6.5)
 
 func exit() -> void:
 	_build_timer = 0.0

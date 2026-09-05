@@ -17,6 +17,8 @@ signal placement_canceled()
 @export var ray_length: float = 2000.0
 @export_flags_3d_physics var terrain_mask: int = 1
 @export var ghost_color: Color = Color(0.2, 0.9, 0.4, 0.55)
+@export var ghost_invalid_color: Color = Color(0.95, 0.22, 0.22, 0.65)
+@export var max_build_distance: float = 45.0 # Distancia máxima permitida desde el territorio/base aliada
 
 # ─── Estado Interno ────────────────────────────────────────────────────────────
 var is_placing: bool = false
@@ -43,16 +45,23 @@ func _physics_process(_delta: float) -> void:
 	var query := PhysicsRayQueryParameters3D.create(ray_origin, ray_end)
 	query.collision_mask = terrain_mask
 
+	var target_pos := Vector3.ZERO
 	var result := space_state.intersect_ray(query)
 	if not result.is_empty():
-		var hit_pos := result.get("position", Vector3.ZERO) as Vector3
-		ghost_node.global_position = ghost_node.global_position.lerp(hit_pos, 0.6)
+		target_pos = result.get("position", Vector3.ZERO) as Vector3
 	else:
 		# Fallback a plano horizontal XZ en Y=0.0
 		var plane := Plane(Vector3.UP, 0.0)
 		var hit_intersection = plane.intersects_ray(ray_origin, camera.project_ray_normal(mouse_pos))
 		if hit_intersection != null:
-			ghost_node.global_position = ghost_node.global_position.lerp(hit_intersection as Vector3, 0.6)
+			target_pos = hit_intersection as Vector3
+
+	if target_pos != Vector3.ZERO:
+		# Asignación directa e instantánea bajo el cursor (elimina lag y desfase de posición)
+		ghost_node.global_position = target_pos
+		var dist_base := _get_nearest_player_anchor_distance(target_pos)
+		var is_valid_dist := (dist_base <= max_build_distance)
+		_update_ghost_material_validity(ghost_node, is_valid_dist)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not is_placing:
@@ -190,6 +199,15 @@ func _confirm_placement() -> void:
 		print("BuildingPlacer: Recursos insuficientes para construir este edificio.")
 		return
 
+	# Validación de distancia máxima de construcción
+	var dist_base := _get_nearest_player_anchor_distance(ghost_node.global_position)
+	if dist_base > max_build_distance:
+		var ncm: Node = get_node_or_null("/root/NetworkChatManager")
+		if is_instance_valid(ncm) and ncm.has_method("enviar_mensaje_local"):
+			ncm.call("enviar_mensaje_local", "⚠️ Demasiado lejos de tu territorio (Distancia: %.0fm > Máx: %.0fm)." % [dist_base, max_build_distance])
+		print("BuildingPlacer: Colocación rechazada. Fuera de rango territorial (%.1fm > %.1fm)" % [dist_base, max_build_distance])
+		return
+
 	# Guardar posición final del fantasma
 	var build_position := ghost_node.global_position
 
@@ -267,3 +285,34 @@ func _setup_ghost_visuals(node: Node) -> void:
 
 	for child in node.get_children():
 		_setup_ghost_visuals(child)
+
+func _get_nearest_player_anchor_distance(pos: Vector3) -> float:
+	var tree_inst := get_tree()
+	if not is_instance_valid(tree_inst):
+		return 0.0
+	var min_dist: float = 999999.0
+	var blds := tree_inst.get_nodes_in_group("player_buildings")
+	for b in blds:
+		if is_instance_valid(b) and (b is Node3D):
+			var d := (b as Node3D).global_position.distance_to(pos)
+			if d < min_dist:
+				min_dist = d
+	if min_dist > 900000.0:
+		var vils := tree_inst.get_nodes_in_group("villagers")
+		for v in vils:
+			if is_instance_valid(v) and (v is Node3D):
+				var d := (v as Node3D).global_position.distance_to(pos)
+				if d < min_dist:
+					min_dist = d
+	return 0.0 if min_dist > 900000.0 else min_dist
+
+func _update_ghost_material_validity(node: Node, is_valid: bool) -> void:
+	if not is_instance_valid(node):
+		return
+	var col: Color = ghost_color if is_valid else ghost_invalid_color
+	if node is MeshInstance3D:
+		var mi := node as MeshInstance3D
+		if mi.material_override is StandardMaterial3D:
+			(mi.material_override as StandardMaterial3D).albedo_color = col
+	for child in node.get_children():
+		_update_ghost_material_validity(child, is_valid)

@@ -77,6 +77,27 @@ func _setup_visual_mesh() -> void:
 			plasma_mesh.radius = 0.3
 			plasma_mesh.height = 0.6
 			_mesh_instance.mesh = plasma_mesh
+		"fire_stone":
+			var fire_mesh := SphereMesh.new()
+			fire_mesh.radius = 0.35
+			fire_mesh.height = 0.7
+			_mesh_instance.mesh = fire_mesh
+			var mat_f := StandardMaterial3D.new()
+			mat_f.albedo_color = Color(0.9, 0.35, 0.05)
+			mat_f.emission_enabled = true
+			mat_f.emission = Color(1.0, 0.4, 0.0)
+			_mesh_instance.material_override = mat_f
+		"bolt":
+			var bolt_mesh := CylinderMesh.new()
+			bolt_mesh.top_radius = 0.04
+			bolt_mesh.bottom_radius = 0.04
+			bolt_mesh.height = 1.0
+			_mesh_instance.mesh = bolt_mesh
+			_mesh_instance.rotation_degrees.x = 90.0
+			var mat_bolt := StandardMaterial3D.new()
+			mat_bolt.albedo_color = Color(0.3, 0.35, 0.4)
+			mat_bolt.metallic = 0.8
+			_mesh_instance.material_override = mat_bolt
 
 func _physics_process(delta: float) -> void:
 	if _is_impacted:
@@ -170,6 +191,11 @@ func _execute_impact(hit_target: Node3D) -> void:
 
 	if is_instance_valid(hit_target) and hit_target.has_method("recibir_daño"):
 		hit_target.call("recibir_daño", final_damage, source_unit)
+
+	# Impacto de Área (AoE) de catapultas / onagros de torsión (Radio 4.0m)
+	if projectile_type == "fire_stone" and is_instance_valid(source_unit) and source_unit.has_method("aplicar_dano_aoe"):
+		var aoe_r: float = float(source_unit.get("radio_aoe")) if "radio_aoe" in source_unit else 4.0
+		source_unit.call("aplicar_dano_aoe", global_position, aoe_r, final_damage)
 
 	# Generar efecto de partículas/impacto si HitVFX3D existe
 	var hit_vfx_class = load("res://scripts/world/hit_vfx_3d.gd")

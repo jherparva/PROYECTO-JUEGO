@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://balistatorsionera3uid001"]
+
+[ext_resource type="Script" path="res://scripts/units/balista_torsion_era3_3d.gd" id="1_balista"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_bal1"]
+size = Vector3(1.6, 1.4, 2.2)
+
+[node name="Balista_Torsion_Era3" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_balista")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+shape = SubResource("BoxShape3D_bal1")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.6)

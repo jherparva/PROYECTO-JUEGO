@@ -79,7 +79,7 @@ func aplicar_estilo_era(era_val: int) -> void:
 	current_era = era_val
 	current_stylebox = crear_stylebox_para_era(era_val)
 
-	if era_val < 3:
+	if era_val < 4:
 		current_theme_name = "madera_rustica" if era_val < 2 else "piedra_labrada"
 	elif era_val < 6:
 		current_theme_name = "bronce_medieval"

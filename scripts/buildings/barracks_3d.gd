@@ -57,6 +57,18 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 7.0, "era_min": 3, "era_max": 5,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
 	},
+	"espadachin_hierro": {
+		"name": "Espadachín de Hierro", "building_type": "barracks",
+		"type": "melee", "cost": {"food": 80, "iron": 40},
+		"train_time": 7.0, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/espadachin_hierro_3d.tscn"
+	},
+	"legionary_era3": {
+		"name": "Legionario Romano", "building_type": "barracks",
+		"type": "melee", "cost": {"food": 90, "iron": 50},
+		"train_time": 7.5, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/legionary_era3_3d.tscn"
+	},
 	"halberdier": {
 		"name": "Halabardero Imperial", "building_type": "barracks",
 		"type": "melee", "cost": {"food": 90, "iron": 50},
@@ -163,6 +175,18 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 9.0, "era_min": 2, "era_max": 4,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
 	},
+	"cataphract_era3": {
+		"name": "Catafracta de Hierro", "building_type": "stable",
+		"type": "cavalry", "cost": {"food": 120, "iron": 80},
+		"train_time": 10.0, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/cataphract_era3_3d.tscn"
+	},
+	"war_elephant_era3": {
+		"name": "Elefante de Guerra", "building_type": "stable",
+		"type": "cavalry", "cost": {"food": 180, "iron": 50},
+		"train_time": 14.0, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/war_elephant_era3_3d.tscn"
+	},
 	"hussar": {
 		"name": "Húsar de Reconocimiento", "building_type": "stable",
 		"type": "cavalry", "cost": {"food": 140, "iron": 60},
@@ -188,6 +212,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "cavalry", "cost": {"wood": 90, "food": 70},
 		"train_time": 8.0, "era_min": 2, "era_max": 4,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
+	},
+	"ariete_carnero_era3": {
+		"name": "Ariete de Carnero", "building_type": "siege_workshop",
+		"type": "siege", "cost": {"wood": 120, "iron": 60},
+		"train_time": 11.0, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/ariete_carnero_era3_3d.tscn"
+	},
+	"catapulta_onagro_era3": {
+		"name": "Onagro de Torsión", "building_type": "siege_workshop",
+		"type": "siege", "cost": {"wood": 150, "iron": 75},
+		"train_time": 13.0, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/catapulta_onagro_era3_3d.tscn"
+	},
+	"balista_torsion_era3": {
+		"name": "Balista de Torsión", "building_type": "siege_workshop",
+		"type": "siege", "cost": {"wood": 130, "iron": 65},
+		"train_time": 12.0, "era_min": 3, "era_max": 5,
+		"scene_path": "res://scenes/units/balista_torsion_era3_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

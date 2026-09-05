@@ -236,6 +236,21 @@ static func calcular_dano(
 			if is_wood_fort:
 				final_damage *= 1.35
 
+		# Multiplicador oficial Era 3: Ariete_Carnero_Era3 (x3.0) contra estructuras y murallas
+		var is_ariete: bool = (att_id == "ariete_carnero_era3" or "ariete_carnero" in att_name or attacker.is_in_group("rams"))
+		if is_ariete:
+			var is_building_struct: bool = (
+				target.is_in_group("buildings") or target.is_in_group("buildings_3d") or
+				target.is_in_group("walls") or target.is_in_group("walls_3d") or
+				"building" in target.name.to_lower() or "wall" in target.name.to_lower()
+			)
+			if is_building_struct:
+				final_damage *= 3.0
+
+	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
+	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):
+		final_damage = target.call("aplicar_mitigacion_testudo", final_damage, weapon_str)
+
 	return maxf(1.0, final_damage)
 
 ## Calcula el modificador de dano por diferencia de altura (dbcliffterrain.dat).

@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://legionaryera3uid001"]
+
+[ext_resource type="Script" path="res://scripts/units/legionary_era3_3d.gd" id="1_legion"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_leg1"]
+radius = 0.42
+height = 1.85
+
+[node name="Legionary_Era3" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_legion")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
+shape = SubResource("CapsuleShape3D_leg1")

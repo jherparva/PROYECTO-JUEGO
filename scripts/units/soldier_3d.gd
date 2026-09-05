@@ -24,6 +24,7 @@ enum Postura {
 @export var projectile_type: String = "bullet" # "stone", "arrow", "bullet", "plasma"
 @export var postura_actual: Postura = Postura.AGRESIVA
 @export var weapon_type: String = "spear"
+@export var impact_type: String = "NONE"
 @export var civilizacion: String = ""
 
 # Backup de atributos base para escalado por Eras
@@ -195,6 +196,129 @@ func _setup_stats() -> void:
 			velocidad_ataque = 1.2
 			speed = 6.0  # Vel base más alta del juego en Era 2
 			era_entrenada = 2
+
+		# ────────────────────────────────────────────────────────────
+		# ERA 3 — EDAD DE HIERRO (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"espadachin_hierro", "espadachin":
+			unit_name = "Espadachín de Hierro"
+			attack_type = "melee"
+			weapon_type = "sword"
+			impact_type = "MELEE_SHOCK"
+			_salud_base = 180.0
+			salud_maxima = 180.0
+			salud_actual = 180.0
+			_daño_base = 22.0
+			daño = 22.0
+			rango_ataque = 3.2
+			velocidad_ataque = 0.85
+			speed = 5.0
+			era_entrenada = 3
+
+		"legionary_era3":
+			unit_name = "Legionario Romano"
+			attack_type = "melee"
+			weapon_type = "sword"
+			impact_type = "MELEE_SHOCK"
+			_salud_base = 190.0
+			salud_maxima = 190.0
+			salud_actual = 190.0
+			_daño_base = 24.0
+			daño = 24.0
+			rango_ataque = 3.2
+			velocidad_ataque = 0.82
+			speed = 5.2
+			era_entrenada = 3
+
+		"cataphract_era3":
+			unit_name = "Catafracta de Hierro"
+			attack_type = "melee"
+			weapon_type = "lance"
+			impact_type = "MELEE_SHOCK"
+			_salud_base = 240.0
+			salud_maxima = 240.0
+			salud_actual = 240.0
+			_daño_base = 26.0
+			daño = 26.0
+			rango_ataque = 3.6
+			velocidad_ataque = 0.95
+			speed = 5.5
+			era_entrenada = 3
+
+		"war_elephant_era3":
+			unit_name = "Elefante de Guerra"
+			attack_type = "melee"
+			weapon_type = "tusk_trample"
+			impact_type = "MELEE_SHOCK"
+			_salud_base = 350.0
+			salud_maxima = 350.0
+			salud_actual = 350.0
+			_daño_base = 28.0
+			daño = 28.0
+			rango_ataque = 4.2
+			velocidad_ataque = 1.1
+			speed = 4.6
+			era_entrenada = 3
+
+		"ariete_carnero_era3":
+			unit_name = "Ariete de Carnero"
+			attack_type = "melee"
+			weapon_type = "bludgeoning"
+			impact_type = "Bludgeoning"
+			_salud_base = 380.0
+			salud_maxima = 380.0
+			salud_actual = 380.0
+			_daño_base = 40.0
+			daño = 40.0
+			rango_ataque = 3.8
+			velocidad_ataque = 1.6
+			speed = 3.2
+			era_entrenada = 3
+
+		"catapulta_onagro_era3":
+			unit_name = "Onagro de Torsión"
+			attack_type = "ranged"
+			weapon_type = "siege_stone"
+			projectile_type = "fire_stone"
+			_salud_base = 220.0
+			salud_maxima = 220.0
+			salud_actual = 220.0
+			_daño_base = 45.0
+			daño = 45.0
+			rango_ataque = 24.0
+			velocidad_ataque = 3.0
+			speed = 3.0
+			era_entrenada = 3
+
+		"balista_torsion_era3":
+			unit_name = "Balista de Torsión"
+			attack_type = "ranged"
+			weapon_type = "piercing_bolt"
+			projectile_type = "bolt"
+			_salud_base = 200.0
+			salud_maxima = 200.0
+			salud_actual = 200.0
+			_daño_base = 38.0
+			daño = 38.0
+			rango_ataque = 22.0
+			velocidad_ataque = 2.2
+			speed = 3.4
+			era_entrenada = 3
+
+		"trirreme_romano_era3":
+			unit_name = "Trirreme Romano"
+			attack_type = "melee"
+			weapon_type = "ram_spur"
+			impact_type = "MELEE_SHOCK"
+			_salud_base = 320.0
+			salud_maxima = 320.0
+			salud_actual = 320.0
+			_daño_base = 35.0
+			daño = 35.0
+			rango_ataque = 5.0
+			velocidad_ataque = 1.8
+			speed = 5.6
+			era_entrenada = 3
 
 	_guard_position = global_position
 

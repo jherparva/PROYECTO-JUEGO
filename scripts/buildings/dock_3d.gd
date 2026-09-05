@@ -36,6 +36,14 @@ const NAVAL_CATALOG: Dictionary = {
 		"train_time": 14.0,
 		"era_min": 4,
 		"scene_path": "res://scenes/units/archer_3d.tscn"
+	},
+	"trirreme_romano_era3": {
+		"name": "Trirreme Romano",
+		"type": "military",
+		"cost": {"wood": 140, "food": 80},
+		"train_time": 9.0,
+		"era_min": 3,
+		"scene_path": "res://scenes/units/trirreme_romano_era3_3d.tscn"
 	}
 }
 

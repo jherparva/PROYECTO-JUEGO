@@ -2468,6 +2468,163 @@ func _init() -> void:
 	print("✅ Test 60 Superado: Maravilla/Zigurat Era 2 con RPC síncrono de cronómetro de 10 minutos (600s) y declarar_victoria_match() certificado.")
 
 
+	# ─── TEST 61: Legionario Romano (Formación Testudo +60% Mitigación / -40% Velocidad) ───
+	print("\n--- TEST 61: Legionario Romano (Testudo: +60% Mitigación vs Flechas y -40% Velocidad) ---")
+	var legion_script: GDScript = load("res://scripts/units/legionary_era3_3d.gd") as GDScript
+	var legion_inst: Soldier3D = legion_script.new() as Soldier3D
+	root.add_child(legion_inst)
+	legion_inst._ready()
+
+	assert(legion_inst.salud_maxima >= 190.0, "Legionario debe tener HP 190 segun dbunitset.dat")
+	assert(abs(legion_inst.speed - 5.2) < 0.01, "Velocidad inicial de marcha debe ser 5.2 m/s")
+
+	# Activar postura táctica Testudo
+	legion_inst.call("activar_testudo", true)
+	assert(legion_inst.get("testudo_active") == true, "La postura Testudo debe estar activa")
+	assert(abs(legion_inst.speed - (5.2 * 0.6)) < 0.05, "La velocidad debe reducirse en -40%% (Esperado: ~3.12, Obtenido: %.2f)" % legion_inst.speed)
+
+	# Validar mitigación estricta del +60% contra proyectiles (ARROW / PIERCE)
+	var mitigated_dmg_t61: float = float(legion_inst.call("aplicar_mitigacion_testudo", 100.0, "arrow"))
+	assert(abs(mitigated_dmg_t61 - 40.0) < 0.01, "Testudo debe mitigar +60%% de daño balístico (Esperado: 40.0, Obtenido: %.2f)" % mitigated_dmg_t61)
+
+	# Desactivar y verificar restauración
+	legion_inst.call("activar_testudo", false)
+	assert(legion_inst.get("testudo_active") == false, "Testudo debe desactivarse")
+	assert(abs(legion_inst.speed - 5.2) < 0.05, "Velocidad debe restaurarse a 5.2 m/s")
+	var unmitigated_dmg_t61: float = float(legion_inst.call("aplicar_mitigacion_testudo", 100.0, "arrow"))
+	assert(abs(unmitigated_dmg_t61 - 100.0) < 0.01, "Sin Testudo el daño balístico no debe ser mitigado")
+
+	legion_inst.free()
+	print("✅ Test 61 Superado: Postura táctica Testudo (+60% mitigación y -40% velocidad) del Legionario Romano certificada.")
+
+
+	# ─── TEST 62: Elefante de Guerra (350 HP y Empuje de Separación RVO 1.2m) ───
+	print("\n--- TEST 62: Elefante de Guerra (350 HP y Empuje RVO 1.2m) ---")
+	var elephant_script: GDScript = load("res://scripts/units/war_elephant_era3_3d.gd") as GDScript
+	var elephant_inst: Soldier3D = elephant_script.new() as Soldier3D
+	root.add_child(elephant_inst)
+	elephant_inst._ready()
+	elephant_inst.position = Vector3(0, 0, 0)
+
+	assert(elephant_inst.salud_maxima >= 350.0, "Elefante de Guerra debe poseer 350 HP según dbunitset.dat")
+
+	var infantry_target_t62: Soldier3D = Soldier3D.new()
+	root.add_child(infantry_target_t62)
+	infantry_target_t62._ready()
+	infantry_target_t62.position = Vector3(0, 0, 2.0)
+	var init_z_t62: float = infantry_target_t62.position.z
+
+	# Aplicar empuje RVO de 1.2m
+	elephant_inst.call("aplicar_empuje_rvo", infantry_target_t62, 1.2)
+	var delta_z_t62: float = infantry_target_t62.position.z - init_z_t62
+	assert(abs(delta_z_t62 - 1.2) < 0.05, "El objetivo debe ser empujado 1.2m por la masa del elefante (Esperado: 1.2m, Obtenido: %.2f)" % delta_z_t62)
+
+	elephant_inst.free()
+	infantry_target_t62.free()
+	print("✅ Test 62 Superado: Elefante de Guerra con 350 HP y empuje de separación física RVO de 1.2m certificado.")
+
+
+	# ─── TEST 63: Ariete de Carnero (Multiplicador x3.0 vs Edificios y Murallas) ───
+	print("\n--- TEST 63: Ariete de Carnero (Multiplicador x3.0 vs Edificios) ---")
+	var ram_script: GDScript = load("res://scripts/units/ariete_carnero_era3_3d.gd") as GDScript
+	var ram_inst: Soldier3D = ram_script.new() as Soldier3D
+	root.add_child(ram_inst)
+	ram_inst._ready()
+
+	var dummy_bld_t63: Node3D = Node3D.new()
+	dummy_bld_t63.name = "MurallaHierro"
+	dummy_bld_t63.add_to_group("buildings")
+	dummy_bld_t63.add_to_group("buildings_3d")
+	dummy_bld_t63.add_to_group("walls")
+	root.add_child(dummy_bld_t63)
+
+	var calc_ram_dmg_t63: float = CombatDamageCalculator.calcular_dano(ram_inst.daño, ram_inst.weapon_type, ram_inst, dummy_bld_t63)
+	# Base counter MELEE/BLUDGEONING vs BUILDING (0.5) * multiplicador ariete (3.0)
+	var expected_ram_dmg_t63: float = (ram_inst.daño * 0.5) * 3.0
+	assert(abs(calc_ram_dmg_t63 - expected_ram_dmg_t63) < 0.05, "Ariete debe aplicar multiplicador x3.0 contra edificios (Esperado: %.2f, Obtenido: %.2f)" % [expected_ram_dmg_t63, calc_ram_dmg_t63])
+
+	ram_inst.free()
+	dummy_bld_t63.free()
+	print("✅ Test 63 Superado: Ariete de Carnero con multiplicador oficial x3.0 contra edificios verificado.")
+
+
+	# ─── TEST 64: Catapulta Onagro (AoE 4.0m) y Balista de Torsión (22m Perforante) ───
+	print("\n--- TEST 64: Catapulta Onagro (AoE 4.0m) y Balista de Torsión (22m Perforante) ---")
+	var onager_script: GDScript = load("res://scripts/units/catapulta_onagro_era3_3d.gd") as GDScript
+	var onager_inst: Soldier3D = onager_script.new() as Soldier3D
+	root.add_child(onager_inst)
+	onager_inst._ready()
+	onager_inst.position = Vector3(0, 0, 0)
+	assert(onager_inst.has_node("ProjectileMuzzle"), "Onagro debe poseer socket ProjectileMuzzle superior")
+
+	# Crear 2 objetivos dentro del radio 4.0m y 1 fuera a 6.0m
+	var target_close1_t64: Soldier3D = Soldier3D.new()
+	target_close1_t64.name = "DianaCercana1"
+	target_close1_t64.add_to_group("units_3d")
+	root.add_child(target_close1_t64)
+	target_close1_t64._ready()
+	target_close1_t64.position = Vector3(2.0, 0, 0) # 2m <= 4m
+
+	var target_close2_t64: Soldier3D = Soldier3D.new()
+	target_close2_t64.name = "DianaCercana2"
+	target_close2_t64.add_to_group("units_3d")
+	root.add_child(target_close2_t64)
+	target_close2_t64._ready()
+	target_close2_t64.position = Vector3(0, 0, 3.5) # 3.5m <= 4m
+
+	var target_far_t64: Soldier3D = Soldier3D.new()
+	target_far_t64.name = "DianaLejana"
+	target_far_t64.add_to_group("units_3d")
+	root.add_child(target_far_t64)
+	target_far_t64._ready()
+	target_far_t64.position = Vector3(0, 0, 6.0) # 6.0m > 4m
+
+	var hit_list_t64: Array[Node3D] = onager_inst.call("aplicar_dano_aoe", Vector3(0, 0, 0), 4.0, 45.0)
+	assert(hit_list_t64.has(target_close1_t64), "DianaCercana1 debe ser alcanzada por el AoE de 4m")
+	assert(hit_list_t64.has(target_close2_t64), "DianaCercana2 debe ser alcanzada por el AoE de 4m")
+	assert(not hit_list_t64.has(target_far_t64), "DianaLejana a 6m NO debe ser alcanzada por el AoE de 4m")
+
+	# Balista de Torsión
+	var ballista_script: GDScript = load("res://scripts/units/balista_torsion_era3_3d.gd") as GDScript
+	var ballista_inst: Soldier3D = ballista_script.new() as Soldier3D
+	root.add_child(ballista_inst)
+	ballista_inst._ready()
+	assert(abs(ballista_inst.rango_ataque - 22.0) < 0.01, "Balista debe poseer rango balístico de 22 metros")
+	assert(ballista_inst.get("es_perforante_lineal") == true, "Balista debe tener configurado es_perforante_lineal = true")
+
+	onager_inst.free()
+	target_close1_t64.free()
+	target_close2_t64.free()
+	target_far_t64.free()
+	ballista_inst.free()
+	print("✅ Test 64 Superado: Catapulta Onagro (AoE esférico 4.0m) y Balista de Torsión (22m perforante) certificados.")
+
+
+	# ─── TEST 65: Trirreme Romano (Espolón de Bronce y Daño Crítico Síncrono) ───
+	print("\n--- TEST 65: Trirreme Romano (Espolón de Bronce y Daño Crítico a Barcos) ---")
+	var trireme_script: GDScript = load("res://scripts/units/trirreme_romano_era3_3d.gd") as GDScript
+	var trireme_inst: Soldier3D = trireme_script.new() as Soldier3D
+	root.add_child(trireme_inst)
+	trireme_inst._ready()
+	assert(trireme_inst.has_node("EspolonBronce"), "Trirreme debe poseer espolón de bronce delantero")
+
+	# Instanciar barco ligero enemigo
+	var light_boat_t65: Soldier3D = Soldier3D.new()
+	light_boat_t65.name = "BotePesqueroEnemigo"
+	light_boat_t65.salud_actual = 100.0
+	light_boat_t65.salud_maxima = 100.0
+	root.add_child(light_boat_t65)
+	light_boat_t65._ready()
+
+	# Ejecutar ataque de espolón crítico
+	trireme_inst.call("ataque_espolon", light_boat_t65)
+	assert(light_boat_t65.salud_actual <= 0.0, "El espolón crítico del Trirreme debe infligir daño fulminante (<= 0 HP)")
+
+	trireme_inst.free()
+	light_boat_t65.free()
+	print("✅ Test 65 Superado: Trirreme Romano con espolón de bronce delantero y daño crítico fulminante verificado.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")

@@ -1,0 +1,18 @@
+[gd_scene load_steps=3 format=3 uid="uid://catapultaonagroera3uid001"]
+
+[ext_resource type="Script" path="res://scripts/units/catapulta_onagro_era3_3d.gd" id="1_onagro"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ona1"]
+size = Vector3(1.8, 1.8, 2.6)
+
+[node name="Catapulta_Onagro_Era3" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_onagro")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("BoxShape3D_ona1")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, -0.4)

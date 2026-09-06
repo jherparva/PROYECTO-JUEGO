@@ -159,6 +159,30 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 14.0, "era_min": 10, "era_max": 11,
 		"scene_path": "res://scenes/units/cyborg_militar_era10_3d.tscn"
 	},
+	"cyber_hacker_era11": {
+		"name": "Exosoldado Hacker de Red", "building_type": "barracks",
+		"type": "ranged", "cost": {"iron": 120, "gold": 160},
+		"train_time": 12.0, "era_min": 11, "era_max": 12,
+		"scene_path": "res://scenes/units/cyber_hacker_era11_3d.tscn"
+	},
+	"humanoide_plasma_era11": {
+		"name": "Sintético de Plasma", "building_type": "barracks",
+		"type": "ranged", "cost": {"iron": 140, "gold": 180},
+		"train_time": 14.0, "era_min": 11, "era_max": 12,
+		"scene_path": "res://scenes/units/humanoide_plasma_era11_3d.tscn"
+	},
+	"plasmamech_bipedo_era11": {
+		"name": "PlasmaMech Bípedo", "building_type": "nano_forge",
+		"type": "melee", "cost": {"iron": 300, "gold": 250},
+		"train_time": 20.0, "era_min": 11, "era_max": 12,
+		"scene_path": "res://scenes/units/plasmamech_bipedo_era11_3d.tscn"
+	},
+	"canon_orbital_plasma_era11": {
+		"name": "Cañón Orbital de Plasma", "building_type": "orbital_platform",
+		"type": "special", "cost": {"iron": 600, "gold": 800},
+		"train_time": 35.0, "era_min": 11, "era_max": 12,
+		"scene_path": ""
+	},
 	"soldado_asalto": {
 		"name": "Soldado de Asalto Táctico", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 130, "iron": 100},

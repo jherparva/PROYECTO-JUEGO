@@ -239,6 +239,9 @@ func recibir_daño(cantidad: float, atacante: Node = null) -> void:
 	if is_dead or cantidad <= 0.0:
 		return
 
+	if shield_generator_protected:
+		cantidad = aplicar_mitigacion_escudo(cantidad)
+
 	salud_actual = maxf(0.0, salud_actual - cantidad)
 	hp_changed.emit(salud_actual, salud_maxima)
 	actualizar_label_vida()
@@ -414,6 +417,30 @@ var has_thermal_vision: bool = false
 var is_disabled: bool = false
 var is_slow_immune: bool = false
 var is_stealth: bool = false
+var is_hack_immune: bool = false
+var shield_generator_protected: bool = false
+
+func aplicar_mitigacion_escudo(dano_entrante: float) -> float:
+	return dano_entrante * 0.30 # -70% mitigación de daño
+
+@rpc("any_peer", "call_local", "reliable")
+func aplicar_hackeo(nuevo_bando: int, nuevo_owner: int) -> bool:
+	if is_dead or is_hack_immune:
+		return false
+	bando = Bando.values()[nuevo_bando] if (nuevo_bando >= 0 and nuevo_bando < Bando.values().size()) else Bando.PLAYER
+	owner_peer_id = nuevo_owner
+	if bando == Bando.PLAYER:
+		if is_in_group("enemy_units"):
+			remove_from_group("enemy_units")
+		add_to_group("player_units")
+	else:
+		if is_in_group("player_units"):
+			remove_from_group("player_units")
+		add_to_group("enemy_units")
+	if is_instance_valid(state_machine) and state_machine.has_method("change_state"):
+		state_machine.change_state(&"Idle")
+	actualizar_label_vida()
+	return true
 
 var is_on_fire: bool = false
 var damage_modifier: float = 1.0
@@ -438,9 +465,23 @@ var is_cloaked: bool = false
 var is_hacked: bool = false
 
 @rpc("any_peer", "call_local", "reliable")
-func aplicar_hackeo_red(duracion: float = 4.0) -> void:
-	if is_dead or is_hacked:
-		return
+func aplicar_hackeo_red(param: Variant = null) -> bool:
+	if param is Node or param is Node3D:
+		var tgt: Node3D = param as Node3D
+		if is_dead or not is_instance_valid(tgt) or tgt.get("is_hack_immune") == true:
+			return false
+		if tgt.has_method("aplicar_hackeo"):
+			return bool(tgt.call("aplicar_hackeo", int(bando), int(owner_peer_id)))
+		else:
+			tgt.set("bando", bando)
+			tgt.set("owner_peer_id", owner_peer_id)
+			return true
+
+	var duracion: float = 4.0
+	if param is float or param is int:
+		duracion = float(param)
+	if is_dead or is_hacked or is_hack_immune:
+		return false
 	is_hacked = true
 	var orig_bando: int = int(bando)
 	# Invertir bando temporalmente (0 -> 1 o 1 -> 0)
@@ -454,10 +495,12 @@ func aplicar_hackeo_red(duracion: float = 4.0) -> void:
 			snd.jugar_sfx_interfaz("minimap_alert")
 
 	print("Unidad/Edificio '%s': ¡Cortafuegos comprometido! Bando invertido por %.1fs" % [name, duracion])
+	_restaurar_hackeo_red_async(orig_bando, duracion)
+	return true
 
+func _restaurar_hackeo_red_async(orig_bando: int, duracion: float) -> void:
 	if is_inside_tree() and get_tree():
 		await get_tree().create_timer(duracion).timeout
-
 	bando = orig_bando as Bando
 	is_hacked = false
 	print("Unidad/Edificio '%s': Cortafuegos reiniciado. Bando restaurado." % name)

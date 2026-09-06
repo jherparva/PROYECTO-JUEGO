@@ -401,6 +401,31 @@ static func calcular_dano(
 			if is_bld_struct:
 				final_damage *= 2.5
 
+		# Multiplicador oficial Era 11: Humanoide_Plasma (x3.0) contra aeronaves, cazas y unidades aéreas
+		var is_plasma_hum: bool = (att_id == "humanoide_plasma_era11" or "humanoide_plasma" in att_id or "plasma" in att_name or attacker.is_in_group("plasma_infantry"))
+		if is_plasma_hum:
+			var is_air_target: bool = (
+				target.is_in_group("air_units") or target.is_in_group("aircraft") or
+				target.get("is_aircraft") == true or target.get("is_stealth") == true or
+				target.is_in_group("stealth_aircraft") or "caza" in target.name.to_lower() or
+				"fokker" in target.name.to_lower() or "apache" in target.name.to_lower() or
+				"avion" in target.name.to_lower()
+			)
+			if is_air_target:
+				final_damage *= 3.0
+
+		# Multiplicador oficial Era 11: PlasmaMech_Bípedo (x3.0) contra edificios, búnkeres y murallas
+		var is_plasmamech: bool = (att_id == "plasmamech_bipedo_era11" or "plasmamech" in att_id or "mech" in att_name or attacker.is_in_group("mechs"))
+		if is_plasmamech:
+			var is_bld_struct: bool = (
+				target.is_in_group("buildings") or target.is_in_group("buildings_3d") or
+				target.is_in_group("walls") or target.is_in_group("walls_3d") or
+				target.is_in_group("bunkers") or "building" in target.name.to_lower() or
+				"wall" in target.name.to_lower() or "bunker" in target.name.to_lower()
+			)
+			if is_bld_struct:
+				final_damage *= 3.0
+
 	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):
 		final_damage = target.call("aplicar_mitigacion_testudo", final_damage, weapon_str)
@@ -412,6 +437,13 @@ static func calcular_dano(
 	# Mitigación de Trinchera del Doughboy de Era 7 (-20% de daño balístico en reposo/Idle)
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_trinchera"):
 		final_damage = target.call("aplicar_mitigacion_trinchera", final_damage, weapon_str)
+
+	# Mitigación del Generador de Escudos Hexagonales Era 11 (-70% de daño recibido bajo la cúpula)
+	if is_instance_valid(target) and (target.get("shield_generator_protected") == true or target.is_in_group("shield_protected")):
+		if target.has_method("aplicar_mitigacion_escudo"):
+			final_damage = target.call("aplicar_mitigacion_escudo", final_damage)
+		else:
+			final_damage *= 0.30
 
 	return maxf(1.0, final_damage)
 

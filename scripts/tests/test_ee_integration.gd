@@ -4112,8 +4112,289 @@ func _init() -> void:
 	print("✅ Test 100 Superado: Hito Centenario — Certificación completa de las 10 Eras de Empire Earth en motor Godot 4.3 Headless con 100 tests unitarios y de integración superados al 100%%.")
 
 
+	# ─── TEST 101: Cyber Hacker (Hackeo RPC) y Humanoide Plasma (x3.0 Antiaéreo) ───
+	print("\n--- TEST 101: Cyber Hacker (Hackeo RPC) y Humanoide Plasma (x3.0 Antiaéreo) ---")
+	var hacker_script: GDScript = load("res://scripts/units/cyber_hacker_era11_3d.gd") as GDScript
+	var hacker_inst: Soldier3D = hacker_script.new() as Soldier3D
+	hacker_inst.bando = UnitBase3D.Bando.PLAYER
+	hacker_inst.owner_peer_id = 1
+	root.add_child(hacker_inst)
+	hacker_inst._ready()
+	hacker_inst.position = Vector3(0, 0, 0)
+
+	# Unidad enemiga para hackear a 10m (<= 18m)
+	var enemy_soldier_t101: Soldier3D = Soldier3D.new()
+	enemy_soldier_t101.bando = UnitBase3D.Bando.ENEMY
+	enemy_soldier_t101.owner_peer_id = 2
+	root.add_child(enemy_soldier_t101)
+	enemy_soldier_t101._ready()
+	enemy_soldier_t101.position = Vector3(10.0, 0, 0)
+
+	assert(enemy_soldier_t101.bando == UnitBase3D.Bando.ENEMY, "Objetivo debe iniciar en bando ENEMY")
+	assert(enemy_soldier_t101.owner_peer_id == 2, "Objetivo debe iniciar con owner_peer_id = 2")
+
+	# Ejecutar hackeo de red
+	var hack_ok: bool = hacker_inst.call("aplicar_hackeo_red", enemy_soldier_t101)
+	assert(hack_ok == true, "Hackeo de red debe completarse con éxito a <= 18m")
+	assert(enemy_soldier_t101.bando == UnitBase3D.Bando.PLAYER, "El bando debe cambiar permanentemente a PLAYER")
+	assert(enemy_soldier_t101.owner_peer_id == 1, "El owner_peer_id debe cambiar permanentemente a 1")
+
+	# Humanoide de Plasma: 450 HP y daño x3.0 vs unidades aéreas
+	var plasma_script: GDScript = load("res://scripts/units/humanoide_plasma_era11_3d.gd") as GDScript
+	var plasma_inst: Soldier3D = plasma_script.new() as Soldier3D
+	root.add_child(plasma_inst)
+	plasma_inst._ready()
+	assert(plasma_inst.salud_maxima == 450.0, "Humanoide Plasma debe tener 450.0 HP")
+	assert(plasma_inst.daño == 48.0, "Humanoide Plasma debe tener daño base 48.0")
+
+	var air_target_t101: Node3D = Node3D.new()
+	air_target_t101.name = "CazaAereoEnemigo"
+	air_target_t101.add_to_group("air_units")
+	air_target_t101.add_to_group("aircraft")
+	root.add_child(air_target_t101)
+
+	var plasma_dmg_air: float = CombatDamageCalculator.calcular_dano(plasma_inst.daño, plasma_inst.weapon_type, plasma_inst, air_target_t101)
+	assert(plasma_dmg_air >= (plasma_inst.daño * 3.0), "Humanoide Plasma debe aplicar multiplicador antiaéreo estricto x3.0")
+
+	hacker_inst.free()
+	enemy_soldier_t101.free()
+	plasma_inst.free()
+	air_target_t101.free()
+	print("✅ Test 101 Superado: Cyber Hacker (hackeo por RPC con conversión de bando y owner) y Humanoide Plasma (450 HP y x3.0 antiaéreo) certificados.")
+
+
+	# ─── TEST 102: Herencia Limpia de Forja Nano-Molecular, Generador de Escudos y Plataforma Orbital ───
+	print("\n--- TEST 102: Herencia Limpia de Nano-Forge, Shield Generator y Plataforma Orbital ---")
+	var forge_script: GDScript = load("res://scripts/buildings/nano_forge_3d.gd") as GDScript
+	var shield_script: GDScript = load("res://scripts/buildings/shield_generator_3d.gd") as GDScript
+	var orbital_script: GDScript = load("res://scripts/buildings/orbital_cannon_platform_3d.gd") as GDScript
+
+	var forge_inst: BuildingBase3D = forge_script.new() as BuildingBase3D
+	var shield_inst: BuildingBase3D = shield_script.new() as BuildingBase3D
+	var orbital_inst: BuildingBase3D = orbital_script.new() as BuildingBase3D
+
+	assert(forge_inst is Barracks3D, "NanoForge3D debe heredar directamente de Barracks3D")
+	assert(shield_inst is Tower3D, "ShieldGenerator3D debe heredar directamente de Tower3D")
+	assert(orbital_inst is Barracks3D, "OrbitalCannonPlatform3D debe heredar directamente de Barracks3D")
+
+	# Validar emergencia vertical progresiva desde el 8% en NanoForge
+	forge_inst.starts_under_construction = true
+	root.add_child(forge_inst)
+	forge_inst._ready()
+
+	var forge_visuals: Array[Node3D] = []
+	for c in forge_inst.get_children():
+		if c is Node3D and not (c is CollisionShape3D or c is NavigationObstacle3D or c is Marker3D or c is Label3D):
+			forge_visuals.append(c as Node3D)
+	assert(not forge_visuals.is_empty(), "NanoForge3D debe contener nodos visuales")
+
+	var forge_scale_0: Vector3 = forge_inst._base_visual_scales.get(forge_visuals[0], Vector3.ONE)
+	var forge_factor_0: float = forge_visuals[0].scale.y / forge_scale_0.y
+	assert(abs(forge_factor_0 - 0.08) < 0.01, "La altura Y inicial de NanoForge3D debe iniciar al 8%% (Obtenido: %.3f)" % forge_factor_0)
+
+	forge_inst._actualizar_progreso_construccion(100.0)
+	var forge_factor_100: float = forge_visuals[0].scale.y / forge_scale_0.y
+	assert(abs(forge_factor_100 - 1.0) < 0.01, "La altura Y al 100%% debe restaurarse a 1.0")
+
+	# Validar encolado de PlasmaMech Bípedo en NanoForge
+	var rm_t102: GlobalResourceManager = GlobalResourceManager.new()
+	rm_t102.era_actual = 11
+	rm_t102.resources["iron"] = 1000
+	rm_t102.resources["gold"] = 1000
+	rm_t102.max_population = 50
+	rm_t102.current_population = 0
+	forge_inst.set("resource_manager", rm_t102)
+
+	var train_mech_ok: bool = forge_inst.call("entrenar_unidad", "plasmamech_bipedo_era11")
+	assert(train_mech_ok == true, "NanoForge3D debe permitir entrenar el PlasmaMech Bípedo")
+	assert(forge_inst.get("production_queue").size() == 1, "Debe existir 1 PlasmaMech en la cola de producción")
+
+	forge_inst.free()
+	shield_inst.free()
+	orbital_inst.free()
+	rm_t102.free()
+	print("✅ Test 102 Superado: Herencia limpia de Nano-Forge, Shield Generator y Plataforma Orbital, emergencia vertical 8%% y cola de producción certificados.")
+
+
+	# ─── TEST 103: PlasmaMech Bípedo (600 HP, Inmunidades CC, 4.5m AoE y x3.0 Edificios) ───
+	print("\n--- TEST 103: PlasmaMech Bípedo (600 HP, Inmunidades CC, 4.5m AoE y x3.0 Edificios) ---")
+	var mech_script: GDScript = load("res://scripts/units/plasmamech_bipedo_era11_3d.gd") as GDScript
+	var mech_inst: Soldier3D = mech_script.new() as Soldier3D
+	root.add_child(mech_inst)
+	mech_inst._ready()
+	mech_inst.position = Vector3(0, 0, 0)
+
+	assert(mech_inst.salud_maxima == 600.0, "PlasmaMech Bípedo debe poseer 600.0 HP")
+	assert(abs(mech_inst.speed - 4.8) < 0.01, "Velocidad de marcha debe ser 4.8 m/s")
+	assert(abs(float(mech_inst.get("altura_titan")) - 4.0) < 0.01, "PlasmaMech Bípedo debe tener altura colosal de 4.0 metros")
+
+	# Inmunidades totales al control de masas
+	assert(mech_inst.get("is_stun_immune") == true, "PlasmaMech debe ser inmune al stun")
+	assert(mech_inst.get("is_slow_immune") == true, "PlasmaMech debe ser inmune a la ralentización/supresión")
+	assert(mech_inst.get("is_hack_immune") == true, "PlasmaMech debe ser inmune al hackeo")
+
+	var stun_result: bool = mech_inst.call("aplicar_stun", 2.0)
+	assert(stun_result == false, "aplicar_stun() debe ser rechazado por la inmunidad")
+	assert(mech_inst.get("is_stunned") == false, "PlasmaMech no debe quedar aturdido")
+
+	var hack_result: bool = mech_inst.call("aplicar_hackeo", 1, 99)
+	assert(hack_result == false, "aplicar_hackeo() debe ser rechazado por la inmunidad")
+
+	# Multiplicador estricto x3.0 contra murallas / edificios
+	var wall_target_t103: Node3D = Node3D.new()
+	wall_target_t103.name = "MurallaTitanio"
+	wall_target_t103.add_to_group("buildings")
+	wall_target_t103.add_to_group("walls")
+	root.add_child(wall_target_t103)
+
+	var mech_dmg_bld: float = CombatDamageCalculator.calcular_dano(mech_inst.daño, "energy", mech_inst, wall_target_t103)
+	var expected_mech_dmg: float = (mech_inst.daño * 2.0) * 3.0
+	assert(abs(mech_dmg_bld - expected_mech_dmg) < 0.05, "PlasmaMech debe infligir x3.0 contra murallas (Esperado: %.2f, Obtenido: %.2f)" % [expected_mech_dmg, mech_dmg_bld])
+
+	# Detonación AoE esférica de 4.5m
+	var target_near1_t103: Soldier3D = Soldier3D.new()
+	target_near1_t103.name = "DianaAoE1"
+	target_near1_t103.add_to_group("enemy_units")
+	root.add_child(target_near1_t103)
+	target_near1_t103._ready()
+	target_near1_t103.position = Vector3(2.5, 0, 0) # <= 4.5m
+
+	var target_near2_t103: Soldier3D = Soldier3D.new()
+	target_near2_t103.name = "DianaAoE2"
+	target_near2_t103.add_to_group("enemy_units")
+	root.add_child(target_near2_t103)
+	target_near2_t103._ready()
+	target_near2_t103.position = Vector3(0, 0, 4.0) # <= 4.5m
+
+	var target_far_t103: Soldier3D = Soldier3D.new()
+	target_far_t103.name = "DianaLejanaAoE"
+	target_far_t103.add_to_group("enemy_units")
+	root.add_child(target_far_t103)
+	target_far_t103._ready()
+	target_far_t103.position = Vector3(7.0, 0, 0) # > 4.5m
+
+	var hit_aoe_t103: Array[Node3D] = mech_inst.call("aplicar_canon_plasma_aoe", Vector3.ZERO, 4.5, 65.0)
+	assert(hit_aoe_t103.has(target_near1_t103), "DianaAoE1 debe ser impactada por el AoE de 4.5m")
+	assert(hit_aoe_t103.has(target_near2_t103), "DianaAoE2 debe ser impactada por el AoE de 4.5m")
+	assert(not hit_aoe_t103.has(target_far_t103), "DianaLejanaAoE a 7m NO debe ser alcanzada")
+
+	mech_inst.free()
+	wall_target_t103.free()
+	target_near1_t103.free()
+	target_near2_t103.free()
+	target_far_t103.free()
+	print("✅ Test 103 Superado: PlasmaMech Bípedo (600 HP, inmunidad a stun/supresión/hackeo, x3.0 vs edificios y daño AoE 4.5m) certificado.")
+
+
+	# ─── TEST 104: Generador de Escudos Hexagonales (-70% Mitigación en Cúpula 15m) ───
+	print("\n--- TEST 104: Generador de Escudos Hexagonales (-70% Mitigación en Cúpula 15m) ---")
+	var shield_gen_script: GDScript = load("res://scripts/buildings/shield_generator_3d.gd") as GDScript
+	var shield_gen_inst: Tower3D = shield_gen_script.new() as Tower3D
+	shield_gen_inst.bando = BuildingBase3D.Bando.PLAYER
+	root.add_child(shield_gen_inst)
+	shield_gen_inst._ready()
+	shield_gen_inst.position = Vector3(0, 0, 0)
+	shield_gen_inst.esta_construido = true
+	shield_gen_inst.progreso_construccion = 100.0
+
+	assert(abs(float(shield_gen_inst.get("radio_cupula")) - 15.0) < 0.01, "El radio de la cúpula holográfica debe ser 15.0 metros")
+
+	# Unidad aliada a 8 metros (<= 15m)
+	var ally_inside_t104: Soldier3D = Soldier3D.new()
+	ally_inside_t104.name = "AliadoProtegido"
+	ally_inside_t104.bando = UnitBase3D.Bando.PLAYER
+	root.add_child(ally_inside_t104)
+	ally_inside_t104._ready()
+	ally_inside_t104.position = Vector3(8.0, 0, 0)
+
+	# Unidad aliada a 25 metros (> 15m)
+	var ally_outside_t104: Soldier3D = Soldier3D.new()
+	ally_outside_t104.name = "AliadoExterior"
+	ally_outside_t104.bando = UnitBase3D.Bando.PLAYER
+	root.add_child(ally_outside_t104)
+	ally_outside_t104._ready()
+	ally_outside_t104.position = Vector3(25.0, 0, 0)
+
+	# Actualizar la protección del generador
+	shield_gen_inst.call("actualizar_estado_cupula")
+	assert(shield_gen_inst.call("esta_en_rango_escudo", ally_inside_t104) == true, "Aliado a 8m debe estar en rango de escudo")
+	assert(shield_gen_inst.call("esta_en_rango_escudo", ally_outside_t104) == false, "Aliado a 25m NO debe estar en rango de escudo")
+
+	shield_gen_inst.call("proteger_nodo", ally_inside_t104)
+	assert(ally_inside_t104.get("shield_generator_protected") == true, "Aliado dentro del escudo debe tener shield_generator_protected = true")
+
+	# Daño entrante debe mitigarse al -70% (factor 0.30)
+	var dmg_original: float = 100.0
+	var dmg_sin_escudo: float = CombatDamageCalculator.calcular_dano(dmg_original, "gun", null, ally_outside_t104)
+	var dmg_mitigado: float = CombatDamageCalculator.calcular_dano(dmg_original, "gun", null, ally_inside_t104)
+	assert(abs(dmg_mitigado - (dmg_sin_escudo * 0.30)) < 0.01, "Cúpula de escudo debe mitigar el -70%% del daño (Esperado: %.2f, Obtenido: %.2f)" % [dmg_sin_escudo * 0.30, dmg_mitigado])
+
+	var dmg_none_mitigado: float = CombatDamageCalculator.calcular_dano(dmg_original, "none", null, ally_inside_t104)
+	assert(abs(dmg_none_mitigado - 30.0) < 0.01, "Con daño base 100.0, la cúpula mitiga a exactamente 30.0 (-70%%)")
+
+	shield_gen_inst.free()
+	ally_inside_t104.free()
+	ally_outside_t104.free()
+	print("✅ Test 104 Superado: Generador de Escudos Hexagonales (cúpula 15m, mitigación estricta del -70%% para aliados guarecidos) certificado.")
+
+
+	# ─── TEST 105: Cañón Orbital de Plasma (Detonación Espacial 22m con 9999 HP Muerte Instantánea) ───
+	print("\n--- TEST 105: Cañón Orbital de Plasma (Detonación 22m y 9999 HP Muerte Instantánea) ---")
+	var orbital_plat_script: GDScript = load("res://scripts/buildings/orbital_cannon_platform_3d.gd") as GDScript
+	var orbital_plat_inst: BuildingBase3D = orbital_plat_script.new() as BuildingBase3D
+	orbital_plat_inst.bando = BuildingBase3D.Bando.PLAYER
+	root.add_child(orbital_plat_inst)
+	orbital_plat_inst._ready()
+
+	assert(abs(float(orbital_plat_inst.get("radio_detonacion")) - 22.0) < 0.01, "Cañón Orbital debe tener radio de detonación colosal de 22.0 metros")
+	assert(abs(float(orbital_plat_inst.get("dano_desintegracion")) - 9999.0) < 0.01, "Cañón Orbital debe infligir daño fulminante de 9999 HP")
+
+	# Crear 2 objetivos dentro del radio de 22m (a 10m y 18m)
+	var victim_near1_t105: Soldier3D = Soldier3D.new()
+	victim_near1_t105.name = "VictimaOrbital1"
+	victim_near1_t105.bando = UnitBase3D.Bando.ENEMY
+	victim_near1_t105.add_to_group("enemy_units")
+	root.add_child(victim_near1_t105)
+	victim_near1_t105._ready()
+	victim_near1_t105.position = Vector3(10.0, 0, 0)
+
+	var victim_near2_t105: Soldier3D = Soldier3D.new()
+	victim_near2_t105.name = "VictimaOrbital2"
+	victim_near2_t105.bando = UnitBase3D.Bando.ENEMY
+	victim_near2_t105.add_to_group("enemy_units")
+	root.add_child(victim_near2_t105)
+	victim_near2_t105._ready()
+	victim_near2_t105.position = Vector3(0, 0, 18.0)
+
+	# Objetivo fuera del radio de 22m (a 32m)
+	var survivor_t105: Soldier3D = Soldier3D.new()
+	survivor_t105.name = "SobrevivienteOrbital"
+	survivor_t105.bando = UnitBase3D.Bando.ENEMY
+	survivor_t105.add_to_group("enemy_units")
+	root.add_child(survivor_t105)
+	survivor_t105._ready()
+	survivor_t105.position = Vector3(32.0, 0, 0)
+	var survivor_init_hp: float = survivor_t105.salud_actual
+
+	# Disparo vertical orbital hacia (0, 0, 0)
+	var impactados_orbital: Array[Node3D] = orbital_plat_inst.call("disparar_canon_orbital", Vector3(0, 0, 0))
+	assert(impactados_orbital.has(victim_near1_t105), "VictimaOrbital1 debe ser alcanzada por el rayo de 22m")
+	assert(impactados_orbital.has(victim_near2_t105), "VictimaOrbital2 debe ser alcanzada por el rayo de 22m")
+	assert(not impactados_orbital.has(survivor_t105), "Sobreviviente a 32m NO debe ser alcanzado por el rayo")
+
+	assert(victim_near1_t105.salud_actual <= 0.0 or victim_near1_t105.is_dead == true, "VictimaOrbital1 debe ser aniquilada al instante por 9999 HP")
+	assert(victim_near2_t105.salud_actual <= 0.0 or victim_near2_t105.is_dead == true, "VictimaOrbital2 debe ser aniquilada al instante por 9999 HP")
+	assert(survivor_t105.salud_actual == survivor_init_hp, "Sobreviviente debe mantener su HP intacto")
+
+	orbital_plat_inst.free()
+	victim_near1_t105.free()
+	victim_near2_t105.free()
+	survivor_t105.free()
+	print("✅ Test 105 Superado: Cañón Orbital de Plasma (haz espacial 22m, muerte instantánea 9999 HP y desintegración total) certificado.")
+
+
 	print("\n========================================================")
-	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
+	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (105/105 - 100%) ")
 	print("========================================================\n")
 	quit(0)
 

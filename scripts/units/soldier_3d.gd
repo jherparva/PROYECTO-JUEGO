@@ -876,6 +876,60 @@ func _setup_stats() -> void:
 			speed = 20.0
 			era_entrenada = 10
 
+		# ────────────────────────────────────────────────────────────
+		# ERA 11 — EDAD NANO-FUTURISTA (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"cyber_hacker_era11", "cyber_hacker":
+			unit_name = "Exosoldado Hacker de Red"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "ENERGY"
+			projectile_type = "bullet"
+			_salud_base = 320.0
+			salud_maxima = 320.0
+			salud_actual = 320.0
+			_daño_base = 34.0
+			daño = 34.0
+			rango_ataque = 18.0
+			velocidad_ataque = 1.1
+			speed = 4.8
+			era_entrenada = 11
+
+		"humanoide_plasma_era11", "humanoide_plasma":
+			unit_name = "Sintético de Plasma"
+			attack_type = "ranged"
+			weapon_type = "energy"
+			impact_type = "ENERGY"
+			projectile_type = "plasma"
+			_salud_base = 450.0
+			salud_maxima = 450.0
+			salud_actual = 450.0
+			_daño_base = 48.0
+			daño = 48.0
+			rango_ataque = 22.0
+			velocidad_ataque = 1.0
+			speed = 5.0
+			era_entrenada = 11
+
+		"plasmamech_bipedo_era11", "plasmamech_bipedo":
+			unit_name = "PlasmaMech Bípedo"
+			attack_type = "ranged"
+			weapon_type = "plasma_cannon"
+			impact_type = "ENERGY"
+			projectile_type = "plasma"
+			is_stun_immune = true
+			is_slow_immune = true
+			is_hack_immune = true
+			_salud_base = 600.0
+			salud_maxima = 600.0
+			salud_actual = 600.0
+			_daño_base = 65.0
+			daño = 65.0
+			rango_ataque = 20.0
+			velocidad_ataque = 1.5
+			speed = 4.8
+			era_entrenada = 11
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:

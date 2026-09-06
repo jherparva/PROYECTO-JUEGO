@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/buildings/shield_generator_3d.gd" id="1_shield"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_shield"]
+height = 5.0
+radius = 1.8
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_shield"]
+top_radius = 0.8
+bottom_radius = 1.3
+height = 4.8
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_shield"]
+albedo_color = Color(0.15, 0.22, 0.3, 1.0)
+metallic = 0.9
+roughness = 0.2
+
+[node name="ShieldGenerator3D" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 7
+script = ExtResource("1_shield")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("CylinderShape3D_shield")
+
+[node name="PylonCore" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.4, 0)
+mesh = SubResource("CylinderMesh_shield")
+surface_material_override/0 = SubResource("StandardMaterial3D_shield")

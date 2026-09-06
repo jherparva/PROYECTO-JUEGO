@@ -802,6 +802,12 @@ func _dispatch_order_to_units(selected_units: Array, target: Node, hit_pos: Vect
 
 		# 6. CASO SUELO: Mover en la formación táctica elegida
 		var offset := _calculate_formation_offset(i, selected_units.size(), move_dir) if selected_units.size() > 1 else Vector3.ZERO
+		
+		# Dispersión de marcha masiva en abanico abierto (Anti-Lineal March)
+		if selected_units.size() > 1:
+			var perp := Vector3(-move_dir.z, 0.0, move_dir.x).normalized()
+			offset += perp * randf_range(-1.2, 1.2)
+			
 		_move_unit(unit_node, hit_pos + offset, move_dir)
 
 func _can_gather_resource(res_node: Node3D) -> Dictionary:

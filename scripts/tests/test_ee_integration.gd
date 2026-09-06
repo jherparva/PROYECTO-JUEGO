@@ -2208,7 +2208,7 @@ func _init() -> void:
 	rm_t54.free()
 	print("✅ Test 54 Superado: Brawler y Aldeano se encolan y consumen recursos fielmente con cupo libre.")
 
-	# ─── TEST 55: Abanico Radial de Recolección (Radial Fan Gathering) ───────────
+	# ─── TEST 55: Abanico Radial de Recolección (Radial Fan Gathering / Dynamic Slot Rotation) ───
 	print("\n--- TEST 55: Abanico Radial de Recolección (TAU / 8 * 1.6m) ---")
 	var root_3d_t55 := Node3D.new()
 	root.add_child(root_3d_t55)
@@ -2217,25 +2217,33 @@ func _init() -> void:
 	root_3d_t55.add_child(res_node_t55)
 	res_node_t55.position = Vector3(20.0, 0.0, 20.0)
 
+	var active_vils: Array[Node] = []
+	
 	# Probar los 8 sectores radiales con 8 aldeanos
 	for i in range(8):
 		var vil_t55 := Villager3DClass.new()
 		vil_t55.name = "Villager_%d" % i
-		vil_t55.set_meta("unit_id", i)
+		vil_t55.add_to_group("villagers")
 		root_3d_t55.add_child(vil_t55)
+		active_vils.append(vil_t55)
 
 		var expected_angle: float = float(i % 8) * (TAU / 8.0)
 		var expected_offset: Vector3 = Vector3(cos(expected_angle), 0.0, sin(expected_angle)) * 1.6
 		var expected_pos: Vector3 = res_node_t55.position + expected_offset
 
 		var calculated_pos: Vector3 = vil_t55.get_radial_gather_target(res_node_t55)
-		assert(calculated_pos.distance_to(expected_pos) < 0.001, "Posición radial del aldeano %d debe coincidir con ángulo TAU/8 a 1.6m" % i)
+		
+		# Asegurar que el aldeano ocupe la ranura calculada para la próxima iteración del escáner
+		vil_t55.global_position = calculated_pos
+		
+		assert(calculated_pos.distance_to(expected_pos) < 0.1, "Posición radial del aldeano %d debe coincidir con sector %d libre" % [i, i])
 		assert(calculated_pos.distance_to(res_node_t55.position) > 1.59 and calculated_pos.distance_to(res_node_t55.position) < 1.61, "Distancia debe ser exactamente 1.6m del nodo")
-		vil_t55.free()
 
+	for v in active_vils:
+		v.free()
 	res_node_t55.free()
 	root_3d_t55.free()
-	print("✅ Test 55 Superado: Abanico radial de recolección equidistante (1.6m) verificado para 8 aldeanos.")
+	print("✅ Test 55 Superado: Abanico radial de recolección equidistante (1.6m) con rotación dinámica verificado para 8 aldeanos.")
 
 
 

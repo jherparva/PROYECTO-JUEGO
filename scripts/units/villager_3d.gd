@@ -595,18 +595,47 @@ func command_gather(resource_node: Node) -> void:
 	if state_machine:
 		state_machine.change_state(&"Gathering", {"target_node": resource_node})
 
-## Calcula la posición radial equidistante (TAU/8 a 1.6m) para evitar solapamiento en el centroide
+## Calcula la posición radial equidistante (TAU/8 a 1.6m) para evitar solapamiento en el centroide con Dynamic Slot Rotation
 func get_radial_gather_target(resource_node: Node3D) -> Vector3:
+	var rpos: Vector3 = resource_node.global_position if resource_node.is_inside_tree() and resource_node.global_position.length_squared() > 0.001 else resource_node.position
+	var base_radius: float = 1.6
+	
+	# Obtener recolectores activos cercanos (<= 2.5m del recurso)
+	var active_gatherers: Array[Node3D] = []
+	var villagers: Array = []
+	var tree := get_tree() if is_inside_tree() else Engine.get_main_loop() as SceneTree
+	if is_instance_valid(tree):
+		villagers = tree.get_nodes_in_group("villagers")
+		
+	if villagers.is_empty() and is_instance_valid(get_parent()):
+		villagers = get_parent().get_children()
+		
+	for u in villagers:
+		if u != self and is_instance_valid(u) and u is Node3D and (u.is_in_group("villagers") or u is Villager3D):
+			var u_pos: Vector3 = u.global_position if u.is_inside_tree() else u.position
+			if u_pos.distance_to(rpos) <= 2.5:
+				active_gatherers.append(u as Node3D)
+					
+	# Escaneo perimetral en caliente sobre los 8 sectores
+	for sector in range(8):
+		var angle: float = float(sector) * (TAU / 8.0)
+		var test_pos := rpos + Vector3(cos(angle), 0.0, sin(angle)) * base_radius
+		
+		# Verificar si este slot está libre
+		var slot_free := true
+		for ally in active_gatherers:
+			var ally_pos: Vector3 = ally.global_position if ally.is_inside_tree() else ally.position
+			if ally_pos.distance_to(test_pos) < 0.8:
+				slot_free = false
+				break
+				
+		if slot_free:
+			return test_pos
+
+	# Fallback original si están todos ocupados
 	var uid: int = abs(get_instance_id())
-	if has_meta("unit_id"):
-		uid = int(get_meta("unit_id"))
-	elif name.contains("_"):
-		var slice_str := name.get_slice("_", -1)
-		if slice_str.is_valid_int():
-			uid = int(slice_str)
-	var angle: float = float(uid % 8) * (TAU / 8.0)
-	var rpos: Vector3 = resource_node.global_position if resource_node.global_position.length_squared() > 0.001 else resource_node.position
-	return rpos + Vector3(cos(angle), 0.0, sin(angle)) * 1.6
+	var fallback_angle: float = float(uid % 8) * (TAU / 8.0)
+	return rpos + Vector3(cos(fallback_angle), 0.0, sin(fallback_angle)) * base_radius
 
 func calculate_radial_gather_position(resource_node: Node3D) -> Vector3:
 	return get_radial_gather_target(resource_node)

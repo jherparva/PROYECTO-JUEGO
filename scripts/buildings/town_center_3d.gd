@@ -220,11 +220,14 @@ func _spawn_initial_units_authority() -> void:
 				v3d.add_to_group("units_3d")
 				v3d.add_to_group("villagers")
 				v3d.add_to_group("civilian_units")
+				v3d.visible = true
 				if is_instance_valid(unit_container):
 					unit_container.add_child(v3d)
 				else:
 					add_child(v3d)
 				v3d.global_position = spawn_p
+				if v3d.is_inside_tree():
+					v3d.request_ready()
 
 				var rm_node: Node = _get_resource_manager()
 				var cur_era_spawn: int = int(rm_node.era_actual) if is_instance_valid(rm_node) and "era_actual" in rm_node else 0
@@ -364,7 +367,13 @@ func _spawn_unit(order: Dictionary) -> void:
 	# Añadir al árbol de nodos primero
 	if is_instance_valid(unit_inst):
 		unit_inst.set_meta("pop_counted", true)
+		unit_inst.visible = true
 	units_parent.add_child(unit_inst)
+
+	if is_instance_valid(unit_inst):
+		unit_inst.visible = true
+		if unit_inst.is_inside_tree():
+			unit_inst.request_ready()
 
 	unit_inst.global_position = spawn_pos
 

@@ -4393,8 +4393,69 @@ func _init() -> void:
 	print("✅ Test 105 Superado: Cañón Orbital de Plasma (haz espacial 22m, muerte instantánea 9999 HP y desintegración total) certificado.")
 
 
+	# ─── TEST 106: Blindaje de Visibilidad Civil 3D y Sockets de Herramientas Anti-Flotación (0,0,0) ───
+	print("\n--- TEST 106: Blindaje de Visibilidad Civil 3D y Sockets de Herramientas Anti-Flotación (0,0,0) ---")
+
+	# 1. Validación de Escena PackedScene (Spawn/Cola de Producción)
+	var vil_scene_t106: PackedScene = load("res://scenes/units/villager_3d.tscn") as PackedScene
+	assert(vil_scene_t106 != null, "La PackedScene 'villager_3d.tscn' debe existir")
+	var vil_inst_t106: Villager3D = vil_scene_t106.instantiate() as Villager3D
+	root.add_child(vil_inst_t106)
+	vil_inst_t106._ready()
+
+	# Certificación de visibilidad absoluta al nacer (100% de mallas civiles visibles)
+	assert(vil_inst_t106.visible == true, "La unidad aldeano instanciada debe iniciar con visible == true")
+	if is_instance_valid(vil_inst_t106.visual_model):
+		assert(vil_inst_t106.visual_model.visible == true, "La malla visual GLB del aldeano debe estar visible en pantalla")
+
+	# 2. Validación de Instanciación Procedural / Servidor
+	var vil_proc_t106: Villager3D = Villager3D.new()
+	vil_proc_t106.name = "Vil_Proc_T106"
+	root.add_child(vil_proc_t106)
+	vil_proc_t106._ready()
+	assert(vil_proc_t106.visible == true, "Aldeano instanciado proceduralmente debe tener visible == true")
+	vil_proc_t106.forzar_refresco_grafico()
+	assert(vil_proc_t106.visible == true, "forzar_refresco_grafico debe mantener visibilidad absoluta")
+
+	# 3. Certificación de Socket Soldado a Cero Absoluto (Anti-Flotación Bug)
+	var hand_socket_t106: Node3D = vil_inst_t106.get_right_hand_attachment()
+	assert(is_instance_valid(hand_socket_t106), "El socket RightHandAttachment debe ser resuelto dinámicamente")
+	assert(hand_socket_t106.position == Vector3.ZERO, "El socket de la mano derecha debe estar soldado en posición local Vector3.ZERO (Obtenido: %s)" % str(hand_socket_t106.position))
+	assert(hand_socket_t106.rotation == Vector3.ZERO, "El socket de la mano derecha debe estar orientado en Vector3.ZERO")
+
+	# 4. Reconexión y Montaje de Herramienta Hacha ("axe")
+	vil_inst_t106.update_hand_tool_visual("axe")
+	var axe_prop_t106: Node3D = hand_socket_t106.get_node_or_null("axe") as Node3D
+	assert(is_instance_valid(axe_prop_t106), "El prop del hacha debe instanciarse como hijo directo del socket")
+	assert(axe_prop_t106.visible == true, "El hacha debe estar visible en la mano")
+	assert(axe_prop_t106.position == Vector3.ZERO, "El hacha debe estar soldada físicamente a Vector3.ZERO en el socket")
+	assert(axe_prop_t106.rotation == Vector3.ZERO, "El hacha debe tener rotación local Vector3.ZERO")
+
+	# 5. Conmutación Dinámica a Pico ("pickaxe") con Limpieza de Prop Previo
+	vil_inst_t106.update_hand_tool_visual("pickaxe")
+	assert(axe_prop_t106.visible == false, "El hacha anterior debe ocultarse inmediatamente")
+	var pick_prop_t106: Node3D = hand_socket_t106.get_node_or_null("pickaxe") as Node3D
+	assert(is_instance_valid(pick_prop_t106), "El pico debe instanciarse como nuevo prop en el socket")
+	assert(pick_prop_t106.visible == true, "El pico debe ser visible")
+	assert(pick_prop_t106.position == Vector3.ZERO, "El pico debe tener posición local en Vector3.ZERO")
+	assert(pick_prop_t106.rotation == Vector3.ZERO, "El pico debe tener rotación local en Vector3.ZERO")
+
+	# 6. Safe Mesh Swap Timing: Inyección Temprana en Frame 1 con Guarda de Retardo
+	var vil_early_t106: Villager3D = Villager3D.new()
+	# Ejecución antes de que el nodo esté en el árbol y listo (is_node_ready == false)
+	vil_early_t106._actualizar_modelo_visual_era(4)
+	root.add_child(vil_early_t106)
+	vil_early_t106._ready()
+	assert(vil_early_t106.visible == true, "La unidad civil con inyección temprana de era debe mantener visible == true")
+
+	vil_inst_t106.free()
+	vil_proc_t106.free()
+	vil_early_t106.free()
+	print("✅ Test 106 Superado: Blindaje de visibilidad civil al 100%%, sockets en (0,0,0) y herramientas soldadas sin flotación certificado.")
+
+
 	print("\n========================================================")
-	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (105/105 - 100%) ")
+	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (106/106 - 100%) ")
 	print("========================================================\n")
 	quit(0)
 

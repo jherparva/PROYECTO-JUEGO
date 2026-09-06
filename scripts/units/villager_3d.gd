@@ -69,8 +69,12 @@ func _setup_stats() -> void:
 @onready var status_label: Label3D = get_node_or_null("StatusLabel") as Label3D
 @onready var visual_model: Node3D = null
 
+func _enter_tree() -> void:
+	self.visible = true
+
 func _ready() -> void:
 	super._ready()
+	self.visible = true
 	
 	# Attempt to load custom GLB for era 0
 	var gltf_path := "res://assets/models/era0/guerrero.glb"
@@ -95,6 +99,15 @@ func _ready() -> void:
 	if not loaded_custom:
 		visual_model = get_node_or_null("CavemanModel") as Node3D
 
+	if is_instance_valid(visual_model):
+		visual_model.visible = true
+
+	# Blindaje de visibilidad absoluta y sockets a cero
+	var hand_s := get_right_hand_attachment()
+	if is_instance_valid(hand_s):
+		hand_s.position = Vector3.ZERO
+		hand_s.rotation = Vector3.ZERO
+
 	# Sincronización Inmediata con la Era Inicial configurada (Runtime Mesh Swap)
 	var gs_node: Node = get_node_or_null("/root/GameSettings")
 	var rm_node: Node = get_node_or_null("/root/ResourceManager")
@@ -105,6 +118,14 @@ func _ready() -> void:
 		cur_era = int(rm_node.era_actual)
 
 	_actualizar_modelo_visual_era(cur_era)
+
+## Fuerza la visibilidad y actualización gráfica absoluta en clientes de red y celulares.
+func forzar_refresco_grafico() -> void:
+	self.visible = true
+	if is_instance_valid(visual_model):
+		visual_model.visible = true
+	if is_inside_tree():
+		request_ready()
 
 func _ensure_state_machine() -> void:
 	if is_instance_valid(_state_machine):
@@ -219,12 +240,33 @@ func clear_inventory() -> Dictionary:
 # ─── Control Visual de Props (Mano y Espalda) ──────────────────────────────────
 
 func get_right_hand_attachment() -> Node3D:
-	var hand := super.get_right_hand_attachment()
+	var hand: Node3D = get_node_or_null("Model/Armature/Skeleton3D/RightHandAttachment") as Node3D
+	if not is_instance_valid(hand):
+		hand = get_node_or_null("CavemanModel/Armature/Skeleton3D/RightHandAttachment") as Node3D
+	if not is_instance_valid(hand) and is_instance_valid(visual_model):
+		hand = visual_model.get_node_or_null("Armature/Skeleton3D/RightHandAttachment") as Node3D
+		if not is_instance_valid(hand):
+			hand = visual_model.find_child("RightHandAttachment", true, false) as Node3D
+	if not is_instance_valid(hand):
+		hand = super.get_right_hand_attachment()
+	if not is_instance_valid(hand):
+		hand = get_node_or_null("RightHandAttachment") as Node3D
+	if not is_instance_valid(hand):
+		hand = find_child("RightHandAttachment", true, false) as Node3D
 	if not is_instance_valid(hand):
 		hand = Node3D.new()
 		hand.name = "RightHandAttachment"
-		hand.position = Vector3(0.35, 0.7, 0.25)
-		add_child(hand)
+		var skel: Skeleton3D = null
+		if is_instance_valid(visual_model):
+			skel = visual_model.find_child("*Skeleton*", true, false) as Skeleton3D
+		if not is_instance_valid(skel):
+			skel = find_child("*Skeleton*", true, false) as Skeleton3D
+		if is_instance_valid(skel):
+			skel.add_child(hand)
+		else:
+			add_child(hand)
+	hand.position = Vector3.ZERO
+	hand.rotation = Vector3.ZERO
 	return hand
 
 func get_back_attachment() -> Node3D:
@@ -237,132 +279,14 @@ func get_back_attachment() -> Node3D:
 	return back
 
 func set_hand_prop(prop_name: String) -> void:
-	_ensure_procedural_hand_props()
-	super.set_hand_prop(prop_name)
+	update_hand_tool_visual(prop_name)
 
 func set_back_prop(prop_name: String) -> void:
 	_ensure_procedural_back_props()
 	super.set_back_prop(prop_name)
 
 func _ensure_procedural_hand_props() -> void:
-	var hand := get_right_hand_attachment()
-	if not is_instance_valid(hand):
-		return
-
-	# 1. Hacha ("axe")
-	if not hand.has_node("axe"):
-		var axe := Node3D.new()
-		axe.name = "axe"
-		var handle := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.height = 0.6
-		cyl.top_radius = 0.025
-		cyl.bottom_radius = 0.025
-		handle.mesh = cyl
-		var mat_wood := StandardMaterial3D.new()
-		mat_wood.albedo_color = Color(0.45, 0.28, 0.15)
-		handle.material_override = mat_wood
-
-		var head := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.05, 0.18, 0.14)
-		head.mesh = box
-		head.position = Vector3(0.0, 0.22, 0.06)
-		var mat_stone := StandardMaterial3D.new()
-		mat_stone.albedo_color = Color(0.52, 0.52, 0.55)
-		head.material_override = mat_stone
-
-		axe.add_child(handle)
-		axe.add_child(head)
-		axe.visible = false
-		hand.add_child(axe)
-
-	# 2. Pico ("pickaxe")
-	if not hand.has_node("pickaxe"):
-		var pick := Node3D.new()
-		pick.name = "pickaxe"
-		var handle := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.height = 0.65
-		cyl.top_radius = 0.025
-		cyl.bottom_radius = 0.025
-		handle.mesh = cyl
-		var mat_wood := StandardMaterial3D.new()
-		mat_wood.albedo_color = Color(0.45, 0.28, 0.15)
-		handle.material_override = mat_wood
-
-		var head := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.04, 0.07, 0.38)
-		head.mesh = box
-		head.position = Vector3(0.0, 0.26, 0.0)
-		var mat_iron := StandardMaterial3D.new()
-		mat_iron.albedo_color = Color(0.35, 0.38, 0.42)
-		mat_iron.metallic = 0.7
-		head.material_override = mat_iron
-
-		pick.add_child(handle)
-		pick.add_child(head)
-		pick.visible = false
-		hand.add_child(pick)
-
-	# 3. Maza / Martillo de Construcción ("Maza_Piedra" / "hammer")
-	if not hand.has_node("Maza_Piedra"):
-		var hammer := Node3D.new()
-		hammer.name = "Maza_Piedra"
-		var handle := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.height = 0.55
-		cyl.top_radius = 0.03
-		cyl.bottom_radius = 0.03
-		handle.mesh = cyl
-		var mat_wood := StandardMaterial3D.new()
-		mat_wood.albedo_color = Color(0.42, 0.26, 0.14)
-		handle.material_override = mat_wood
-
-		var head := MeshInstance3D.new()
-		var box := BoxMesh.new()
-		box.size = Vector3(0.14, 0.14, 0.22)
-		head.mesh = box
-		head.position = Vector3(0.0, 0.22, 0.0)
-		var mat_rock := StandardMaterial3D.new()
-		mat_rock.albedo_color = Color(0.40, 0.40, 0.42)
-		mat_rock.roughness = 0.9
-		head.material_override = mat_rock
-
-		hammer.add_child(handle)
-		hammer.add_child(head)
-		hammer.visible = false
-		hand.add_child(hammer)
-
-	# 4. Lanza de Caza ("spear")
-	if not hand.has_node("spear"):
-		var spear := Node3D.new()
-		spear.name = "spear"
-		var shaft := MeshInstance3D.new()
-		var cyl := CylinderMesh.new()
-		cyl.height = 1.6
-		cyl.top_radius = 0.022
-		cyl.bottom_radius = 0.022
-		shaft.mesh = cyl
-		var mat_wood := StandardMaterial3D.new()
-		mat_wood.albedo_color = Color(0.55, 0.40, 0.22)
-		shaft.material_override = mat_wood
-
-		var tip := MeshInstance3D.new()
-		var prism := PrismMesh.new()
-		prism.size = Vector3(0.08, 0.28, 0.03)
-		tip.mesh = prism
-		tip.position = Vector3(0.0, 0.85, 0.0)
-		var mat_flint := StandardMaterial3D.new()
-		mat_flint.albedo_color = Color(0.65, 0.68, 0.72)
-		mat_flint.metallic = 0.5
-		tip.material_override = mat_flint
-
-		spear.add_child(shaft)
-		spear.add_child(tip)
-		spear.visible = false
-		hand.add_child(spear)
+	pass
 
 func _ensure_procedural_back_props() -> void:
 	var back := get_back_attachment()
@@ -473,10 +397,146 @@ func _ensure_procedural_back_props() -> void:
 		iron_cargo.visible = false
 		back.add_child(iron_cargo)
 
-## Actualiza la herramienta sostenida en la mano derecha según la actividad o recurso.
+## Actualiza la herramienta sostenida en la mano derecha según la actividad o recurso (Anti-Flotación Bug).
 func update_hand_tool_visual(tool_type: String) -> void:
-	# Mapeo de herramientas según la acción/recurso: "axe", "pickaxe", "hammer", "spear", "Maza_Piedra"
-	set_hand_prop(tool_type)
+	var hand_socket: Node3D = get_node_or_null("Model/Armature/Skeleton3D/RightHandAttachment") as Node3D
+	if not is_instance_valid(hand_socket):
+		hand_socket = get_node_or_null("CavemanModel/Armature/Skeleton3D/RightHandAttachment") as Node3D
+	if not is_instance_valid(hand_socket) and is_instance_valid(visual_model):
+		hand_socket = visual_model.get_node_or_null("Armature/Skeleton3D/RightHandAttachment") as Node3D
+		if not is_instance_valid(hand_socket):
+			hand_socket = visual_model.find_child("RightHandAttachment", true, false) as Node3D
+	if not is_instance_valid(hand_socket):
+		hand_socket = get_right_hand_attachment()
+
+	if not is_instance_valid(hand_socket):
+		return
+
+	# Asegurar posición y rotación local soldada a cero absoluto
+	hand_socket.position = Vector3.ZERO
+	hand_socket.rotation = Vector3.ZERO
+
+	# Ocultar y limpiar cualquier prop viejo
+	var existing_tool: Node3D = null
+	for child in hand_socket.get_children():
+		if child is Node3D:
+			(child as Node3D).visible = false
+			if child.name.to_lower() == tool_type.to_lower() and not child.is_queued_for_deletion():
+				existing_tool = child as Node3D
+			else:
+				child.queue_free()
+
+	if tool_type.is_empty():
+		return
+
+	if is_instance_valid(existing_tool):
+		existing_tool.position = Vector3.ZERO
+		existing_tool.rotation = Vector3.ZERO
+		existing_tool.visible = true
+		return
+
+	# Carga de herramienta .glb
+	var glb_path := _get_tool_glb_path(tool_type)
+	var new_tool: Node3D = null
+	if not glb_path.is_empty() and ResourceLoader.exists(glb_path):
+		var pscene := load(glb_path) as PackedScene
+		if pscene:
+			new_tool = pscene.instantiate() as Node3D
+
+	# Si no existe .glb o falla, instanciar fallback procedural
+	if not is_instance_valid(new_tool):
+		new_tool = _create_fallback_tool_node(tool_type)
+
+	if is_instance_valid(new_tool):
+		new_tool.name = tool_type
+		hand_socket.add_child(new_tool)
+		new_tool.position = Vector3.ZERO
+		new_tool.rotation = Vector3.ZERO
+		new_tool.visible = true
+
+func _get_tool_glb_path(tool_type: String) -> String:
+	match tool_type.to_lower():
+		"axe", "stone_axe":
+			return "res://assets/survival_kit/tool-axe.glb"
+		"iron_axe", "axe_upgraded":
+			return "res://assets/survival_kit/tool-axe-upgraded.glb"
+		"pickaxe", "pico", "bronze_pick", "iron_pick", "steel_pick":
+			return "res://assets/survival_kit/tool-pickaxe.glb"
+		"pickaxe_upgraded":
+			return "res://assets/survival_kit/tool-pickaxe-upgraded.glb"
+		"hammer", "steel_hammer", "maza_piedra", "hammer_rock":
+			return "res://assets/survival_kit/tool-hammer.glb"
+		"hammer_upgraded":
+			return "res://assets/survival_kit/tool-hammer-upgraded.glb"
+		"hoe":
+			return "res://assets/survival_kit/tool-hoe.glb"
+		"shovel":
+			return "res://assets/survival_kit/tool-shovel.glb"
+		_:
+			return ""
+
+func _create_fallback_tool_node(tool_type: String) -> Node3D:
+	var tool_node := Node3D.new()
+	var t := tool_type.to_lower()
+	if t.contains("spear") or t.contains("lanza"):
+		var shaft := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.height = 1.6
+		cyl.top_radius = 0.022
+		cyl.bottom_radius = 0.022
+		shaft.mesh = cyl
+		var mat_wood := StandardMaterial3D.new()
+		mat_wood.albedo_color = Color(0.55, 0.40, 0.22)
+		shaft.material_override = mat_wood
+
+		var tip := MeshInstance3D.new()
+		var prism := PrismMesh.new()
+		prism.size = Vector3(0.08, 0.28, 0.03)
+		tip.mesh = prism
+		tip.position = Vector3(0.0, 0.85, 0.0)
+		var mat_flint := StandardMaterial3D.new()
+		mat_flint.albedo_color = Color(0.65, 0.68, 0.72)
+		mat_flint.metallic = 0.5
+		tip.material_override = mat_flint
+
+		tool_node.add_child(shaft)
+		tool_node.add_child(tip)
+	elif t.contains("laser") or t.contains("nano"):
+		var emitter := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.06, 0.06, 0.35)
+		emitter.mesh = box
+		var mat_sci := StandardMaterial3D.new()
+		mat_sci.albedo_color = Color(0.1, 0.8, 1.0)
+		mat_sci.emission_enabled = true
+		mat_sci.emission = Color(0.2, 0.9, 1.0)
+		mat_sci.emission_energy_multiplier = 0.8
+		emitter.material_override = mat_sci
+		tool_node.add_child(emitter)
+	else:
+		var handle := MeshInstance3D.new()
+		var cyl := CylinderMesh.new()
+		cyl.height = 0.6
+		cyl.top_radius = 0.025
+		cyl.bottom_radius = 0.025
+		handle.mesh = cyl
+		var mat_wood := StandardMaterial3D.new()
+		mat_wood.albedo_color = Color(0.45, 0.28, 0.15)
+		handle.material_override = mat_wood
+
+		var head := MeshInstance3D.new()
+		var box := BoxMesh.new()
+		box.size = Vector3(0.05, 0.18, 0.14)
+		head.mesh = box
+		head.position = Vector3(0.0, 0.22, 0.06)
+		var mat_stone := StandardMaterial3D.new()
+		mat_stone.albedo_color = Color(0.52, 0.52, 0.55)
+		head.material_override = mat_stone
+
+		tool_node.add_child(handle)
+		tool_node.add_child(head)
+
+	return tool_node
 
 ## Actualiza el fardo/cesta visual cargado en la espalda según el recurso recolectado.
 func update_back_prop_visual() -> void:
@@ -748,6 +808,13 @@ func _on_era_evolucionada(player_id: int = 0, nueva_era: int = 0) -> void:
 	])
 
 func _actualizar_modelo_visual_era(era_val: int) -> void:
+	if not is_node_ready():
+		await ready
+
+	self.visible = true
+	if is_instance_valid(visual_model):
+		visual_model.visible = true
+
 	var target_key: String = "Primitive_Mesh"
 	match era_val:
 		0, 1, 2:

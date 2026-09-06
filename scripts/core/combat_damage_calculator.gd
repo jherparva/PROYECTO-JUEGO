@@ -145,8 +145,10 @@ const WEAPON_STRING_MAP: Dictionary = {
 	"bludgeoning": WeaponType.MELEE_SHOCK,
 	"piercing":    WeaponType.MELEE_PIERCE,
 	"fist":        WeaponType.MELEE_SHOCK,
-	"club":        WeaponType.MELEE_SHOCK,
 	"sword":       WeaponType.MELEE_SHOCK,
+	"slashing":    WeaponType.MELEE_SHOCK,
+	"club":        WeaponType.MELEE_SHOCK,
+	"mace":        WeaponType.MELEE_SHOCK,
 	"axe":         WeaponType.MELEE_SHOCK,
 	"spear":       WeaponType.MELEE_PIERCE,
 	"pike":        WeaponType.MELEE_PIERCE,
@@ -168,6 +170,7 @@ const WEAPON_STRING_MAP: Dictionary = {
 	"gun":        WeaponType.GUNPOWDER,
 	"gunpowder":  WeaponType.GUNPOWDER,
 	"gunpotwer":  WeaponType.GUNPOWDER,
+	"gatling":    WeaponType.GUNPOWDER,
 	"musket":     WeaponType.GUNPOWDER,
 	"rifle":      WeaponType.GUNPOWDER,
 	"machinegun": WeaponType.GUNPOWDER,
@@ -314,6 +317,30 @@ static func calcular_dano(
 		var is_mosquetero: bool = (att_id == "mosquetero_era5" or att_id == "mosquetero" or "mosquetero" in att_name or attacker.get("is_armor_piercing_gun") == true)
 		if is_mosquetero and armor_type == ArmorType.HEAVY:
 			final_damage *= 1.25
+
+		# Multiplicador oficial Era 6: Hussar_Era6 (x1.40) contra unidades de rango de infantería desprotegidas
+		var is_hussar: bool = (att_id == "hussar_era6" or "hussar" in att_name or attacker.is_in_group("hussars"))
+		if is_hussar:
+			var is_ranged_infantry: bool = (
+				target.is_in_group("ranged_infantry") or target.is_in_group("archers") or
+				target.is_in_group("fusileros") or "fusilero" in target.name.to_lower() or
+				"mosquetero" in target.name.to_lower() or "crossbow" in target.name.to_lower() or
+				"longbow" in target.name.to_lower() or "archer" in target.name.to_lower() or
+				str(target.get("weapon_type")).to_lower() in ["gun", "arrow"]
+			)
+			if is_ranged_infantry:
+				final_damage *= 1.40
+
+		# Multiplicador oficial Era 6: SteamTank_Era6 (x2.5) contra estructuras y murallas
+		var is_steamtank: bool = (att_id == "steamtank_era6" or "steamtank" in att_name or attacker.is_in_group("steamtanks"))
+		if is_steamtank:
+			var is_building_target_st: bool = (
+				target.is_in_group("buildings") or target.is_in_group("buildings_3d") or
+				target.is_in_group("walls") or target.is_in_group("walls_3d") or
+				"building" in target.name.to_lower() or "wall" in target.name.to_lower()
+			)
+			if is_building_target_st:
+				final_damage *= 2.5
 
 	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):

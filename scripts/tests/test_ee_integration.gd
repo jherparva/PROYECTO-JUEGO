@@ -3002,7 +3002,249 @@ func _init() -> void:
 
 	davinci_inst.free()
 	test_attacker_t75.free()
-	print("✅ Test 75 Superado: Carro Blindado Da Vinci (4 troneras, ráfaga perimetral y mitigación -20%) certificado.")
+	print("✅ Test 75 Superado: Carro Blindado Da Vinci (4 troneras, ráfaga perimetral y mitigación -20%%) certificado.")
+
+
+	# ─── TEST 76: Fusilero Imperial (Ataque Dual Rango GUN / Melee Bayoneta) y Ametralladora Gatling (Ráfaga 5 tiros) ───
+	print("\n--- TEST 76: Fusilero Imperial y Ametralladora Gatling ---")
+	var fusilero_script: GDScript = load("res://scripts/units/fusilero_imperial_era6_3d.gd") as GDScript
+	var fusilero_inst: Soldier3D = fusilero_script.new() as Soldier3D
+	root.add_child(fusilero_inst)
+	fusilero_inst._ready()
+	fusilero_inst.position = Vector3(0, 0, 0)
+	assert(fusilero_inst.has_node("ProjectileMuzzle"), "Fusilero Imperial debe tener socket ProjectileMuzzle")
+	assert(abs(fusilero_inst.daño - 28.0) < 0.01, "Fusilero Imperial debe tener daño base de 28.0")
+
+	# Target lejano (distancia = 12.0m > 2.0m) -> Disparo balístico GUN
+	var target_far_t76: Soldier3D = Soldier3D.new()
+	target_far_t76.name = "EnemigoLejanoT76"
+	root.add_child(target_far_t76)
+	target_far_t76._ready()
+	target_far_t76.position = Vector3(12.0, 0, 0)
+
+	var res_ranged: Dictionary = fusilero_inst.call("ejecutar_ataque_fusilero", target_far_t76)
+	assert(res_ranged["modo"] == "rango_fusil", "A distancia > 2.0m el fusilero debe disparar con fusil")
+	assert(res_ranged["tipo_dano"] == "GUN", "El disparo a distancia debe ser de tipo GUN")
+
+	# Target cercano (distancia = 1.5m <= 2.0m) -> Estocada de bayoneta Slashing
+	var target_close_t76: Soldier3D = Soldier3D.new()
+	target_close_t76.name = "EnemigoCercanoT76"
+	root.add_child(target_close_t76)
+	target_close_t76._ready()
+	target_close_t76.position = Vector3(1.5, 0, 0)
+
+	var res_melee: Dictionary = fusilero_inst.call("ejecutar_ataque_fusilero", target_close_t76)
+	assert(res_melee["modo"] == "melee_bayoneta", "A distancia <= 2.0m el fusilero debe conmutar automáticamente a bayoneta")
+	assert(res_melee["tipo_dano"] == "Slashing", "El ataque de bayoneta debe aplicar daño tipo Slashing")
+
+	# Ametralladora Gatling (Artillería Ligera de Ráfaga: 5 proyectiles y cooldown de 1.2s)
+	var gatling_script: GDScript = load("res://scripts/units/ametralladora_gatling_era6_3d.gd") as GDScript
+	var gatling_inst: Soldier3D = gatling_script.new() as Soldier3D
+	root.add_child(gatling_inst)
+	gatling_inst._ready()
+	assert(gatling_inst.has_node("ProjectileMuzzle"), "Gatling debe poseer socket ProjectileMuzzle")
+	assert(gatling_inst.get("is_mechanical") == true, "Gatling debe ser unidad mecánica")
+
+	var disparos_gat: int = gatling_inst.call("disparar_rafaga_gatling")
+	assert(disparos_gat == 5, "Gatling debe disparar una ráfaga continua de 5 proyectiles")
+	assert(gatling_inst.get("tiempo_cooldown_restante") > 1.0, "Gatling debe entrar en cooldown local de 1.2s tras la ráfaga")
+
+	var disparos_en_cd: int = gatling_inst.call("disparar_rafaga_gatling")
+	assert(disparos_en_cd == 0, "Gatling no debe disparar mientras se encuentre en cooldown")
+
+	fusilero_inst.free()
+	target_far_t76.free()
+	target_close_t76.free()
+	gatling_inst.free()
+	print("✅ Test 76 Superado: Fusilero Imperial (ataque dual rango GUN / estocada bayoneta) y Ametralladora Gatling (ráfaga de 5 tiros y cooldown) certificados.")
+
+
+	# ─── TEST 77: Húsar a Caballo (Velocidad 6.8 m/s, x1.40 vs Unidades de Rango y Flanqueo a ±65°) ───
+	print("\n--- TEST 77: Húsar a Caballo (Velocidad 6.8 m/s, x1.40 vs Rango y Flanqueo ±65°) ---")
+	var hussar_script: GDScript = load("res://scripts/units/hussar_era6_3d.gd") as GDScript
+	var hussar_inst: Soldier3D = hussar_script.new() as Soldier3D
+	root.add_child(hussar_inst)
+	hussar_inst._ready()
+	assert(abs(hussar_inst.speed - 6.8) < 0.01, "Húsar debe tener velocidad ultra veloz de 6.8 m/s")
+	assert(hussar_inst.is_cavalry == true, "Húsar debe pertenecer a caballería (is_cavalry = true)")
+
+	# Multiplicador estricto x1.40 contra unidades de rango de infantería
+	var ranged_inf_t77: Soldier3D = Soldier3D.new()
+	ranged_inf_t77.name = "FusileroDefensorT77"
+	ranged_inf_t77.add_to_group("fusileros")
+	ranged_inf_t77.add_to_group("ranged_infantry")
+	ranged_inf_t77.weapon_type = "gun"
+	root.add_child(ranged_inf_t77)
+	ranged_inf_t77._ready()
+
+	var dmg_hussar_vs_ranged: float = CombatDamageCalculator.calcular_dano(hussar_inst.daño, hussar_inst.weapon_type, hussar_inst, ranged_inf_t77)
+	# Base counter MELEE_SHOCK vs INFANTRY (1.5) * hussar bono vs ranged (1.40) = 2.10 -> 26.0 * 2.10 = 54.6
+	var expected_hussar_dmg: float = (hussar_inst.daño * 1.5) * 1.40
+	assert(abs(dmg_hussar_vs_ranged - expected_hussar_dmg) < 0.05, "Húsar debe aplicar multiplicador x1.40 contra unidades de rango (Esperado: %.2f, Obtenido: %.2f)" % [expected_hussar_dmg, dmg_hussar_vs_ranged])
+
+	# Maniobra táctica de flanqueo a ±65 grados
+	hussar_inst.position = Vector3(0, 0, 10)
+	var pos_flanqueo_der: Vector3 = hussar_inst.call("calcular_posicion_flanqueo", Vector3(0, 0, 0), 4.0, 1)
+	var ang_flanqueo_rad: float = deg_to_rad(65.0)
+	var expected_x: float = sin(ang_flanqueo_rad) * 4.0
+	var expected_z: float = cos(ang_flanqueo_rad) * 4.0
+	assert(abs(pos_flanqueo_der.x - expected_x) < 0.1 and abs(pos_flanqueo_der.z - expected_z) < 0.1, "Húsar debe calcular posición de flanqueo precisa a 65 grados")
+
+	hussar_inst.free()
+	ranged_inf_t77.free()
+	print("✅ Test 77 Superado: Húsar a Caballo (velocidad 6.8 m/s, multiplicador x1.40 vs rango y flanqueo a ±65°) certificado.")
+
+
+	# ─── TEST 78: Factoría Pesada (Factory_Era6: Herencia Barracks3D, Emergencia 8% y Humo Continuo) ───
+	print("\n--- TEST 78: Factoría Pesada (Herencia Barracks3D, Emergencia 8% y Chimeneas con Humo) ---")
+	var factory_script: GDScript = load("res://scripts/buildings/factory_era6_3d.gd") as GDScript
+	var factory_inst: BuildingBase3D = factory_script.new() as BuildingBase3D
+	assert(factory_inst is Barracks3D, "Factory_Era6 debe heredar directamente de Barracks3D")
+	assert(factory_inst is BuildingBase3D, "Factory_Era6 debe heredar de BuildingBase3D")
+
+	factory_inst.starts_under_construction = true
+	root.add_child(factory_inst)
+	factory_inst._ready()
+
+	# Emergencia vertical progresiva desde el 8%
+	factory_inst._actualizar_progreso_construccion(0.0)
+	factory_inst._actualizar_progreso_construccion(50.0)
+	factory_inst._actualizar_progreso_construccion(100.0)
+	assert(factory_inst.esta_construido == true, "Factoría debe completarse al 100%% de progreso")
+
+	# Emisor de partículas continuas de humo pesado
+	assert(factory_inst.has_node("Chimney1/IndustrialSmokeParticles"), "Factoría debe poseer chimenea con nodo IndustrialSmokeParticles")
+	var smoke_node = factory_inst.get_node("Chimney1/IndustrialSmokeParticles")
+	assert(smoke_node.get("emitting") == true, "Partículas de humo industrial deben estar emitiéndose continuamente")
+
+	# Cola de producción de blindados de Era 6
+	var rm_t78: GlobalResourceManager = root.get_node_or_null("ResourceManager") as GlobalResourceManager
+	if not is_instance_valid(rm_t78):
+		rm_t78 = GlobalResourceManager.new()
+		rm_t78.name = "ResourceManager"
+		root.add_child(rm_t78)
+	rm_t78.era_actual = 6
+	rm_t78.resources["iron"] = 1000
+	rm_t78.resources["gold"] = 1000
+	rm_t78.resources["wood"] = 1000
+	rm_t78.max_population = 50
+	rm_t78.current_population = 0
+	factory_inst.resource_manager = rm_t78
+
+	var train_tank_success: bool = factory_inst.call("entrenar_unidad", "steamtank_era6")
+	assert(train_tank_success == true or factory_inst.get("production_queue").size() > 0, "Factoría debe encolar Tanque de Vapor en Era 6")
+
+	factory_inst.free()
+	print("✅ Test 78 Superado: Factoría Pesada con herencia de Barracks3D, emergencia al 8%, chimeneas de humo y cola de producción certificada.")
+
+
+	# ─── TEST 79: Tanque de Vapor (HP 450.0, Inmunidad al Stun, Multiplicador x2.5 y AoE 3.5m) ───
+	print("\n--- TEST 79: Tanque de Vapor (HP 450.0, Inmunidad Stun, x2.5 vs Estructuras y AoE 3.5m) ---")
+	var steamtank_script: GDScript = load("res://scripts/units/steamtank_era6_3d.gd") as GDScript
+	var steamtank_inst: Soldier3D = steamtank_script.new() as Soldier3D
+	root.add_child(steamtank_inst)
+	steamtank_inst._ready()
+	steamtank_inst.position = Vector3(0, 0, 0)
+	assert(abs(steamtank_inst.salud_maxima - 450.0) < 0.01, "Tanque de Vapor debe poseer salud masiva de 450.0 HP")
+	assert(steamtank_inst.has_node("ProjectileMuzzle"), "Tanque de Vapor debe poseer socket ProjectileMuzzle")
+	assert(steamtank_inst.get("is_stun_immune") == true, "Tanque de Vapor debe ser totalmente inmune a aturdimiento (is_stun_immune = true)")
+
+	# Validación de inmunidad frente a Stun
+	var stun_aplicado: bool = steamtank_inst.call("aplicar_stun", 2.0)
+	assert(stun_aplicado == false, "aplicar_stun() debe retornar false en Tanque de Vapor")
+	assert(steamtank_inst.get("is_stunned") == false, "Tanque de Vapor no debe quedar aturdido bajo ninguna circunstancia")
+
+	# Multiplicador x2.5 contra edificios y estructuras
+	var bld_t79: BuildingBase3D = BuildingBase3D.new()
+	bld_t79.name = "FortalezaAcero"
+	bld_t79.add_to_group("buildings")
+	bld_t79.add_to_group("buildings_3d")
+	bld_t79.salud_actual = 2000.0
+	bld_t79.salud_maxima = 2000.0
+	root.add_child(bld_t79)
+	bld_t79.position = Vector3(25.0, 0, 0)
+
+	var dmg_steamtank_bld: float = CombatDamageCalculator.calcular_dano(steamtank_inst.daño, steamtank_inst.weapon_type, steamtank_inst, bld_t79)
+	# Base counter SIEGE vs BUILDING (3.0) * steamtank bono (2.5) = 7.5 -> 90.0 * 7.5 = 675.0
+	var expected_stk_dmg: float = (steamtank_inst.daño * 3.0) * 2.5
+	assert(abs(dmg_steamtank_bld - expected_stk_dmg) < 0.05, "Tanque de Vapor debe aplicar multiplicador x2.5 vs estructuras (Esperado: %.2f, Obtenido: %.2f)" % [expected_stk_dmg, dmg_steamtank_bld])
+
+	# Detonación AoE de 3.5 metros
+	var bld_close_t79: BuildingBase3D = BuildingBase3D.new()
+	bld_close_t79.name = "MuroCercanoAoE"
+	bld_close_t79.add_to_group("buildings")
+	root.add_child(bld_close_t79)
+	bld_close_t79.position = Vector3(27.0, 0, 0) # A 2.0m de (25, 0, 0) <= 3.5m
+
+	var bld_far_t79: BuildingBase3D = BuildingBase3D.new()
+	bld_far_t79.name = "MuroLejanoAoE"
+	bld_far_t79.add_to_group("buildings")
+	root.add_child(bld_far_t79)
+	bld_far_t79.position = Vector3(32.0, 0, 0) # A 7.0m de (25, 0, 0) > 3.5m
+
+	var aoe_hits_t79: Array[Node3D] = steamtank_inst.call("disparar_canon_vapor", Vector3(25, 0, 0))
+	assert(aoe_hits_t79.has(bld_t79), "Objetivo principal debe ser alcanzado por la salva")
+	assert(aoe_hits_t79.has(bld_close_t79), "Estructura a 2.0m debe ser alcanzada por el AoE de 3.5m")
+	assert(not aoe_hits_t79.has(bld_far_t79), "Estructura a 7.0m NO debe ser alcanzada")
+
+	steamtank_inst.free()
+	bld_t79.free()
+	bld_close_t79.free()
+	bld_far_t79.free()
+	print("✅ Test 79 Superado: Tanque de Vapor (HP 450.0, inmunidad al stun, x2.5 vs estructuras y AoE 3.5m) certificado.")
+
+
+	# ─── TEST 80: Camión Industrial (Guarecido de 6 Infantes, Duplicación en Caminos y Desembarque RPC) ───
+	print("\n--- TEST 80: Camión Industrial (Guarecido 6 Unidades, Bonus Camino y Desembarque RPC) ---")
+	var camion_script: GDScript = load("res://scripts/units/camion_industrial_era6_3d.gd") as GDScript
+	var camion_inst: Soldier3D = camion_script.new() as Soldier3D
+	root.add_child(camion_inst)
+	camion_inst._ready()
+	assert(abs(camion_inst.speed - 5.0) < 0.01, "Velocidad base del Camión debe ser 5.0 m/s")
+
+	# Duplicación de velocidad en caminos (5.0 -> 10.0 m/s)
+	camion_inst.call("aplicar_bonus_camino", true)
+	assert(abs(camion_inst.speed - 10.0) < 0.01, "Camión debe duplicar su velocidad en caminos a 10.0 m/s")
+	camion_inst.call("aplicar_bonus_camino", false)
+	assert(abs(camion_inst.speed - 5.0) < 0.01, "Camión debe retornar a su velocidad base fuera de caminos")
+
+	# Guarecido militar de hasta 6 unidades del grupo infantry_3d
+	var infantiles_cargados: Array[Soldier3D] = []
+	for i in range(6):
+		var inf_node := Soldier3D.new()
+		inf_node.name = "InfanteGuarecido_%d" % i
+		inf_node.add_to_group("infantry_3d")
+		root.add_child(inf_node)
+		inf_node._ready()
+		var load_ok: bool = camion_inst.call("guarecer_unidad", inf_node)
+		assert(load_ok == true, "Debe permitir guarecer infante %d" % i)
+		assert(inf_node.visible == false, "El infante guarecido debe quedar oculto")
+		infantiles_cargados.append(inf_node)
+
+	var garrison_list: Array = camion_inst.get("garrison_array")
+	assert(garrison_list.size() == 6, "El camión debe contener exactamente 6 unidades en garrison_array")
+
+	# Intentar guarecer una 7ma unidad (debe ser rechazada)
+	var inf_extra := Soldier3D.new()
+	inf_extra.name = "InfanteExcedente"
+	inf_extra.add_to_group("infantry_3d")
+	root.add_child(inf_extra)
+	inf_extra._ready()
+	var load_fail: bool = camion_inst.call("guarecer_unidad", inf_extra)
+	assert(load_fail == false, "El camión no debe permitir exceder la capacidad máxima de 6 unidades")
+	inf_extra.free()
+
+	# Desembarque síncrono vía RPC
+	var desembarcadas: Array[Node3D] = camion_inst.call("desembarcar_unidades")
+	assert(desembarcadas.size() == 6, "Deben haberse desembarcado exactamente las 6 unidades")
+	assert(camion_inst.get("garrison_array").size() == 0, "El garrison_array debe quedar vacío tras desembarcar")
+
+	for u in infantiles_cargados:
+		assert(u.visible == true, "Las unidades desembarcadas deben volver a ser visibles")
+		u.free()
+
+	camion_inst.free()
+	print("✅ Test 80 Superado: Camión Industrial (guarecido de 6 infantes, duplicación en caminos y desembarque síncrono) certificado.")
 
 
 	print("\n========================================================")

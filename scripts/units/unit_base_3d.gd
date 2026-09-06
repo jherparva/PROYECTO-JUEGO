@@ -343,10 +343,17 @@ func _alertar_aliados_cercanos(atacante: Node, radio: float) -> void:
 						sm.change_state(&"Attacking", {"target": atacante})
 
 var is_stunned: bool = false
+var is_stun_immune: bool = false
+
+func aplicar_stun(duracion: float = 1.5) -> bool:
+	if is_dead or is_stunned or is_stun_immune:
+		return false
+	aplicar_aturdimiento(duracion)
+	return true
 
 @rpc("any_peer", "call_local", "reliable")
 func aplicar_aturdimiento(duracion: float = 1.5) -> void:
-	if is_dead or is_stunned:
+	if is_dead or is_stunned or is_stun_immune:
 		return
 	is_stunned = true
 	var orig_mode := process_mode

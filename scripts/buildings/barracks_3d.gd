@@ -99,6 +99,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 8.5, "era_min": 5, "era_max": 7,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
 	},
+	"fusilero_imperial": {
+		"name": "Fusilero Imperial", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 110, "iron": 80, "gold": 50},
+		"train_time": 8.5, "era_min": 6, "era_max": 8,
+		"scene_path": "res://scenes/units/fusilero_imperial_era6_3d.tscn"
+	},
 	"soldado_asalto": {
 		"name": "Soldado de Asalto Táctico", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 130, "iron": 100},
@@ -229,6 +235,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 11.0, "era_min": 5, "era_max": 7,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
 	},
+	"hussar_era6": {
+		"name": "Húsar a Caballo", "building_type": "stable",
+		"type": "cavalry", "cost": {"food": 140, "iron": 70, "gold": 60},
+		"train_time": 9.5, "era_min": 6, "era_max": 8,
+		"scene_path": "res://scenes/units/hussar_era6_3d.tscn"
+	},
 	"apc_blindado": {
 		"name": "APC Transporte Blindado", "building_type": "stable",
 		"type": "cavalry", "cost": {"iron": 180, "gold": 90},
@@ -284,6 +296,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "siege", "cost": {"wood": 180, "iron": 120, "gold": 100},
 		"train_time": 15.0, "era_min": 5, "era_max": 7,
 		"scene_path": "res://scenes/units/carro_blindado_davinci_3d.tscn"
+	},
+	"ametralladora_gatling": {
+		"name": "Ametralladora Gatling", "building_type": "siege_workshop",
+		"type": "ranged", "cost": {"iron": 160, "wood": 60, "gold": 100},
+		"train_time": 12.0, "era_min": 6, "era_max": 8,
+		"scene_path": "res://scenes/units/ametralladora_gatling_era6_3d.tscn"
+	},
+	"steamtank_era6": {
+		"name": "Tanque de Vapor", "building_type": "factory",
+		"type": "siege", "cost": {"iron": 250, "gold": 150, "wood": 100},
+		"train_time": 18.0, "era_min": 6, "era_max": 8,
+		"scene_path": "res://scenes/units/steamtank_era6_3d.tscn"
+	},
+	"camion_industrial": {
+		"name": "Camión Industrial", "building_type": "factory",
+		"type": "cavalry", "cost": {"iron": 180, "gold": 80, "wood": 80},
+		"train_time": 13.0, "era_min": 6, "era_max": 8,
+		"scene_path": "res://scenes/units/camion_industrial_era6_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

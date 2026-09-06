@@ -479,6 +479,91 @@ func _setup_stats() -> void:
 			speed = 3.8
 			era_entrenada = 5
 
+		# ────────────────────────────────────────────────────────────
+		# ERA 6 — EDAD INDUSTRIAL (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"fusilero_imperial":
+			unit_name = "Fusilero Imperial"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 175.0
+			salud_maxima = 175.0
+			salud_actual = 175.0
+			_daño_base = 28.0
+			daño = 28.0
+			rango_ataque = 20.0
+			velocidad_ataque = 1.7
+			speed = 4.4
+			era_entrenada = 6
+
+		"hussar_era6":
+			unit_name = "Húsar a Caballo"
+			attack_type = "melee"
+			weapon_type = "sword"
+			impact_type = "MELEE_SHOCK"
+			is_cavalry = true
+			_salud_base = 230.0
+			salud_maxima = 230.0
+			salud_actual = 230.0
+			_daño_base = 26.0
+			daño = 26.0
+			rango_ataque = 3.2
+			velocidad_ataque = 0.8
+			speed = 6.8
+			era_entrenada = 6
+
+		"ametralladora_gatling":
+			unit_name = "Ametralladora Gatling"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 220.0
+			salud_maxima = 220.0
+			salud_actual = 220.0
+			_daño_base = 14.0
+			daño = 14.0
+			rango_ataque = 18.0
+			velocidad_ataque = 1.2
+			speed = 2.8
+			era_entrenada = 6
+
+		"steamtank_era6":
+			unit_name = "Tanque de Vapor"
+			attack_type = "ranged"
+			weapon_type = "cannon"
+			impact_type = "GUNPOWDER"
+			projectile_type = "fire_stone"
+			is_cavalry = true
+			is_stun_immune = true
+			_salud_base = 450.0
+			salud_maxima = 450.0
+			salud_actual = 450.0
+			_daño_base = 90.0
+			daño = 90.0
+			rango_ataque = 22.0
+			velocidad_ataque = 3.2
+			speed = 2.6
+			era_entrenada = 6
+
+		"camion_industrial":
+			unit_name = "Camión Industrial"
+			attack_type = "melee"
+			weapon_type = "none"
+			impact_type = "NONE"
+			is_cavalry = true
+			_salud_base = 320.0
+			salud_maxima = 320.0
+			salud_actual = 320.0
+			_daño_base = 0.0
+			daño = 0.0
+			rango_ataque = 0.0
+			velocidad_ataque = 1.0
+			speed = 5.0
+			era_entrenada = 6
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:

@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://hussar_era6_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/hussar_era6_3d.gd" id="1_hus6"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_hus"]
+size = Vector3(0.9, 1.6, 2.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_hus_body"]
+size = Vector3(0.7, 0.9, 1.7)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hus_mat"]
+albedo_color = Color(0.35, 0.22, 0.14, 1)
+
+[node name="Hussar_Era6" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_hus6")
+unit_id = "hussar_era6"
+unit_name = "Húsar a Caballo"
+attack_type = "melee"
+weapon_type = "sword"
+impact_type = "Slashing"
+is_cavalry = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+shape = SubResource("BoxShape3D_hus")
+
+[node name="HorseMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, 0)
+mesh = SubResource("BoxMesh_hus_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_hus_mat")

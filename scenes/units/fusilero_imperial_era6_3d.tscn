@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://fusilero_imperial_era6_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/fusilero_imperial_era6_3d.gd" id="1_fsi6"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_fsi"]
+radius = 0.35
+height = 1.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_fsi_torso"]
+size = Vector3(0.55, 0.85, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fsi_torso"]
+albedo_color = Color(0.65, 0.15, 0.15, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_fsi_musket"]
+top_radius = 0.03
+bottom_radius = 0.04
+height = 1.6
+
+[node name="Fusilero_Imperial" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_fsi6")
+unit_id = "fusilero_imperial"
+unit_name = "Fusilero Imperial"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape3D_fsi")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 1.2, -0.9)
+
+[node name="SoldierTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("BoxMesh_fsi_torso")
+surface_material_override/0 = SubResource("StandardMaterial3D_fsi_torso")

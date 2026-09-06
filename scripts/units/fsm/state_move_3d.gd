@@ -151,6 +151,8 @@ func _move_with_nav_agent(delta: float) -> void:
 		return
 
 	unit.move_and_slide()
+	if unit.has_method("aplicar_protocolo_anti_stuck_civil"):
+		unit.aplicar_protocolo_anti_stuck_civil()
 
 func _move_direct(delta: float) -> void:
 	var to_target := (_target_position - unit.global_position)
@@ -179,6 +181,8 @@ func _move_direct(delta: float) -> void:
 		unit.velocity = Vector3.ZERO
 		
 	unit.move_and_slide()
+	if unit.has_method("aplicar_protocolo_anti_stuck_civil"):
+		unit.aplicar_protocolo_anti_stuck_civil()
 
 ## Aplica una fuerza de dirección tangencial con distancia de seguridad ante edificios y obstáculos
 func _apply_obstacle_clearance(raw_move_dir: Vector3) -> Vector3:

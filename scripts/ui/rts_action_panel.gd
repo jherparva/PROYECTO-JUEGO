@@ -14,7 +14,8 @@ var portrait_label: Label
 var label_title: Label
 var label_subtitle: Label
 var hp_bar: ProgressBar
-var actions_container: HBoxContainer
+var actions_container: GridContainer
+var production_queue_container: HBoxContainer
 
 var _current_selection: Array = []
 var _building_placer: BuildingPlacer = null
@@ -220,11 +221,21 @@ func _create_ui_hierarchy() -> void:
 	v_sep.add_theme_stylebox_override("separator", sep_style)
 	main_hbox.add_child(v_sep)
 
-	# ── Sección Derecha: Cuadrícula de Acciones Tácticas ──────────────────────
-	actions_container = HBoxContainer.new()
-	actions_container.alignment = BoxContainer.ALIGNMENT_CENTER
-	actions_container.add_theme_constant_override("separation", 14)
-	main_hbox.add_child(actions_container)
+	# ── Sección Derecha: Cuadrícula de Acciones Tácticas y Cola de Producción ──
+	var right_vbox = VBoxContainer.new()
+	right_vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	main_hbox.add_child(right_vbox)
+
+	actions_container = GridContainer.new()
+	actions_container.columns = 3
+	actions_container.add_theme_constant_override("h_separation", 6)
+	actions_container.add_theme_constant_override("v_separation", 6)
+	right_vbox.add_child(actions_container)
+
+	production_queue_container = HBoxContainer.new()
+	production_queue_container.custom_minimum_size.y = 20
+	production_queue_container.add_theme_constant_override("separation", 4)
+	right_vbox.add_child(production_queue_container)
 
 # ─── Respuesta a Cambio de Selección ──────────────────────────────────────────
 

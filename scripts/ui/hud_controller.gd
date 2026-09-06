@@ -24,6 +24,7 @@ var registered_containers: Array[Control] = []
 func _ready() -> void:
 	process_mode = PROCESS_MODE_ALWAYS
 	add_to_group("hud_controller")
+	_build_hud_structure()
 	_connect_resource_manager()
 	aplicar_estilo_era(current_era)
 
@@ -147,3 +148,94 @@ static func crear_stylebox_para_era(era_val: int) -> StyleBoxFlat:
 		s.shadow_size = 8
 
 	return s
+
+# ─── ESTRUCTURA TRIPARTITA DEL HUD (Empire Earth) ──────────────────────────────
+var hud_bottom_bar: HBoxContainer = null
+var panel_left_stats: PanelContainer = null
+var panel_center_grid: PanelContainer = null
+var panel_right_minimap: PanelContainer = null
+
+var lbl_unit_name: Label = null
+var lbl_unit_hp: Label = null
+var lbl_unit_stats: Label = null
+
+func _build_hud_structure() -> void:
+	# Asegurar que estamos en un CanvasLayer superior
+	var layer := CanvasLayer.new()
+	layer.layer = 10
+	add_child(layer)
+
+	var margin := MarginContainer.new()
+	margin.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
+	margin.add_theme_constant_override("margin_left", 0)
+	margin.add_theme_constant_override("margin_right", 0)
+	margin.add_theme_constant_override("margin_bottom", 0)
+	layer.add_child(margin)
+
+	hud_bottom_bar = HBoxContainer.new()
+	hud_bottom_bar.custom_minimum_size.y = 160
+	hud_bottom_bar.add_theme_constant_override("separation", 2)
+	margin.add_child(hud_bottom_bar)
+
+	# Panel Izquierdo: Stats/Selección (20%)
+	panel_left_stats = PanelContainer.new()
+	panel_left_stats.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_left_stats.size_flags_stretch_ratio = 0.25
+	hud_bottom_bar.add_child(panel_left_stats)
+	registrar_contenedor(panel_left_stats)
+
+	var vbox_left = VBoxContainer.new()
+	panel_left_stats.add_child(vbox_left)
+	lbl_unit_name = Label.new()
+	lbl_unit_name.add_theme_font_size_override("font_size", 16)
+	vbox_left.add_child(lbl_unit_name)
+	lbl_unit_hp = Label.new()
+	lbl_unit_hp.add_theme_color_override("font_color", Color.GREEN)
+	vbox_left.add_child(lbl_unit_hp)
+	lbl_unit_stats = Label.new()
+	lbl_unit_stats.add_theme_font_size_override("font_size", 12)
+	vbox_left.add_child(lbl_unit_stats)
+
+	# Panel Central: Consola de Comandos / Grid de Producción (55%)
+	panel_center_grid = PanelContainer.new()
+	panel_center_grid.name = "CenterGridContainer"
+	panel_center_grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_center_grid.size_flags_stretch_ratio = 0.55
+	hud_bottom_bar.add_child(panel_center_grid)
+	registrar_contenedor(panel_center_grid)
+
+	var action_panel = load("res://scripts/ui/rts_action_panel.gd").new()
+	action_panel.name = "RTSActionPanel"
+	panel_center_grid.add_child(action_panel)
+
+	# Panel Derecho: Minimapa (20%)
+	panel_right_minimap = PanelContainer.new()
+	panel_right_minimap.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel_right_minimap.size_flags_stretch_ratio = 0.20
+	hud_bottom_bar.add_child(panel_right_minimap)
+	registrar_contenedor(panel_right_minimap)
+
+	# Conectar al gestor de selección
+	_connect_selection_manager()
+
+func _connect_selection_manager() -> void:
+	var sm: Node = get_node_or_null("/root/SelectionManager")
+	if is_instance_valid(sm) and sm.has_signal("selection_changed"):
+		if not sm.selection_changed.is_connected(_on_selection_changed):
+			sm.selection_changed.connect(_on_selection_changed)
+
+func _on_selection_changed(selected_units: Array) -> void:
+	if selected_units.is_empty():
+		panel_left_stats.visible = false
+	else:
+		panel_left_stats.visible = true
+		var target = selected_units[0]
+		if is_instance_valid(target):
+			var u_name = target.get("unit_name") if "unit_name" in target else target.name
+			var hp = target.get("salud_actual") if "salud_actual" in target else 0
+			var max_hp = target.get("salud_maxima") if "salud_maxima" in target else 0
+			var dmg = target.get("daño") if "daño" in target else 0
+
+			lbl_unit_name.text = str(u_name)
+			lbl_unit_hp.text = "%d/%d HP" % [int(hp), int(max_hp)]
+			lbl_unit_stats.text = "Daño: %d\nArmadura: Base" % int(dmg)

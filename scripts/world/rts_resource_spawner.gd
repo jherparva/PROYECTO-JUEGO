@@ -459,7 +459,53 @@ func obtener_altura_terreno(x: float, z: float) -> float:
 			return -1.8 # Valles navegables ocasionales
 		return 0.0
 
-func _instanciar_nodo_recurso(tipo: String, cantidad_max: int, pos: Vector3, es_acuatico: bool = false) -> void:
+## Consulta de Raycast vertical hacia abajo desde Y = 50.0m para fijar recursos al terreno real
+func snap_posicion_a_terreno(pos: Vector3, fallback_y: float = 0.0) -> Vector3:
+	var target_pos := pos
+	var ray_start := Vector3(pos.x, 50.0, pos.z)
+	var ray_end := Vector3(pos.x, -25.0, pos.z)
+
+	var world_3d: World3D = get_world_3d() if is_inside_tree() else null
+	if not is_instance_valid(world_3d):
+		var tree_inst := _get_tree_safe()
+		if is_instance_valid(tree_inst) and is_instance_valid(tree_inst.root):
+			world_3d = tree_inst.root.get_world_3d()
+
+	if is_instance_valid(world_3d) and world_3d.direct_space_state:
+		var query := PhysicsRayQueryParameters3D.create(ray_start, ray_end)
+		query.collide_with_areas = true
+		query.collide_with_bodies = true
+		var hit := world_3d.direct_space_state.intersect_ray(query)
+		if not hit.is_empty():
+			var collider = hit.get("collider")
+			if is_instance_valid(collider) and collider.is_in_group("terrain"):
+				var hit_pos: Vector3 = hit.get("position", Vector3.ZERO)
+				target_pos.y = hit_pos.y
+				return target_pos
+			else:
+				var hit_pos: Vector3 = hit.get("position", Vector3.ZERO)
+				target_pos.y = hit_pos.y
+				return target_pos
+
+	# Si no hay colisión física en la escena, calcular la cota vía FastNoiseLite
+	var noise_y := obtener_altura_terreno(pos.x, pos.z)
+	if abs(noise_y) > 0.001:
+		target_pos.y = noise_y
+	elif abs(fallback_y) > 0.001:
+		target_pos.y = fallback_y
+	else:
+		target_pos.y = 0.05
+
+	return target_pos
+
+func _instanciar_nodo_recurso(tipo: String, cantidad_max: int, pos: Vector3, es_acuatico: bool = false) -> ResourceNode3D:
+	var final_pos := pos
+	if not es_acuatico:
+		final_pos = snap_posicion_a_terreno(pos, pos.y)
+	else:
+		if abs(final_pos.y) < 0.001:
+			final_pos.y = -1.8 # Cota acuática para recursos marítimos
+
 	var node: ResourceNode3D = null
 	if is_instance_valid(_resource_scene):
 		node = _resource_scene.instantiate() as ResourceNode3D
@@ -476,6 +522,7 @@ func _instanciar_nodo_recurso(tipo: String, cantidad_max: int, pos: Vector3, es_
 	node.max_amount = final_qty
 	node.current_amount = final_qty
 	node.is_aquatic = es_acuatico
+	node.position = final_pos
 
 	var res_container: Node = null
 	if get_parent() != null:
@@ -490,9 +537,8 @@ func _instanciar_nodo_recurso(tipo: String, cantidad_max: int, pos: Vector3, es_
 	else:
 		add_child(node)
 
-	node.position = pos
-	if node.is_inside_tree():
-		node.global_position = pos
+	node.global_position = final_pos
+	return node
 
 ## Purga síncrona inmediata de nodos placeholder del editor (TownCenter central y aldeanos de prueba)
 ## para evitar que los recursos iniciales se siembren en el origen en lugar de las bases territoriales reales.

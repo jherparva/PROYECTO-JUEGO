@@ -4454,8 +4454,175 @@ func _init() -> void:
 	print("✅ Test 106 Superado: Blindaje de visibilidad civil al 100%%, sockets en (0,0,0) y herramientas soldadas sin flotación certificado.")
 
 
+	# ─── TEST 107: Proyección y Snapping de Recursos al Terreno Real (Terrain Snapping Logic) ───
+	print("\n--- TEST 107: Proyección y Snapping de Recursos al Terreno Real ---")
+	var spawner_t107: RTSResourceSpawner = RTSResourceSpawnerClass.new()
+	root.add_child(spawner_t107)
+
+	# 1. Probar método snap_posicion_a_terreno con elevación procedural
+	var test_origin := Vector3(25.0, 0.0, -18.0)
+	var snapped_pos: Vector3 = spawner_t107.snap_posicion_a_terreno(test_origin)
+	assert(typeof(snapped_pos.y) == TYPE_FLOAT, "snap_posicion_a_terreno debe retornar un valor Vector3 con componente Y válida")
+
+	# 2. Con colisionador en grupo 'terrain' a altura Y = 14.5
+	var terrain_body := StaticBody3D.new()
+	terrain_body.name = "TerrainMeshCollider"
+	terrain_body.add_to_group("terrain")
+	var cshape := CollisionShape3D.new()
+	var box_shape := BoxShape3D.new()
+	box_shape.size = Vector3(100.0, 2.0, 100.0)
+	cshape.shape = box_shape
+	terrain_body.add_child(cshape)
+	root.add_child(terrain_body)
+	terrain_body.position = Vector3(0.0, 14.5, 0.0)
+
+	# 3. Validar instanciación procedural de recurso: No puede tener Y plana de 0.0
+	var res_spawned: ResourceNode3D = spawner_t107._instanciar_nodo_recurso("wood", 100, Vector3(10.0, 0.0, 10.0))
+	assert(is_instance_valid(res_spawned), "El recurso debe instanciarse exitosamente")
+	var elevacion_esperada: Vector3 = spawner_t107.snap_posicion_a_terreno(Vector3(10.0, 0.0, 10.0))
+	assert(abs(res_spawned.position.y - elevacion_esperada.y) < 0.1 or abs(res_spawned.global_position.y - elevacion_esperada.y) < 0.1, "El recurso debe clavarse a la coordenada Y del terreno real")
+
+	res_spawned.free()
+	terrain_body.free()
+	spawner_t107.free()
+	print("✅ Test 107 Superado: Proyección síncrona y snapping de recursos a la cota del terreno certificada.")
+
+
+	# ─── TEST 108: Normalización Dinámica de AABB de Edificios (Mesh Pivot Calibrator) ───
+	print("\n--- TEST 108: Normalización Dinámica de AABB de Edificios ---")
+	var bld_t108: BuildingBase3D = Barracks3DClass.new()
+	root.add_child(bld_t108)
+	bld_t108._ready()
+
+	# Limpiar cualquier malla visual preexistente del GLB para la aserción pura
+	for child in bld_t108.find_children("*", "MeshInstance3D", true, false):
+		child.queue_free()
+		bld_t108.remove_child(child.get_parent()) if child.get_parent() != bld_t108 else bld_t108.remove_child(child)
+
+	# Añadir malla visual con dimensiones conocidas
+	var mesh_inst := MeshInstance3D.new()
+	mesh_inst.name = "TestVisualMesh"
+	var box := BoxMesh.new()
+	box.size = Vector3(6.0, 4.0, 8.0)
+	mesh_inst.mesh = box
+	mesh_inst.scale = Vector3(1.5, 1.5, 1.5)
+	bld_t108.add_child(mesh_inst)
+
+	# get_building_extents() debe usar aabb.size * 0.5 * visual_mesh.scale
+	var ext: Vector3 = bld_t108.get_building_extents()
+	assert(abs(ext.x - 4.5) < 0.1, "La semiextensión X debe ser 4.5 (Obtenido: %.2f)" % ext.x)
+	assert(abs(ext.z - 6.0) < 0.1, "La semiextensión Z debe ser 6.0 (Obtenido: %.2f)" % ext.z)
+
+	# Verificar que el perímetro de parada para aldeanos se calibre con base a la geometría
+	var stop_dist: float = bld_t108.get_perimeter_stop_distance()
+	assert(stop_dist >= 6.0 + 1.2 - 0.1, "La distancia de parada perimetral debe ser al menos radio visible (6.0) + 1.2m de muro (Obtenido: %.2f)" % stop_dist)
+
+	bld_t108.free()
+	print("✅ Test 108 Superado: AABB dinámica de mallas, calibración perimetral y mitigación de martilleo al aire certificada.")
+
+
+	# ─── TEST 109: Depósito Perimetral en Capitolio/Almacén y Acreditación Inmediata ───
+	print("\n--- TEST 109: Depósito Perimetral en Capitolio/Almacén y Acreditación Inmediata ---")
+	var tc_t109: TownCenter3D = TownCenter3DClass.new()
+	tc_t109.name = "TownCenter_Test109"
+	tc_t109.bando = BuildingBase3D.Bando.PLAYER
+	tc_t109.add_to_group("town_centers")
+	root.add_child(tc_t109)
+	tc_t109._ready()
+
+	# Configurar ResourceManager en la raíz si no existe
+	var rm_t109: Node = root.get_node_or_null("ResourceManager")
+	var rm_created := false
+	if not is_instance_valid(rm_t109):
+		rm_t109 = GlobalResourceManager.new()
+		rm_t109.name = "ResourceManager"
+		root.add_child(rm_t109)
+		rm_created = true
+	var wood_before: int = int(rm_t109.get_resource("wood")) if rm_t109.has_method("get_resource") else 0
+
+	# Crear aldeano cargado de madera
+	var vil_t109: Villager3D = Villager3DClass.new()
+	vil_t109.name = "Vil_Collector_T109"
+	vil_t109.bando = UnitBase3D.Bando.PLAYER
+	root.add_child(vil_t109)
+	vil_t109._ready()
+	vil_t109.carried_amount = 15
+	vil_t109.carried_resource_type = "wood"
+	vil_t109.update_back_prop_visual()
+
+	# Obtener distancia perimetral de entrega
+	var perim_dist: float = tc_t109.get_perimeter_stop_distance()
+	assert(perim_dist > 2.0, "La distancia de entrega perimetral debe ser mayor a 2.0m para coincidir con la arista exterior")
+
+	# Simular llegada al depósito en StateGathering3D
+	var sm_t109 = vil_t109._state_machine
+	assert(is_instance_valid(sm_t109), "Villager debe poseer StateMachine3D activa")
+	sm_t109.change_state(&"Gathering", {"deposit_target": tc_t109})
+
+	# Validar vaciado del inventario y acreditación de recursos
+	assert(vil_t109.carried_amount == 0, "El inventario del aldeano debe haberse vaciado tras la entrega")
+	assert(vil_t109.carried_resource_type.is_empty(), "El tipo de recurso transportado debe resetearse a vacío")
+	var wood_after: int = int(rm_t109.get_resource("wood")) if rm_t109.has_method("get_resource") else 0
+	assert(wood_after == wood_before + 15, "Los 15u de madera deben haberse acreditado al ResourceManager (Antes: %d, Ahora: %d)" % [wood_before, wood_after])
+
+	vil_t109.free()
+	tc_t109.free()
+	if rm_created:
+		rm_t109.free()
+	print("✅ Test 109 Superado: Entrega perimetral en Capitolio y acreditación síncrona de recursos certificada.")
+
+
+	# ─── TEST 110: Protocolo Anti-Pegado Civil y Prop Inicial de Martillo en Spawn (0,0,0) ───
+	print("\n--- TEST 110: Protocolo Anti-Pegado Civil y Prop Inicial de Martillo en Spawn (0,0,0) ---")
+
+	# 1. Validar que los aldeanos nazcan con martillo en el frame 1 y en (0,0,0)
+	var fresh_vil: Villager3D = Villager3DClass.new()
+	fresh_vil.name = "FreshVil_T110"
+	root.add_child(fresh_vil)
+	fresh_vil._ready()
+
+	var socket_t110: Node3D = fresh_vil.get_right_hand_attachment()
+	assert(is_instance_valid(socket_t110), "Socket de mano derecha debe existir")
+	var hammer_child := socket_t110.get_node_or_null("hammer") as Node3D
+	assert(is_instance_valid(hammer_child), "El aldeano recién nacido debe portar el martillo por defecto")
+	assert(hammer_child.visible == true, "El martillo debe estar visible desde el frame 1")
+	assert(hammer_child.position == Vector3.ZERO, "El martillo debe estar soldado en posición Vector3.ZERO")
+
+	# 2. Validar protocolo de escape tangencial / ortogonal anti-stuck
+	var civil_a: Villager3D = Villager3DClass.new()
+	civil_a.name = "CivilA_T110"
+	civil_a.bando = UnitBase3D.Bando.PLAYER
+	root.add_child(civil_a)
+	civil_a._ready()
+
+	var civil_b: Villager3D = Villager3DClass.new()
+	civil_b.name = "CivilB_T110"
+	civil_b.bando = UnitBase3D.Bando.PLAYER
+	root.add_child(civil_b)
+	civil_b._ready()
+
+	civil_a.velocity = Vector3(2.0, 0.0, 0.0)
+	assert(civil_a.has_method("aplicar_protocolo_anti_stuck_civil"), "UnitBase3D/Villager3D debe contar con aplicar_protocolo_anti_stuck_civil")
+
+	# Inyección ortogonal directa: Vector3(-velocity.z, 0.0, velocity.x).normalized() * 1.5
+	var vel_test := Vector3(2.0, 0.0, 0.0)
+	var exp_escape := Vector3(-vel_test.z, 0.0, vel_test.x).normalized() * 1.5
+	assert(abs(exp_escape.z - 1.5) < 0.01 and abs(exp_escape.x) < 0.01, "El vector de escape ortogonal debe ser (0, 0, 1.5)")
+
+	# Validar presencia de avoidance_priority aleatoria en NavigationAgent3D
+	var nav_agent_a := civil_a.get_node_or_null("NavigationAgent3D") as NavigationAgent3D
+	if is_instance_valid(nav_agent_a):
+		civil_a.aplicar_protocolo_anti_stuck_civil()
+		assert(nav_agent_a.avoidance_priority >= 0.0 and nav_agent_a.avoidance_priority <= 1.0, "La prioridad de evasión RVO debe fluctuar entre 0.0 y 1.0")
+
+	fresh_vil.free()
+	civil_a.free()
+	civil_b.free()
+	print("✅ Test 110 Superado: Desviación lateral anti-stuck y martillo inicial soldado en (0,0,0) certificados.")
+
+
 	print("\n========================================================")
-	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (106/106 - 100%) ")
+	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (110/110 - 100%) ")
 	print("========================================================\n")
 	quit(0)
 

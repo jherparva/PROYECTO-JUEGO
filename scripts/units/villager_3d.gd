@@ -108,6 +108,10 @@ func _ready() -> void:
 		hand_s.position = Vector3.ZERO
 		hand_s.rotation = Vector3.ZERO
 
+	# Grupos civiles para protocolo anti-stuck
+	add_to_group("villagers")
+	add_to_group("civilian_units")
+
 	# Sincronización Inmediata con la Era Inicial configurada (Runtime Mesh Swap)
 	var gs_node: Node = get_node_or_null("/root/GameSettings")
 	var rm_node: Node = get_node_or_null("/root/ResourceManager")
@@ -118,6 +122,9 @@ func _ready() -> void:
 		cur_era = int(rm_node.era_actual)
 
 	_actualizar_modelo_visual_era(cur_era)
+
+	# Asignación de herramienta por defecto en el spawn (Initial Tool Visual Attach)
+	update_hand_tool_visual("hammer")
 
 ## Fuerza la visibilidad y actualización gráfica absoluta en clientes de red y celulares.
 func forzar_refresco_grafico() -> void:
@@ -177,6 +184,9 @@ func set_gathering_animation(active: bool) -> void:
 	_is_gathering_anim = active
 
 func _physics_process(delta: float) -> void:
+	# Protocolo anti-pegado y rechazo tangencial civil
+	aplicar_protocolo_anti_stuck_civil()
+
 	if not is_instance_valid(visual_model):
 		return
 

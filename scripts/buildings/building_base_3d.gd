@@ -174,8 +174,10 @@ func _ensure_building_label3d() -> void:
 	lbl.text = building_name
 	lbl.font_size = 20
 	lbl.modulate = Color(1.0, 0.95, 0.7, 0.90)
-	lbl.billboard = BaseMaterial3D.BILLBOARD_ENABLED
-	var height: float = 5.5 if is_in_group("town_centers") else 4.5
+	var b_ext := get_building_extents()
+	var height: float = maxf(b_ext.y * 2.0 + 0.8, 4.5)
+	if is_in_group("town_centers"):
+		height = maxf(height, 5.5)
 	lbl.position = Vector3(0.0, height, 0.0)
 	lbl.pixel_size = 0.008
 	lbl.no_depth_test = true
@@ -366,8 +368,32 @@ func _actualizar_progreso_construccion(porcentaje: float) -> void:
 func set_construction_progress(percent: float) -> void:
 	_actualizar_progreso_construccion(percent)
 
-## Extrae dinámicamente las semiextensiones (half-extents) de la estructura inspeccionando CollisionShape3D o AABB.
+## Extrae dinámicamente las semiextensiones (half-extents) de la estructura inspeccionando AABB visible o CollisionShape3D.
 func get_building_extents() -> Vector3:
+	# 1. Normalización Dinámica de AABB de Edificios (Mesh Pivot Calibrator)
+	# Si existe una malla visual (MeshInstance3D o MultiMeshInstance3D), extraer su geometría real
+	var visual_mesh: Node3D = null
+	for child in find_children("*", "MeshInstance3D", true, false):
+		if child is MeshInstance3D and is_instance_valid(child.mesh) and child.visible and not child.name.contains("Indicator") and not child.name.contains("Selection") and not child.name.contains("Scaffold") and not child.name.contains("HealthBar") and not child.name.contains("Rally"):
+			visual_mesh = child
+			break
+
+	if not is_instance_valid(visual_mesh):
+		for child in find_children("*", "MultiMeshInstance3D", true, false):
+			if child is MultiMeshInstance3D and child.visible:
+				visual_mesh = child
+				break
+
+	if is_instance_valid(visual_mesh):
+		var aabb: AABB = visual_mesh.get_aabb()
+		if aabb.size.length_squared() > 0.001:
+			var g_scale: Vector3 = visual_mesh.global_transform.basis.get_scale() if visual_mesh.is_inside_tree() else visual_mesh.scale
+			if not visual_mesh.is_inside_tree() and is_instance_valid(visual_mesh.get_parent()) and visual_mesh.get_parent() is Node3D:
+				g_scale *= (visual_mesh.get_parent() as Node3D).scale
+			g_scale = Vector3(abs(g_scale.x), abs(g_scale.y), abs(g_scale.z))
+			return aabb.size * 0.5 * g_scale
+
+	# 2. Fallback a CollisionShape3D si no hay malla visual directa
 	var col: CollisionShape3D = find_child("CollisionShape3D", true, false) as CollisionShape3D
 	if is_instance_valid(col) and col.shape:
 		if col.shape is BoxShape3D:
@@ -379,14 +405,7 @@ func get_building_extents() -> Vector3:
 			var r := (col.shape as SphereShape3D).radius
 			return Vector3(r, r, r)
 
-	# Fallback a AABB de mallas visuales si no hay colisión explícita
-	for child in get_children():
-		if child is MeshInstance3D and is_instance_valid(child.mesh):
-			var aabb: AABB = child.mesh.get_aabb()
-			var s: Vector3 = child.scale
-			return aabb.size * 0.5 * s
-
-	# Dimensiones canónicas estándar por defecto según tipo de edificio
+	# 3. Dimensiones canónicas estándar por defecto según tipo de edificio
 	if is_in_group("town_centers") or "TownCenter" in name:
 		return Vector3(3.0, 2.0, 3.0)
 	elif is_in_group("barracks") or "arracks" in building_name:

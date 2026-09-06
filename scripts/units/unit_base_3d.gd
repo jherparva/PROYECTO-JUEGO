@@ -585,10 +585,23 @@ func _order_selected_units_to_attack_self() -> void:
 # ─── Sistema de Attachment & Props ──────────────────────────────────────────────
 
 func get_right_hand_attachment() -> Node3D:
-	return find_child("RightHandAttachment", true, false) as Node3D
+	var hand := find_child("RightHandAttachment", true, false) as Node3D
+	if not is_instance_valid(hand):
+		hand = Node3D.new()
+		hand.name = "RightHandAttachment"
+		add_child(hand)
+		hand.position = Vector3.ZERO
+		hand.rotation = Vector3.ZERO
+	return hand
 
 func get_back_attachment() -> Node3D:
-	return find_child("BackAttachment", true, false) as Node3D
+	var back := find_child("BackAttachment", true, false) as Node3D
+	if not is_instance_valid(back):
+		back = Node3D.new()
+		back.name = "BackAttachment"
+		add_child(back)
+		back.position = Vector3(0, 1.0, -0.3)
+	return back
 
 func set_attachment_prop(attachment: Node3D, prop_name: String) -> void:
 	if not is_instance_valid(attachment):
@@ -621,6 +634,29 @@ func rotate_towards_direction(direction: Vector3, delta: float) -> void:
 	
 	var target_y_rad := atan2(flat_dir.x, flat_dir.z)
 	rotation.y = lerp_angle(rotation.y, target_y_rad, rotation_speed * delta)
+
+## Protocolo Anti-Pegado y Rechazo Tangencial Civil (Anti-Stuck RVO Escape)
+func aplicar_protocolo_anti_stuck_civil() -> void:
+	if not (is_in_group("villagers") or is_in_group("civilian_units")):
+		return
+
+	# Detección de colisión física continua con otra unidad aliada en movimiento
+	var count := get_slide_collision_count()
+	for i in range(count):
+		var col := get_slide_collision(i)
+		var other := col.get_collider() as Node
+		if is_instance_valid(other) and other is CharacterBody3D and other != self:
+			var other_bando: int = int(other.get("bando")) if "bando" in other else -1
+			var my_bando: int = int(self.get("bando")) if "bando" in self else 0
+			if other_bando == my_bando or other.is_in_group("player_units") or other.is_in_group("villagers"):
+				if velocity.length_squared() > 0.01:
+					var escape_vector := Vector3(-velocity.z, 0.0, velocity.x).normalized() * 1.5
+					velocity += escape_vector
+
+				var nav := nav_agent if "nav_agent" in self and is_instance_valid(nav_agent) else (get_node_or_null("NavigationAgent3D") as NavigationAgent3D)
+				if is_instance_valid(nav):
+					nav.avoidance_priority = randf()
+				break
 
 # ─── Selección RTS ─────────────────────────────────────────────────────────────
 

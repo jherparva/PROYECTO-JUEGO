@@ -12,6 +12,7 @@ extends CanvasLayer
 @onready var label_piedra: Label = find_child("LabelPiedra", true, false) as Label
 @onready var label_hierro: Label = find_child("LabelHierro", true, false) as Label
 @onready var label_oro: Label    = find_child("LabelOro", true, false) as Label
+@onready var label_poblacion: Label = find_child("LabelPoblacion", true, false) as Label
 
 # ─── Ciclo de Vida ─────────────────────────────────────────────────────────────
 
@@ -159,3 +160,9 @@ func _on_recursos_actualizados(recursos: Dictionary) -> void:
 
 	if is_instance_valid(label_oro):
 		label_oro.text = "🪙 " + str(recursos.get("gold", 0))
+
+	var rm: Node = get_node_or_null("/root/ResourceManager")
+	if is_instance_valid(rm) and is_instance_valid(label_poblacion):
+		var cur_pop = rm.get("current_population") if "current_population" in rm else 0
+		var max_pop = rm.get("max_population") if "max_population" in rm else 0
+		label_poblacion.text = "👥 Población: %d/%d" % [cur_pop, max_pop]

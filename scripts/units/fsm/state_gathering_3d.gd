@@ -339,9 +339,16 @@ func _go_to_deposit() -> void:
 	var tc := _find_nearest_town_center()
 	if is_instance_valid(tc):
 		_town_center = tc
+		var target_stop_dist: float = deposit_range
+		if tc.has_method("get_perimeter_stop_distance"):
+			target_stop_dist = float(tc.call("get_perimeter_stop_distance"))
+		elif tc.has_method("get_building_extents"):
+			var b_ext: Vector3 = tc.call("get_building_extents")
+			target_stop_dist = maxf(b_ext.x, b_ext.z) + 1.2
+
 		state_machine.change_state(&"Move", {
 			"target_node": tc,
-			"stopping_distance": deposit_range,
+			"stopping_distance": target_stop_dist,
 			"on_arrival_state": &"Gathering",
 			"on_arrival_context": {
 				"deposit_target": tc,

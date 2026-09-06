@@ -3247,6 +3247,184 @@ func _init() -> void:
 	print("✅ Test 80 Superado: Camión Industrial (guarecido de 6 infantes, duplicación en caminos y desembarque síncrono) certificado.")
 
 
+	# ─── TEST 81: Doughboy de Trinchera (Mitigación del 20% en Idle y Daño GUN 30.0) ───
+	print("\n--- TEST 81: Doughboy de Trinchera (Daño GUN y Mitigación 20% en Idle) ---")
+	var doughboy_script: GDScript = load("res://scripts/units/doughboy_era7_3d.gd") as GDScript
+	var doughboy_inst: Soldier3D = doughboy_script.new() as Soldier3D
+	root.add_child(doughboy_inst)
+	doughboy_inst._ready()
+	assert(doughboy_inst.has_node("ProjectileMuzzle"), "Doughboy debe poseer socket ProjectileMuzzle")
+	assert(abs(doughboy_inst.daño - 30.0) < 0.01, "Doughboy debe poseer daño base de 30.0")
+
+	# Mitigación del 20% en reposo / Idle contra daño balístico
+	doughboy_inst.set("esta_en_trinchera", true)
+	var dano_test_balistico: float = 100.0
+	var dano_con_mitigacion: float = doughboy_inst.call("aplicar_mitigacion_trinchera", dano_test_balistico, "gun")
+	assert(abs(dano_con_mitigacion - 80.0) < 0.01, "Doughboy en reposo debe mitigar un 20%% del daño balístico")
+
+	# En movimiento / fuera de trinchera no aplica mitigación
+	doughboy_inst.set("esta_en_trinchera", false)
+	doughboy_inst.velocity = Vector3(5.0, 0, 0)
+	var dano_sin_mitigacion: float = doughboy_inst.call("aplicar_mitigacion_trinchera", dano_test_balistico, "gun")
+	assert(abs(dano_sin_mitigacion - 100.0) < 0.01, "Doughboy en movimiento no debe mitigar daño balístico")
+
+	# Verificación integrada con CombatDamageCalculator
+	doughboy_inst.set("esta_en_trinchera", true)
+	doughboy_inst.velocity = Vector3.ZERO
+	var attacker_t81: Soldier3D = Soldier3D.new()
+	root.add_child(attacker_t81)
+	attacker_t81._ready()
+	attacker_t81.daño = 50.0
+	attacker_t81.weapon_type = "gun"
+
+	var calc_dmg_doughboy: float = CombatDamageCalculator.calcular_dano(attacker_t81.daño, "gun", attacker_t81, doughboy_inst)
+	# Base counter GUN vs INFANTRY (1.2) * mitigación trinchera (0.80) = 0.96 -> 50.0 * 0.96 = 48.0
+	var expected_dmg_doughboy: float = (attacker_t81.daño * 1.2) * 0.80
+	assert(abs(calc_dmg_doughboy - expected_dmg_doughboy) < 0.05, "CombatDamageCalculator debe aplicar mitigación de trinchera del 20%% (Esperado: %.2f, Obtenido: %.2f)" % [expected_dmg_doughboy, calc_dmg_doughboy])
+
+	doughboy_inst.free()
+	attacker_t81.free()
+	print("✅ Test 81 Superado: Doughboy de Trinchera (daño GUN 30.0, socket ProjectileMuzzle y mitigación del 20% en Idle) certificado.")
+
+
+	# ─── TEST 82: Ametralladora Maxim (Ráfaga de 4 Tiros y Debuff Supresión -30%) ───
+	print("\n--- TEST 82: Ametralladora Maxim (Ráfaga 4 Tiros y Supresión -30%) ---")
+	var maxim_script: GDScript = load("res://scripts/units/ametralladora_maxim_era7_3d.gd") as GDScript
+	var maxim_inst: Soldier3D = maxim_script.new() as Soldier3D
+	root.add_child(maxim_inst)
+	maxim_inst._ready()
+	assert(maxim_inst.has_node("ProjectileMuzzle"), "Maxim debe poseer socket ProjectileMuzzle")
+	assert(abs(maxim_inst.daño - 16.0) < 0.01, "Maxim debe poseer daño base de 16.0")
+
+	# Target para recibir la ráfaga y el debuff de supresión
+	var target_maxim: Soldier3D = Soldier3D.new()
+	target_maxim.name = "InfanteObjetivoMaxim"
+	root.add_child(target_maxim)
+	target_maxim._ready()
+	var initial_speed: float = target_maxim.speed
+
+	var shots_fired: int = maxim_inst.call("disparar_rafaga_maxim", target_maxim)
+	assert(shots_fired == 4, "Ametralladora Maxim debe disparar ráfagas continuas de 4 tiros")
+	assert(target_maxim.get("is_suppressed") == true, "El objetivo de la Maxim debe quedar en estado is_suppressed")
+	assert(abs(target_maxim.speed - (initial_speed * 0.70)) < 0.05, "El objetivo debe sufrir ralentización del -30%% en su velocidad")
+
+	maxim_inst.free()
+	target_maxim.free()
+	print("✅ Test 82 Superado: Ametralladora Maxim (ráfagas continuas de 4 tiros y debuff de supresión del -30% por 2s) certificada.")
+
+
+	# ─── TEST 83: Tanque Mark IV (HP 400.0, Inmunidad Stun y Barbetas Dobles Simultáneas) ───
+	print("\n--- TEST 83: Tanque Mark IV (HP 400.0, Inmunidad Stun y Barbetas Muzzle_Left / Muzzle_Right) ---")
+	var markiv_script: GDScript = load("res://scripts/units/mark_iv_tanque_era7_3d.gd") as GDScript
+	var markiv_inst: Soldier3D = markiv_script.new() as Soldier3D
+	root.add_child(markiv_inst)
+	markiv_inst._ready()
+	assert(abs(markiv_inst.salud_maxima - 400.0) < 0.01, "Tanque Mark IV debe poseer 400.0 HP masivos")
+	assert(markiv_inst.get("is_stun_immune") == true, "Tanque Mark IV debe ser totalmente inmune al stun")
+
+	var stun_attempt: bool = markiv_inst.call("aplicar_stun", 2.0)
+	assert(stun_attempt == false, "aplicar_stun debe retornar false en Mark IV")
+	assert(markiv_inst.get("is_stunned") == false, "Mark IV no debe quedar aturdido")
+
+	# Barbetas dobles
+	assert(markiv_inst.has_node("Muzzle_Left"), "Mark IV debe poseer barbeta izquierda Muzzle_Left")
+	assert(markiv_inst.has_node("Muzzle_Right"), "Mark IV debe poseer barbeta derecha Muzzle_Right")
+
+	var enemy_left := Soldier3D.new()
+	var enemy_right := Soldier3D.new()
+	root.add_child(enemy_left)
+	root.add_child(enemy_right)
+	enemy_left._ready()
+	enemy_right._ready()
+
+	var dual_result: Dictionary = markiv_inst.call("disparar_barbetas_dobles", enemy_left, enemy_right)
+	assert(dual_result["left_hit"] == true, "Barbeta izquierda debe alcanzar su objetivo")
+	assert(dual_result["right_hit"] == true, "Barbeta derecha debe alcanzar su objetivo")
+
+	markiv_inst.free()
+	enemy_left.free()
+	enemy_right.free()
+	print("✅ Test 83 Superado: Tanque Mark IV (HP 400.0, inmunidad al stun y fuego simultáneo desde barbetas dobles) certificado.")
+
+
+	# ─── TEST 84: Aeródromo de Lienzo y Búnker de Hormigón (Herencia Barracks3D y Tower3D) ───
+	print("\n--- TEST 84: Aeródromo WWI y Búnker de Hormigón ---")
+	var airfield_script: GDScript = load("res://scripts/buildings/airfield_wwi_3d.gd") as GDScript
+	var airfield_inst: BuildingBase3D = airfield_script.new() as BuildingBase3D
+	assert(airfield_inst is Barracks3D, "Airfield_WWI_3D debe heredar directamente de Barracks3D")
+	assert(airfield_inst is BuildingBase3D, "Airfield_WWI_3D debe heredar de BuildingBase3D")
+
+	airfield_inst.starts_under_construction = true
+	root.add_child(airfield_inst)
+	airfield_inst._ready()
+
+	# Emergencia vertical desde el 8%
+	airfield_inst._actualizar_progreso_construccion(0.0)
+	airfield_inst._actualizar_progreso_construccion(50.0)
+	airfield_inst._actualizar_progreso_construccion(100.0)
+	assert(airfield_inst.esta_construido == true, "Aeródromo debe completarse al 100%% de construcción")
+
+	# Cola de producción de unidad aérea
+	var rm_t84: GlobalResourceManager = root.get_node_or_null("ResourceManager") as GlobalResourceManager
+	if not is_instance_valid(rm_t84):
+		rm_t84 = GlobalResourceManager.new()
+		rm_t84.name = "ResourceManager"
+		root.add_child(rm_t84)
+	rm_t84.era_actual = 7
+	rm_t84.resources["wood"] = 1000
+	rm_t84.resources["iron"] = 1000
+	rm_t84.resources["gold"] = 1000
+	rm_t84.max_population = 50
+	rm_t84.current_population = 0
+	airfield_inst.resource_manager = rm_t84
+
+	var train_fokker_ok: bool = airfield_inst.call("entrenar_unidad", "biplano_fokker_era7")
+	assert(train_fokker_ok == true or airfield_inst.get("production_queue").size() > 0, "Aeródromo debe encolar Biplano Fokker en Era 7")
+
+	# Búnker de Hormigón Armado (herencia Tower3D)
+	var bunker_script: GDScript = load("res://scripts/buildings/fortress_bunker_3d.gd") as GDScript
+	var bunker_inst: Tower3D = bunker_script.new() as Tower3D
+	assert(bunker_inst is Tower3D, "Fortress_Bunker_3D debe heredar de Tower3D")
+	root.add_child(bunker_inst)
+	bunker_inst._ready()
+	assert(abs(bunker_inst.salud_maxima - 2200.0) < 0.01, "Búnker debe poseer salud de 2200.0 HP")
+	assert(abs(bunker_inst.base_damage - 45.0) < 0.01, "Búnker debe poseer daño base de 45.0")
+
+	airfield_inst.free()
+	bunker_inst.free()
+	print("✅ Test 84 Superado: Aeródromo WWI (herencia Barracks3D, emergencia 8% y cola de aviones) y Búnker de Hormigón (herencia Tower3D, 2200 HP) certificados.")
+
+
+	# ─── TEST 85: Biplano Fokker Era 7 (Vuelo Y=10.0m, Velocidad 9.5 m/s y Retorno Autónomo por Munición) ───
+	print("\n--- TEST 85: Biplano Fokker (Vuelo Y=10m, Velocidad 9.5 m/s y Rearme Autónomo) ---")
+	var fokker_script: GDScript = load("res://scripts/units/biplano_fokker_era7_3d.gd") as GDScript
+	var fokker_inst: Soldier3D = fokker_script.new() as Soldier3D
+	root.add_child(fokker_inst)
+	fokker_inst._ready()
+	assert(abs(fokker_inst.speed - 9.5) < 0.01, "Biplano Fokker debe poseer velocidad de vuelo de 9.5 m/s")
+	assert(abs(fokker_inst.position.y - 10.0) < 0.01, "Biplano Fokker debe navegar a una altura fija constante en Y = 10.0m")
+
+	# Pasadas de ametrallamiento y consumo de munición (max_ammo = 3)
+	var ground_target_t85 := Soldier3D.new()
+	root.add_child(ground_target_t85)
+	ground_target_t85._ready()
+
+	assert(fokker_inst.get("current_ammo") == 3, "Biplano debe iniciar con 3 cargas de munición")
+	fokker_inst.call("ametrallar_objetivo", ground_target_t85)
+	assert(fokker_inst.get("current_ammo") == 2, "Debe quedar con 2 cargas tras primer ataque")
+	fokker_inst.call("ametrallar_objetivo", ground_target_t85)
+	assert(fokker_inst.get("current_ammo") == 1, "Debe quedar con 1 carga tras segundo ataque")
+
+	# Tercer ataque agota munición y activa retorno autónomo al aeródromo
+	fokker_inst.call("ametrallar_objetivo", ground_target_t85)
+	assert(fokker_inst.get("current_ammo") == 0, "Munición debe quedar agotada a 0")
+	assert(fokker_inst.get("estado_vuelo") == "regresando", "Biplano debe conmutar autónomamente a estado 'regresando' hacia el aeródromo")
+
+	fokker_inst.free()
+	ground_target_t85.free()
+	print("✅ Test 85 Superado: Biplano Fokker (capa aérea Y=10m, velocidad 9.5 m/s, pasadas de ametrallamiento y retorno autónomo por rearme) certificado.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")

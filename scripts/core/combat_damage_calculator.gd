@@ -350,6 +350,10 @@ static func calcular_dano(
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_blindaje"):
 		final_damage = target.call("aplicar_mitigacion_blindaje", final_damage)
 
+	# Mitigación de Trinchera del Doughboy de Era 7 (-20% de daño balístico en reposo/Idle)
+	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_trinchera"):
+		final_damage = target.call("aplicar_mitigacion_trinchera", final_damage, weapon_str)
+
 	return maxf(1.0, final_damage)
 
 ## Calcula el modificador de dano por diferencia de altura (dbcliffterrain.dat).

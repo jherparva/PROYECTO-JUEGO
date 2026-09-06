@@ -564,6 +564,75 @@ func _setup_stats() -> void:
 			speed = 5.0
 			era_entrenada = 6
 
+		# ────────────────────────────────────────────────────────────
+		# ERA 7 — EDAD ATÓMICA / PRIMERA GUERRA MUNDIAL (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"doughboy_era7":
+			unit_name = "Doughboy de Trinchera"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 190.0
+			salud_maxima = 190.0
+			salud_actual = 190.0
+			_daño_base = 30.0
+			daño = 30.0
+			rango_ataque = 22.0
+			velocidad_ataque = 1.6
+			speed = 4.3
+			era_entrenada = 7
+
+		"ametralladora_maxim":
+			unit_name = "Ametralladora Maxim"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 240.0
+			salud_maxima = 240.0
+			salud_actual = 240.0
+			_daño_base = 16.0
+			daño = 16.0
+			rango_ataque = 22.0
+			velocidad_ataque = 1.0
+			speed = 2.6
+			era_entrenada = 7
+
+		"mark_iv_tanque":
+			unit_name = "Tanque Mark IV"
+			attack_type = "ranged"
+			weapon_type = "cannon"
+			impact_type = "GUNPOWDER"
+			projectile_type = "bullet"
+			is_cavalry = true
+			is_stun_immune = true
+			_salud_base = 400.0
+			salud_maxima = 400.0
+			salud_actual = 400.0
+			_daño_base = 35.0
+			daño = 35.0
+			rango_ataque = 20.0
+			velocidad_ataque = 2.0
+			speed = 2.8
+			era_entrenada = 7
+
+		"biplano_fokker_era7":
+			unit_name = "Biplano Fokker"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 180.0
+			salud_maxima = 180.0
+			salud_actual = 180.0
+			_daño_base = 32.0
+			daño = 32.0
+			rango_ataque = 24.0
+			velocidad_ataque = 1.2
+			speed = 9.5
+			era_entrenada = 7
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:

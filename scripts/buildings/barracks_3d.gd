@@ -105,6 +105,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 8.5, "era_min": 6, "era_max": 8,
 		"scene_path": "res://scenes/units/fusilero_imperial_era6_3d.tscn"
 	},
+	"doughboy_era7": {
+		"name": "Doughboy de Trinchera", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 120, "iron": 90, "gold": 60},
+		"train_time": 9.0, "era_min": 7, "era_max": 8,
+		"scene_path": "res://scenes/units/doughboy_era7_3d.tscn"
+	},
 	"soldado_asalto": {
 		"name": "Soldado de Asalto Táctico", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 130, "iron": 100},
@@ -314,6 +320,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "cavalry", "cost": {"iron": 180, "gold": 80, "wood": 80},
 		"train_time": 13.0, "era_min": 6, "era_max": 8,
 		"scene_path": "res://scenes/units/camion_industrial_era6_3d.tscn"
+	},
+	"ametralladora_maxim": {
+		"name": "Ametralladora Maxim", "building_type": "siege_workshop",
+		"type": "ranged", "cost": {"iron": 180, "gold": 120},
+		"train_time": 12.0, "era_min": 7, "era_max": 8,
+		"scene_path": "res://scenes/units/ametralladora_maxim_era7_3d.tscn"
+	},
+	"mark_iv_tanque": {
+		"name": "Tanque Mark IV", "building_type": "factory",
+		"type": "siege", "cost": {"iron": 280, "gold": 180, "wood": 80},
+		"train_time": 17.0, "era_min": 7, "era_max": 8,
+		"scene_path": "res://scenes/units/mark_iv_tanque_era7_3d.tscn"
+	},
+	"biplano_fokker_era7": {
+		"name": "Biplano Fokker", "building_type": "airfield",
+		"type": "aircraft", "cost": {"wood": 150, "iron": 120, "gold": 140},
+		"train_time": 15.0, "era_min": 7, "era_max": 8,
+		"scene_path": "res://scenes/units/biplano_fokker_era7_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

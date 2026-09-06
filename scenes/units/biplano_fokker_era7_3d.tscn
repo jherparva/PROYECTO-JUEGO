@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://biplano_fokker_era7_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/biplano_fokker_era7_3d.gd" id="1_fok7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fok"]
+size = Vector3(4.8, 1.2, 3.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fok_fuse"]
+size = Vector3(0.7, 0.6, 3.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fok_mat"]
+albedo_color = Color(0.75, 0.15, 0.15, 1)
+
+[node name="Biplano_Fokker_Era7" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_fok7")
+unit_id = "biplano_fokker_era7"
+unit_name = "Biplano Fokker"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_fok")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.2, -1.6)
+
+[node name="FuselageMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_fok_fuse")
+surface_material_override/0 = SubResource("StandardMaterial3D_fok_mat")

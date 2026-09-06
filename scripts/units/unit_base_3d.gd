@@ -376,6 +376,21 @@ func aplicar_aturdimiento(duracion: float = 1.5) -> void:
 		if is_instance_valid(state_machine):
 			state_machine.process_mode = PROCESS_MODE_INHERIT
 
+var is_suppressed: bool = false
+
+@rpc("any_peer", "call_local", "reliable")
+func aplicar_supresion(duracion: float = 2.0) -> void:
+	if is_dead or is_suppressed:
+		return
+	is_suppressed = true
+	var orig_speed = _speed
+	_speed = _speed * 0.70 # Ralentización del -30%
+	var tree := get_tree() if is_inside_tree() and get_tree() else Engine.get_main_loop() as SceneTree
+	if is_instance_valid(tree):
+		await tree.create_timer(duracion).timeout
+		is_suppressed = false
+		_speed = orig_speed
+
 var is_on_fire: bool = false
 var damage_modifier: float = 1.0
 

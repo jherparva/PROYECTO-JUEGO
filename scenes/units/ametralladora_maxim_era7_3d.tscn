@@ -1,0 +1,36 @@
+[gd_scene load_steps=5 format=3 uid="uid://ametralladora_maxim_era7_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/ametralladora_maxim_era7_3d.gd" id="1_mxm7"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_mxm"]
+size = Vector3(1.2, 1.2, 1.8)
+
+[sub_resource type="BoxMesh" id="BoxMesh_mxm_shield"]
+size = Vector3(0.9, 0.8, 0.06)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mxm_metal"]
+albedo_color = Color(0.24, 0.25, 0.22, 1)
+metallic = 0.8
+
+[node name="Ametralladora_Maxim" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_mxm7")
+unit_id = "ametralladora_maxim"
+unit_name = "Ametralladora Maxim"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+shape = SubResource("BoxShape3D_mxm")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1.3)
+
+[node name="GunShieldMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -0.6)
+mesh = SubResource("BoxMesh_mxm_shield")
+surface_material_override/0 = SubResource("StandardMaterial3D_mxm_metal")

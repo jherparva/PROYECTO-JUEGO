@@ -1,0 +1,39 @@
+[gd_scene load_steps=6 format=3 uid="uid://foundry_era5_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/buildings/foundry_era5_3d.gd" id="1_fd5"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_fd5"]
+size = Vector3(8.0, 5.0, 6.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_fd_hall"]
+size = Vector3(5.0, 3.2, 5.0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_fd_hall"]
+albedo_color = Color(0.48, 0.46, 0.44, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_fd_furnace"]
+top_radius = 1.4
+bottom_radius = 2.0
+height = 4.8
+
+[node name="Foundry_Era5" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 3
+script = ExtResource("1_fd5")
+building_name = "Fundición de Artillería"
+building_type = "foundry"
+salud_maxima = 1250.0
+salud_actual = 1250.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("BoxShape3D_fd5")
+
+[node name="FoundryHall" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0, 1.6, 0)
+mesh = SubResource("BoxMesh_fd_hall")
+surface_material_override/0 = SubResource("StandardMaterial3D_fd_hall")
+
+[node name="FoundryFurnace" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.8, 2.4, 0)
+mesh = SubResource("CylinderMesh_fd_furnace")

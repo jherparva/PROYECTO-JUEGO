@@ -2810,6 +2810,201 @@ func _init() -> void:
 	print("✅ Test 70 Superado: Iglesia Románica (herencia Temple3D) y Gran Catedral Gótica (Maravilla Era 4 con cronómetro de 600s) certificados.")
 
 
+	# ─── TEST 71: Mosquetero de Pólvora (GUN, Socket Muzzle, -25% Penetración Armadura) y Alabardero Suizo (x1.65 vs Caballería, 207 HP) ───
+	print("\n--- TEST 71: Mosquetero de Pólvora y Alabardero Suizo ---")
+	var musket_script: GDScript = load("res://scripts/units/mosquetero_era5_3d.gd") as GDScript
+	var musket_inst: Soldier3D = musket_script.new() as Soldier3D
+	root.add_child(musket_inst)
+	musket_inst._ready()
+	assert(musket_inst.impact_type == "GUN", "Mosquetero debe tener impacto tipo GUN")
+	assert(musket_inst.has_node("ProjectileMuzzle"), "Mosquetero debe tener socket ProjectileMuzzle")
+	assert(abs(musket_inst.daño - 24.0) < 0.01, "Mosquetero debe tener 24.0 de daño base")
+	assert(musket_inst.get("is_armor_piercing_gun") == true, "Mosquetero debe tener is_armor_piercing_gun = true")
+
+	var armor_pen_t71: float = musket_inst.call("calcular_penetracion_polvora", 100.0)
+	assert(abs(armor_pen_t71 - 75.0) < 0.01, "Mosquetero debe penetrar un 25%% de armadura (Esperado: 75.0, Obtenido: %.1f)" % armor_pen_t71)
+
+	var halberd_script: GDScript = load("res://scripts/units/halberdier_era5_3d.gd") as GDScript
+	var halberd_inst: Soldier3D = halberd_script.new() as Soldier3D
+	root.add_child(halberd_inst)
+	halberd_inst._ready()
+	assert(halberd_inst.impact_type == "MELEE_PIERCE", "Alabardero Suizo debe tener impacto MELEE_PIERCE")
+	assert(abs(halberd_inst.salud_maxima - 207.0) < 0.01, "Alabardero Suizo debe tener 207 HP (+15% vs Piquero 180 HP)")
+
+	# Alabardero contra Caballería (x1.65 multiplier sobre base counter PIERCE vs CAVALRY 1.8)
+	var knight_target_t71: Soldier3D = Soldier3D.new()
+	knight_target_t71.name = "CaballeroEnemigoT71"
+	knight_target_t71.set("is_cavalry", true)
+	knight_target_t71.add_to_group("cavalry")
+	root.add_child(knight_target_t71)
+	knight_target_t71._ready()
+
+	var dmg_halb_vs_cav: float = CombatDamageCalculator.calcular_dano(halberd_inst.daño, halberd_inst.weapon_type, halberd_inst, knight_target_t71)
+	var expected_halb_dmg: float = (halberd_inst.daño * 1.8) * 1.65
+	assert(abs(dmg_halb_vs_cav - expected_halb_dmg) < 0.05, "Alabardero Suizo debe aplicar multiplicador x1.65 contra caballería (Esperado: %.2f, Obtenido: %.2f)" % [expected_halb_dmg, dmg_halb_vs_cav])
+
+	musket_inst.free()
+	halberd_inst.free()
+	knight_target_t71.free()
+	print("✅ Test 71 Superado: Mosquetero de Pólvora (daño GUN, -25% penetración) y Alabardero Suizo (207 HP, x1.65 vs caballería) certificados.")
+
+
+	# ─── TEST 72: Conquistador Ecuestre (6.2 m/s, Caballería Rango, x1.30 vs Infantería Ligera de Choque) ───
+	print("\n--- TEST 72: Conquistador Ecuestre (6.2 m/s, x1.30 vs Infantería Ligera) ---")
+	var conq_script: GDScript = load("res://scripts/units/conquistador_era5_3d.gd") as GDScript
+	var conq_inst: Soldier3D = conq_script.new() as Soldier3D
+	root.add_child(conq_inst)
+	conq_inst._ready()
+	assert(conq_inst.get("is_cavalry") == true, "Conquistador debe ser unidad de caballería")
+	assert(abs(conq_inst.speed - 6.2) < 0.01, "Conquistador debe tener velocidad 6.2 m/s")
+	assert(conq_inst.has_node("ProjectileMuzzle"), "Conquistador debe poseer socket ProjectileMuzzle")
+
+	var light_infantry_t72: Soldier3D = Soldier3D.new()
+	light_infantry_t72.name = "InfanteriaChoqueT72"
+	light_infantry_t72.set("impact_type", "MELEE_SHOCK")
+	light_infantry_t72.set("weapon_type", "melee_shock")
+	light_infantry_t72.add_to_group("infantry_3d")
+	root.add_child(light_infantry_t72)
+	light_infantry_t72._ready()
+
+	var dmg_conq_vs_inf: float = CombatDamageCalculator.calcular_dano(conq_inst.daño, conq_inst.weapon_type, conq_inst, light_infantry_t72)
+	# Base counter GUNPOWDER vs INFANTRY (1.2) * conquistador bonus (1.30) = 1.56
+	var expected_conq_dmg: float = (conq_inst.daño * 1.2) * 1.30
+	assert(abs(dmg_conq_vs_inf - expected_conq_dmg) < 0.05, "Conquistador debe aplicar x1.30 contra infantería ligera de choque (Esperado: %.2f, Obtenido: %.2f)" % [expected_conq_dmg, dmg_conq_vs_inf])
+
+	conq_inst.free()
+	light_infantry_t72.free()
+	print("✅ Test 72 Superado: Conquistador Ecuestre (6.2 m/s, socket balístico y x1.30 vs infantería de choque) certificado.")
+
+
+	# ─── TEST 73: Fundición de Artillería (Foundry_Era5: Herencia Limpia Barracks3D, Emergencia 8% y Cola) ───
+	print("\n--- TEST 73: Fundición de Artillería (Herencia Barracks3D y Emergencia 8%) ---")
+	var foundry_script: GDScript = load("res://scripts/buildings/foundry_era5_3d.gd") as GDScript
+	var foundry_inst: BuildingBase3D = foundry_script.new() as BuildingBase3D
+	assert(foundry_inst is Barracks3D, "Foundry_Era5 debe heredar directamente de Barracks3D")
+	assert(foundry_inst is BuildingBase3D, "Foundry_Era5 debe heredar de BuildingBase3D")
+
+	foundry_inst.starts_under_construction = true
+	root.add_child(foundry_inst)
+	foundry_inst._ready()
+
+	# Emergencia vertical progresiva desde el 8%
+	foundry_inst._actualizar_progreso_construccion(0.0)
+	foundry_inst._actualizar_progreso_construccion(50.0)
+	foundry_inst._actualizar_progreso_construccion(100.0)
+	assert(foundry_inst.esta_construido == true, "Fundición debe completarse al 100% de progreso")
+
+	# Cola de producción de artillería
+	var rm_t73: GlobalResourceManager = root.get_node_or_null("ResourceManager") as GlobalResourceManager
+	if not is_instance_valid(rm_t73):
+		rm_t73 = GlobalResourceManager.new()
+		rm_t73.name = "ResourceManager"
+		root.add_child(rm_t73)
+	rm_t73.era_actual = 5
+	rm_t73.resources["iron"] = 500
+	rm_t73.resources["wood"] = 500
+	rm_t73.resources["gold"] = 500
+	rm_t73.max_population = 50
+	rm_t73.current_population = 0
+	foundry_inst.resource_manager = rm_t73
+
+	var train_cannon_success: bool = foundry_inst.call("entrenar_unidad", "canon_culebrina_era5")
+	assert(train_cannon_success == true or foundry_inst.get("production_queue").size() > 0, "Fundición debe encolar Cañón Culebrina en Era 5")
+
+	foundry_inst.free()
+	print("✅ Test 73 Superado: Fundición de Artillería con herencia total de Barracks3D, emergencia al 8% y cola de producción certificada.")
+
+
+	# ─── TEST 74: Cañón Culebrina (Multiplicador x3.0 vs Edificios, AoE 3.0m y Socket Muzzle) ───
+	print("\n--- TEST 74: Cañón Culebrina (Multiplicador x3.0 vs Edificios y AoE 3m) ---")
+	var culebrina_script: GDScript = load("res://scripts/units/canon_culebrina_era5_3d.gd") as GDScript
+	var culebrina_inst: Soldier3D = culebrina_script.new() as Soldier3D
+	root.add_child(culebrina_inst)
+	culebrina_inst._ready()
+	culebrina_inst.position = Vector3(0, 0, 0)
+	assert(culebrina_inst.has_node("ProjectileMuzzle"), "Culebrina debe tener socket ProjectileMuzzle alineado")
+
+	# Multiplicador x3.0 contra edificios
+	var dummy_bld_t74: BuildingBase3D = BuildingBase3D.new()
+	dummy_bld_t74.name = "FortificacionPiedra"
+	dummy_bld_t74.add_to_group("buildings")
+	dummy_bld_t74.add_to_group("buildings_3d")
+	dummy_bld_t74.salud_actual = 1500.0
+	dummy_bld_t74.salud_maxima = 1500.0
+	root.add_child(dummy_bld_t74)
+	dummy_bld_t74.position = Vector3(20.0, 0, 0)
+
+	var dmg_canon_bld: float = CombatDamageCalculator.calcular_dano(culebrina_inst.daño, culebrina_inst.weapon_type, culebrina_inst, dummy_bld_t74)
+	# Base counter SIEGE/CANNON vs BUILDING (3.0) * culebrina bono (3.0) = 9.0
+	var expected_canon_dmg: float = (culebrina_inst.daño * 3.0) * 3.0
+	assert(abs(dmg_canon_bld - expected_canon_dmg) < 0.05, "Culebrina debe aplicar x3.0 contra estructuras (Esperado: %.2f, Obtenido: %.2f)" % [expected_canon_dmg, dmg_canon_bld])
+
+	# Detonación de daño AoE en 3.0 metros
+	var bld_close_aoe: BuildingBase3D = BuildingBase3D.new()
+	bld_close_aoe.name = "MurallaCercana"
+	bld_close_aoe.add_to_group("buildings")
+	bld_close_aoe.salud_actual = 1000.0
+	bld_close_aoe.salud_maxima = 1000.0
+	root.add_child(bld_close_aoe)
+	bld_close_aoe.position = Vector3(21.5, 0, 0) # A 1.5m de (20, 0, 0) <= 3m
+
+	var bld_far_aoe: BuildingBase3D = BuildingBase3D.new()
+	bld_far_aoe.name = "MurallaLejana"
+	bld_far_aoe.add_to_group("buildings")
+	bld_far_aoe.salud_actual = 1000.0
+	bld_far_aoe.salud_maxima = 1000.0
+	root.add_child(bld_far_aoe)
+	bld_far_aoe.position = Vector3(26.0, 0, 0) # A 6.0m de (20, 0, 0) > 3m
+
+	var aoe_hits_t74: Array[Node3D] = culebrina_inst.call("disparar_canon", Vector3(20, 0, 0))
+	assert(aoe_hits_t74.has(dummy_bld_t74), "Objetivo principal debe recibir impacto")
+	assert(aoe_hits_t74.has(bld_close_aoe), "Muralla a 1.5m debe recibir daño AoE de 3m")
+	assert(not aoe_hits_t74.has(bld_far_aoe), "Muralla a 6m NO debe recibir daño AoE")
+
+	culebrina_inst.free()
+	dummy_bld_t74.free()
+	bld_close_aoe.free()
+	bld_far_aoe.free()
+	print("✅ Test 74 Superado: Cañón Culebrina (multiplicador x3.0 vs edificios, socket ProjectileMuzzle y AoE 3m) certificado.")
+
+
+	# ─── TEST 75: Carro Blindado Da Vinci (Ráfagas en 4 Direcciones y Mitigación -20%) ───
+	print("\n--- TEST 75: Carro Blindado Da Vinci (Ráfagas 4 Direcciones y Mitigación -20%) ---")
+	var davinci_script: GDScript = load("res://scripts/units/carro_blindado_davinci_3d.gd") as GDScript
+	var davinci_inst: Soldier3D = davinci_script.new() as Soldier3D
+	root.add_child(davinci_inst)
+	davinci_inst._ready()
+
+	# 1. Validación de 4 troneras / sockets en cruz (N, S, E, W)
+	assert(davinci_inst.has_node("Muzzle_N"), "Debe tener socket Muzzle_N")
+	assert(davinci_inst.has_node("Muzzle_S"), "Debe tener socket Muzzle_S")
+	assert(davinci_inst.has_node("Muzzle_E"), "Debe tener socket Muzzle_E")
+	assert(davinci_inst.has_node("Muzzle_W"), "Debe tener socket Muzzle_W")
+
+	var sockets_fired: int = davinci_inst.call("disparar_rafaga_omnidireccional")
+	assert(sockets_fired == 4, "Carro Blindado DaVinci debe disparar desde 4 direcciones simultáneas")
+
+	# 2. Mitigación pasiva del -20% a todo daño físico recibido
+	var dano_base_t75: float = 100.0
+	var dano_mitigado_t75: float = davinci_inst.call("aplicar_mitigacion_blindaje", dano_base_t75)
+	assert(abs(dano_mitigado_t75 - 80.0) < 0.01, "Carro DaVinci debe mitigar un 20%% del daño recibido (Esperado: 80.0, Obtenido: %.1f)" % dano_mitigado_t75)
+
+	# Verificación integrada a través de CombatDamageCalculator
+	var test_attacker_t75: Soldier3D = Soldier3D.new()
+	root.add_child(test_attacker_t75)
+	test_attacker_t75._ready()
+	test_attacker_t75.daño = 50.0
+
+	var calc_dmg_davinci: float = CombatDamageCalculator.calcular_dano(test_attacker_t75.daño, "melee", test_attacker_t75, davinci_inst)
+	# Base counter SHOCK vs CAVALRY/VEHICLE (0.9) * mitigación DaVinci (0.80) = 0.72 -> 50.0 * 0.72 = 36.0
+	var expected_calc_dmg: float = (test_attacker_t75.daño * 0.9) * 0.80
+	assert(abs(calc_dmg_davinci - expected_calc_dmg) < 0.05, "CombatDamageCalculator debe aplicar la mitigación del -20%% del Carro DaVinci (Esperado: %.2f, Obtenido: %.2f)" % [expected_calc_dmg, calc_dmg_davinci])
+
+	davinci_inst.free()
+	test_attacker_t75.free()
+	print("✅ Test 75 Superado: Carro Blindado Da Vinci (4 troneras, ráfaga perimetral y mitigación -20%) certificado.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")

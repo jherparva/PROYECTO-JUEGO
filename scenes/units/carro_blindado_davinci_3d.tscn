@@ -1,0 +1,48 @@
+[gd_scene load_steps=5 format=3 uid="uid://carro_blindado_davinci_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/carro_blindado_davinci_3d.gd" id="1_dv5"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_dv5"]
+height = 1.8
+radius = 1.7
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_dv_hull"]
+top_radius = 0.5
+bottom_radius = 1.6
+height = 1.6
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dv_hull"]
+albedo_color = Color(0.42, 0.3, 0.18, 1)
+roughness = 0.8
+
+[node name="Carro_Blindado_DaVinci" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_dv5")
+unit_id = "carro_blindado_davinci"
+unit_name = "Carro Blindado Da Vinci"
+attack_type = "ranged"
+weapon_type = "cannon"
+impact_type = "SIEGE"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CylinderShape3D_dv5")
+
+[node name="Muzzle_N" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, -1.5)
+
+[node name="Muzzle_S" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 1.5)
+
+[node name="Muzzle_E" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.8, 0)
+
+[node name="Muzzle_W" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0.8, 0)
+
+[node name="ConicalHull" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("CylinderMesh_dv_hull")
+surface_material_override/0 = SubResource("StandardMaterial3D_dv_hull")

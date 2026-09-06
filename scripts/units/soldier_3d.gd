@@ -399,6 +399,86 @@ func _setup_stats() -> void:
 			speed = 2.5
 			era_entrenada = 4
 
+		"mosquetero_era5":
+			unit_name = "Mosquetero de Pólvora"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 150.0
+			salud_maxima = 150.0
+			salud_actual = 150.0
+			_daño_base = 24.0
+			daño = 24.0
+			rango_ataque = 18.0
+			velocidad_ataque = 1.8
+			speed = 4.3
+			era_entrenada = 5
+
+		"halberdier_era5":
+			unit_name = "Alabardero Suizo"
+			attack_type = "melee"
+			weapon_type = "melee_pierce"
+			impact_type = "MELEE_PIERCE"
+			_salud_base = 207.0
+			salud_maxima = 207.0
+			salud_actual = 207.0
+			_daño_base = 24.0
+			daño = 24.0
+			rango_ataque = 3.0
+			velocidad_ataque = 0.95
+			speed = 4.7
+			era_entrenada = 5
+
+		"conquistador_era5":
+			unit_name = "Conquistador Ecuestre"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			is_cavalry = true
+			_salud_base = 220.0
+			salud_maxima = 220.0
+			salud_actual = 220.0
+			_daño_base = 22.0
+			daño = 22.0
+			rango_ataque = 10.0
+			velocidad_ataque = 1.4
+			speed = 6.2
+			era_entrenada = 5
+
+		"canon_culebrina_era5":
+			unit_name = "Cañón Culebrina"
+			attack_type = "ranged"
+			weapon_type = "cannon"
+			impact_type = "GUNPOWDER"
+			projectile_type = "fire_stone"
+			_salud_base = 250.0
+			salud_maxima = 250.0
+			salud_actual = 250.0
+			_daño_base = 110.0
+			daño = 110.0
+			rango_ataque = 28.0
+			velocidad_ataque = 3.5
+			speed = 2.4
+			era_entrenada = 5
+
+		"carro_blindado_davinci":
+			unit_name = "Carro Blindado Da Vinci"
+			attack_type = "ranged"
+			weapon_type = "cannon"
+			impact_type = "SIEGE"
+			projectile_type = "bullet"
+			_salud_base = 340.0
+			salud_maxima = 340.0
+			salud_actual = 340.0
+			_daño_base = 28.0
+			daño = 28.0
+			rango_ataque = 16.0
+			velocidad_ataque = 2.0
+			speed = 3.8
+			era_entrenada = 5
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:

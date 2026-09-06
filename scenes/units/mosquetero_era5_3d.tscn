@@ -1,0 +1,45 @@
+[gd_scene load_steps=6 format=3 uid="uid://mosquetero_era5_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/mosquetero_era5_3d.gd" id="1_mq5"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_mq5"]
+radius = 0.35
+height = 1.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_mq_torso"]
+size = Vector3(0.55, 0.85, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mq_torso"]
+albedo_color = Color(0.18, 0.32, 0.58, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_mq_musket"]
+top_radius = 0.03
+bottom_radius = 0.04
+height = 1.6
+
+[node name="Mosquetero" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_mq5")
+unit_id = "mosquetero_era5"
+unit_name = "Mosquetero de Pólvora"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape3D_mq5")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.1, -1.0)
+
+[node name="SoldierTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("BoxMesh_mq_torso")
+surface_material_override/0 = SubResource("StandardMaterial3D_mq_torso")
+
+[node name="MusketProp" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.173648, 0.984808, 0, -0.984808, 0.173648, 0.25, 1.0, -0.4)
+mesh = SubResource("CylinderMesh_mq_musket")

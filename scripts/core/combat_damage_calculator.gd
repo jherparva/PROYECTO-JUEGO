@@ -165,6 +165,9 @@ const WEAPON_STRING_MAP: Dictionary = {
 	"cannon":     WeaponType.SIEGE,
 	"howitzer":   WeaponType.SIEGE,
 	"bullet":     WeaponType.GUNPOWDER,
+	"gun":        WeaponType.GUNPOWDER,
+	"gunpowder":  WeaponType.GUNPOWDER,
+	"gunpotwer":  WeaponType.GUNPOWDER,
 	"musket":     WeaponType.GUNPOWDER,
 	"rifle":      WeaponType.GUNPOWDER,
 	"machinegun": WeaponType.GUNPOWDER,
@@ -273,9 +276,52 @@ static func calcular_dano(
 			if is_cavalry_target:
 				final_damage *= 2.0
 
+		# Multiplicador oficial Era 5: Halberdier_Era5 (x1.65) contra caballería blindada
+		var is_halberdier: bool = (att_id == "halberdier_era5" or "halberdier" in att_name or attacker.is_in_group("halberdiers"))
+		if is_halberdier:
+			var is_cavalry_target_h: bool = (
+				target.get("is_cavalry") == true or target.is_in_group("cavalry") or
+				target.is_in_group("heavy_cavalry") or target.is_in_group("chariots") or
+				"knight" in target.name.to_lower() or "caballero" in target.name.to_lower()
+			)
+			if is_cavalry_target_h:
+				final_damage *= 1.65
+
+		# Multiplicador oficial Era 5: Conquistador_Era5 (x1.30) contra infantería ligera de choque
+		var is_conquistador: bool = (att_id == "conquistador_era5" or "conquistador" in att_name or attacker.is_in_group("conquistadors"))
+		if is_conquistador:
+			var is_shock_infantry: bool = (
+				target.is_in_group("infantry_3d") or target.is_in_group("military_units") or
+				str(target.get("impact_type")).to_lower() == "melee_shock" or
+				str(target.get("weapon_type")).to_lower() == "melee_shock" or
+				"soldier" in target.name.to_lower() or "infantry" in target.name.to_lower()
+			)
+			if is_shock_infantry:
+				final_damage *= 1.30
+
+		# Multiplicador oficial Era 5: Canon_Culebrina_Era5 (x3.0) contra edificios y murallas
+		var is_culebrina: bool = (att_id == "canon_culebrina_era5" or "culebrina" in att_name or attacker.is_in_group("cannons"))
+		if is_culebrina:
+			var is_building_target: bool = (
+				target.is_in_group("buildings") or target.is_in_group("buildings_3d") or
+				target.is_in_group("walls") or target.is_in_group("walls_3d") or
+				"building" in target.name.to_lower() or "wall" in target.name.to_lower()
+			)
+			if is_building_target:
+				final_damage *= 3.0
+
+		# Penetración oficial Era 5: Mosquetero (reduce mitigaciones de armadura pesada en -25%)
+		var is_mosquetero: bool = (att_id == "mosquetero_era5" or att_id == "mosquetero" or "mosquetero" in att_name or attacker.get("is_armor_piercing_gun") == true)
+		if is_mosquetero and armor_type == ArmorType.HEAVY:
+			final_damage *= 1.25
+
 	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):
 		final_damage = target.call("aplicar_mitigacion_testudo", final_damage, weapon_str)
+
+	# Mitigación innata del Carro Blindado de DaVinci (-20% de daño físico recibido)
+	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_blindaje"):
+		final_damage = target.call("aplicar_mitigacion_blindaje", final_damage)
 
 	return maxf(1.0, final_damage)
 
@@ -325,7 +371,7 @@ static func _resolver_armor_type(target: Node) -> ArmorType:
 		if at_val is int:
 			return at_val as ArmorType
 
-	if target.get("is_cavalry") == true or target.is_in_group("cavalry") or target.is_in_group("heavy_cavalry"):
+	if target.get("is_cavalry") == true or target.get("is_vehicle") == true or target.is_in_group("cavalry") or target.is_in_group("heavy_cavalry"):
 		return ArmorType.CAVALRY
 
 	for group_name: String in ARMOR_STRING_MAP:

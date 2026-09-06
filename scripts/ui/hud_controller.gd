@@ -81,7 +81,7 @@ func aplicar_estilo_era(era_val: int) -> void:
 
 	if era_val < 4:
 		current_theme_name = "madera_rustica" if era_val < 2 else "piedra_labrada"
-	elif era_val < 6:
+	elif era_val == 4:
 		current_theme_name = "bronce_medieval"
 	elif era_val < 8:
 		current_theme_name = "hierro_victoriano"

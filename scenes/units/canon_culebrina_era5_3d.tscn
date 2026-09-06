@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3 uid="uid://canon_culebrina_era5_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/canon_culebrina_era5_3d.gd" id="1_cl5"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_cl5"]
+size = Vector3(1.5, 1.2, 2.5)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cl_carriage"]
+size = Vector3(1.1, 0.6, 1.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cl_carriage"]
+albedo_color = Color(0.38, 0.25, 0.15, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_cl_barrel"]
+top_radius = 0.12
+bottom_radius = 0.18
+height = 2.4
+
+[node name="Canon_Culebrina_Era5" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_cl5")
+unit_id = "canon_culebrina_era5"
+unit_name = "Cañón Culebrina"
+attack_type = "ranged"
+weapon_type = "cannon"
+impact_type = "GUNPOWDER"
+projectile_type = "fire_stone"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, -0.2)
+shape = SubResource("BoxShape3D_cl5")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.7, -1.8)
+
+[node name="WoodenCarriage" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.35, -0.2)
+mesh = SubResource("BoxMesh_cl_carriage")
+surface_material_override/0 = SubResource("StandardMaterial3D_cl_carriage")
+
+[node name="CannonBarrel" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0, -1, 0, 1, 0, 0, 0.7, -0.6)
+mesh = SubResource("CylinderMesh_cl_barrel")

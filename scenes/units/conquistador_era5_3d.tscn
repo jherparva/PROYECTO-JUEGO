@@ -1,0 +1,44 @@
+[gd_scene load_steps=6 format=3 uid="uid://conquistador_era5_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/conquistador_era5_3d.gd" id="1_cq5"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cq5"]
+radius = 0.55
+height = 1.9
+
+[sub_resource type="BoxMesh" id="BoxMesh_cq_horse"]
+size = Vector3(0.85, 1.1, 2.1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cq_horse"]
+albedo_color = Color(0.24, 0.16, 0.12, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cq_rider"]
+size = Vector3(0.6, 0.8, 0.45)
+
+[node name="Conquistador_Era5" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_cq5")
+unit_id = "conquistador_era5"
+unit_name = "Conquistador Ecuestre"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+is_cavalry = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
+shape = SubResource("CapsuleShape3D_cq5")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.35, 1.4, -0.9)
+
+[node name="HorseBody" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("BoxMesh_cq_horse")
+surface_material_override/0 = SubResource("StandardMaterial3D_cq_horse")
+
+[node name="RiderTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -0.1)
+mesh = SubResource("BoxMesh_cq_rider")

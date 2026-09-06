@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://halberdier_era5_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/halberdier_era5_3d.gd" id="1_hb5"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_hb5"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_hb_torso"]
+size = Vector3(0.6, 0.9, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hb_torso"]
+albedo_color = Color(0.78, 0.65, 0.15, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_hb_pole"]
+top_radius = 0.035
+bottom_radius = 0.035
+height = 2.8
+
+[node name="Halberdier_Era5" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_hb5")
+unit_id = "halberdier_era5"
+unit_name = "Alabardero Suizo"
+attack_type = "melee"
+weapon_type = "melee_pierce"
+impact_type = "MELEE_PIERCE"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_hb5")
+
+[node name="SoldierTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("BoxMesh_hb_torso")
+surface_material_override/0 = SubResource("StandardMaterial3D_hb_torso")
+
+[node name="HalberdProp" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.5, 0.866025, 0, -0.866025, 0.5, 0.25, 0.9, -0.8)
+mesh = SubResource("CylinderMesh_hb_pole")

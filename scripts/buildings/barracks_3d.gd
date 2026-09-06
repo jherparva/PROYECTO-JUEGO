@@ -81,6 +81,18 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 7.5, "era_min": 4, "era_max": 6,
 		"scene_path": "res://scenes/units/soldier_3d.tscn"
 	},
+	"halberdier_era5": {
+		"name": "Alabardero Suizo", "building_type": "barracks",
+		"type": "melee", "cost": {"food": 80, "iron": 40},
+		"train_time": 7.0, "era_min": 5, "era_max": 7,
+		"scene_path": "res://scenes/units/halberdier_era5_3d.tscn"
+	},
+	"mosquetero_era5": {
+		"name": "Mosquetero de Pólvora", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 100, "iron": 60, "gold": 40},
+		"train_time": 8.0, "era_min": 5, "era_max": 7,
+		"scene_path": "res://scenes/units/mosquetero_era5_3d.tscn"
+	},
 	"mosquetero": {
 		"name": "Mosquetero de Línea", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 100, "iron": 70},
@@ -199,6 +211,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 10.0, "era_min": 3, "era_max": 5,
 		"scene_path": "res://scenes/units/cataphract_era3_3d.tscn"
 	},
+	"conquistador_era5": {
+		"name": "Conquistador Ecuestre", "building_type": "stable",
+		"type": "cavalry", "cost": {"food": 130, "iron": 70, "gold": 50},
+		"train_time": 10.5, "era_min": 5, "era_max": 7,
+		"scene_path": "res://scenes/units/conquistador_era5_3d.tscn"
+	},
 	"war_elephant_era3": {
 		"name": "Elefante de Guerra", "building_type": "stable",
 		"type": "cavalry", "cost": {"food": 180, "iron": 50},
@@ -254,6 +272,18 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "siege", "cost": {"wood": 200, "iron": 100, "gold": 100},
 		"train_time": 16.0, "era_min": 4, "era_max": 6,
 		"scene_path": "res://scenes/units/trabuquete_contrapeso_3d.tscn"
+	},
+	"canon_culebrina_era5": {
+		"name": "Cañón Culebrina", "building_type": "siege_workshop",
+		"type": "siege", "cost": {"iron": 150, "wood": 100, "gold": 80},
+		"train_time": 14.0, "era_min": 5, "era_max": 7,
+		"scene_path": "res://scenes/units/canon_culebrina_era5_3d.tscn"
+	},
+	"carro_blindado_davinci": {
+		"name": "Carro Blindado Da Vinci", "building_type": "siege_workshop",
+		"type": "siege", "cost": {"wood": 180, "iron": 120, "gold": 100},
+		"train_time": 15.0, "era_min": 5, "era_max": 7,
+		"scene_path": "res://scenes/units/carro_blindado_davinci_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

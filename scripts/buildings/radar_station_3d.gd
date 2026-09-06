@@ -81,6 +81,10 @@ func emitir_pulso_radar() -> Array[Node3D]:
 		var pos_c: Vector3 = cand_3d.position if cand_3d.position != Vector3.ZERO else cand_3d.global_position
 		if pos_c.distance_to(centro) <= radio_vision:
 			if cand.is_in_group("air_units") or cand.is_in_group("aircraft") or cand.get("is_aircraft") == true or pos_c.y >= 5.0:
+				if cand.has_method("ser_revelado_por_radar"):
+					cand.call("ser_revelado_por_radar", self)
+				elif "is_invisible" in cand:
+					cand.set("is_invisible", false)
 				detectadas.append(cand_3d)
 
 	pulso_radar_emitido.emit(detectadas.size())

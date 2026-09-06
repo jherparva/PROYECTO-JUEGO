@@ -141,6 +141,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 10.0, "era_min": 9, "era_max": 10,
 		"scene_path": "res://scenes/units/anti_tank_soldier_era9_3d.tscn"
 	},
+	"infiltrador_nano_era10": {
+		"name": "Infiltrador Nanotecnológico", "building_type": "barracks",
+		"type": "melee", "cost": {"food": 140, "gold": 120},
+		"train_time": 11.0, "era_min": 10, "era_max": 11,
+		"scene_path": "res://scenes/units/infiltrador_nano_era10_3d.tscn"
+	},
+	"soldado_emp_era10": {
+		"name": "Soldado EMP", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 120, "iron": 100, "gold": 110},
+		"train_time": 10.5, "era_min": 10, "era_max": 11,
+		"scene_path": "res://scenes/units/soldado_emp_era10_3d.tscn"
+	},
+	"cyborg_militar_era10": {
+		"name": "Cyborg Militar Pesado", "building_type": "robotics_lab",
+		"type": "ranged", "cost": {"iron": 250, "gold": 180},
+		"train_time": 14.0, "era_min": 10, "era_max": 11,
+		"scene_path": "res://scenes/units/cyborg_militar_era10_3d.tscn"
+	},
 	"soldado_asalto": {
 		"name": "Soldado de Asalto Táctico", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 130, "iron": 100},
@@ -404,6 +422,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "aircraft", "cost": {"iron": 190, "gold": 170},
 		"train_time": 15.0, "era_min": 9, "era_max": 10,
 		"scene_path": "res://scenes/units/helicoptero_apache_era9_3d.tscn"
+	},
+	"caza_furtivo_era10": {
+		"name": "Caza Furtivo F-22", "building_type": "airbase",
+		"type": "aircraft", "cost": {"iron": 260, "gold": 250},
+		"train_time": 18.0, "era_min": 10, "era_max": 11,
+		"scene_path": "res://scenes/units/caza_furtivo_era10_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

@@ -380,7 +380,7 @@ var is_suppressed: bool = false
 
 @rpc("any_peer", "call_local", "reliable")
 func aplicar_supresion(duracion: float = 2.0) -> void:
-	if is_dead or is_suppressed:
+	if is_dead or is_suppressed or is_slow_immune:
 		return
 	is_suppressed = true
 	var orig_speed = _speed
@@ -391,12 +391,29 @@ func aplicar_supresion(duracion: float = 2.0) -> void:
 		is_suppressed = false
 		_speed = orig_speed
 
+@rpc("any_peer", "call_local", "reliable")
+func aplicar_desactivacion_emp(duracion: float = 4.5) -> void:
+	if is_dead:
+		return
+	is_disabled = true
+	velocity = Vector3.ZERO
+	var current_st = get("current_state")
+	if is_instance_valid(current_st) and current_st.has_method("cancelar_ataque"):
+		current_st.call("cancelar_ataque")
+	var tree := get_tree() if is_inside_tree() and get_tree() else Engine.get_main_loop() as SceneTree
+	if is_instance_valid(tree):
+		await tree.create_timer(duracion).timeout
+		is_disabled = false
+
 var is_radiation_immune: bool = false
 var is_invisible: bool = false
 var is_civilian: bool = false
 var is_tank: bool = false
 var is_orbiting: bool = false
 var has_thermal_vision: bool = false
+var is_disabled: bool = false
+var is_slow_immune: bool = false
+var is_stealth: bool = false
 
 var is_on_fire: bool = false
 var damage_modifier: float = 1.0

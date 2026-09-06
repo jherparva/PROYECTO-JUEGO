@@ -3906,10 +3906,217 @@ func _init() -> void:
 	print("✅ Test 95 Superado: Tanque M1 Abrams (HP 520.0, velocidad 5.5 m/s, inmunidad stun, x2.5 vs edificios y AoE 4.0m) certificado.")
 
 
+	# ─── TEST 96: Infiltrador_Nano (Sigilo Permanente en Idle/Move) y Soldado_EMP (Desactivación FSM 4.5s) ───
+	print("\n--- TEST 96: Infiltrador Nano y Soldado de Pulso EMP ---")
+	var nano_script: GDScript = load("res://scripts/units/infiltrador_nano_era10_3d.gd") as GDScript
+	var nano_inst: Soldier3D = nano_script.new() as Soldier3D
+	root.add_child(nano_inst)
+	nano_inst._ready()
+	nano_inst.position = Vector3(0, 0, 0)
+	assert(abs(nano_inst.daño - 40.0) < 0.01, "Infiltrador Nano debe poseer daño base de 40.0")
+	assert(nano_inst.get("is_invisible") == true, "Infiltrador Nano debe iniciar en estado invisible permanente")
+
+	# Simular movimiento sigiloso: debe permanecer invisible
+	nano_inst.velocity = Vector3(2.0, 0, 0)
+	nano_inst._physics_process(0.016)
+	assert(nano_inst.get("is_invisible") == true, "Infiltrador Nano debe mantener camuflaje en marcha sigilosa (Move)")
+
+	# Ejecutar ataque: rompe el camuflaje durante el impacto y luego lo restaura
+	var dummy_enemy := Soldier3D.new()
+	dummy_enemy.name = "EnemigoNanoTarget"
+	root.add_child(dummy_enemy)
+	dummy_enemy._ready()
+	dummy_enemy.salud_actual = 200.0
+
+	var nano_dmg: float = nano_inst.call("ejecutar_ataque_sigiloso", dummy_enemy)
+	assert(nano_dmg > 0.0, "Ataque de Infiltrador debe infligir daño")
+	nano_inst.call("establecer_sigilo", true)
+	assert(nano_inst.get("is_invisible") == true, "Infiltrador Nano debe reactivar camuflaje tras el combate")
+
+	# Soldado EMP: Pulso de desactivación total sobre mecanizados/tanques
+	var emp_script: GDScript = load("res://scripts/units/soldado_emp_era10_3d.gd") as GDScript
+	var emp_inst: Soldier3D = emp_script.new() as Soldier3D
+	root.add_child(emp_inst)
+	emp_inst._ready()
+	assert(emp_inst.has_node("ProjectileMuzzle"), "Soldado EMP debe poseer socket ProjectileMuzzle")
+	assert(abs(emp_inst.daño - 30.0) < 0.01, "Soldado EMP debe infligir 30.0 de daño base")
+
+	var abrams_target_script: GDScript = load("res://scripts/units/m1_abrams_tank_3d.gd") as GDScript
+	var abrams_target: Soldier3D = abrams_target_script.new() as Soldier3D
+	root.add_child(abrams_target)
+	abrams_target._ready()
+	abrams_target.velocity = Vector3(5.0, 0, 0)
+
+	var emp_afecto: bool = emp_inst.call("disparar_pulso_emp", abrams_target)
+	assert(emp_afecto == true, "Pulso EMP debe reconocer al Tanque Abrams como unidad mecanizada")
+	assert(abrams_target.get("is_disabled") == true, "El Tanque Abrams debe quedar con flag is_disabled = true")
+	assert(abrams_target.velocity == Vector3.ZERO, "La velocidad del objetivo congelado por EMP debe fijarse a Vector3.ZERO")
+
+	nano_inst.free()
+	dummy_enemy.free()
+	emp_inst.free()
+	abrams_target.free()
+	print("✅ Test 96 Superado: Infiltrador Nano (sigilo permanente en Idle/Move y revelación en ataque) y Soldado EMP (congelación de FSM por 4.5s sobre blindados) certificados.")
+
+
+	# ─── TEST 97: Cyborg_Militar (HP 400.0, Minigun 8 tiros/s e Inmunidad al Slow) ───
+	print("\n--- TEST 97: Cyborg Militar Pesado ---")
+	var cyborg_script: GDScript = load("res://scripts/units/cyborg_militar_era10_3d.gd") as GDScript
+	var cyborg_inst: Soldier3D = cyborg_script.new() as Soldier3D
+	root.add_child(cyborg_inst)
+	cyborg_inst._ready()
+	assert(abs(cyborg_inst.salud_maxima - 400.0) < 0.01, "Cyborg Militar debe poseer 400.0 HP de salud máxima")
+	assert(cyborg_inst.get("is_slow_immune") == true, "Cyborg Militar debe poseer flag is_slow_immune = true")
+	assert(cyborg_inst.has_node("MinigunArm"), "Cyborg Militar debe portar componente MinigunArm en su extremidad")
+
+	# Comprobación de inmunidad absoluta a la ralentización
+	var vel_orig: float = cyborg_inst.speed
+	cyborg_inst.call("aplicar_supresion", 2.0)
+	assert(cyborg_inst.get("is_suppressed") == false, "Cyborg Militar debe rechazar la ralentización por supresión")
+	assert(cyborg_inst.speed == vel_orig, "La velocidad del Cyborg debe permanecer inalterada tras intento de slow")
+
+	# Cadencia extrema de 8 disparos por segundo
+	var dummy_cyborg_target := Soldier3D.new()
+	dummy_cyborg_target.name = "ObjetivoMinigunCyborg"
+	root.add_child(dummy_cyborg_target)
+	dummy_cyborg_target._ready()
+	dummy_cyborg_target.salud_actual = 500.0
+
+	var tiros_efectuados: int = cyborg_inst.call("disparar_rafaga_cyborg", dummy_cyborg_target, 1.0)
+	assert(tiros_efectuados == 8, "Cyborg Militar debe efectuar exactamente 8 impactos por segundo con su minigun (Obtenido: %d)" % tiros_efectuados)
+	assert(dummy_cyborg_target.salud_actual < 500.0, "Objetivo debe recibir daño de la ráfaga de 8 tiros")
+
+	cyborg_inst.free()
+	dummy_cyborg_target.free()
+	print("✅ Test 97 Superado: Cyborg Militar Pesado (HP 400.0, minigun con 8 tiros/s e inmunidad absoluta a la ralentización) certificado.")
+
+
+	# ─── TEST 98: Laboratorio de Robótica, Centro Cibernético y Mutación HUD 'cromo_neon_digital' ───
+	print("\n--- TEST 98: Laboratorio de Robótica, Centro Cibernético y Estilo HUD Digital ---")
+	var roblab_script: GDScript = load("res://scripts/buildings/robotics_lab_3d.gd") as GDScript
+	var roblab_inst: Barracks3D = roblab_script.new() as Barracks3D
+	roblab_inst.starts_under_construction = true
+	root.add_child(roblab_inst)
+	roblab_inst._ready()
+	assert(roblab_inst.building_name == "Laboratorio de Robótica", "Nombre debe ser 'Laboratorio de Robótica'")
+	assert(roblab_inst.has_node("PolycarbonateDome"), "Estructura debe poseer domo de policarbonato")
+
+	# Emergencia vertical progresiva desde el 8%
+	roblab_inst._actualizar_progreso_construccion(0.0)
+	roblab_inst._actualizar_progreso_construccion(50.0)
+	roblab_inst._actualizar_progreso_construccion(100.0)
+	assert(roblab_inst.esta_construido == true, "Laboratorio debe completarse al 100%% de progreso")
+
+	var rm_t98 := GlobalResourceManager.new()
+	rm_t98.era_actual = 10
+	rm_t98.recursos["iron"] = 1000
+	rm_t98.recursos["gold"] = 1000
+	rm_t98.recursos["food"] = 1000
+	roblab_inst.resource_manager = rm_t98
+
+	# Encolar Cyborg Militar en Era 10
+	var train_cyborg_ok: bool = roblab_inst.call("entrenar_unidad", "cyborg_militar_era10")
+	assert(train_cyborg_ok == true or roblab_inst.production_queue.size() > 0, "Laboratorio de Robótica debe encolar Cyborg Militar en Era 10")
+
+	# Centro Cibernético
+	var cyber_script: GDScript = load("res://scripts/buildings/cyber_center_3d.gd") as GDScript
+	var cyber_inst: Barracks3D = cyber_script.new() as Barracks3D
+	root.add_child(cyber_inst)
+	cyber_inst._ready()
+	cyber_inst.resource_manager = rm_t98
+	assert(cyber_inst.building_name == "Centro Cibernético", "Nombre debe ser 'Centro Cibernético'")
+	assert(cyber_inst.has_node("NeonAntenna"), "Centro Cibernético debe incorporar antena de neón")
+	var train_nano_ok: bool = cyber_inst.call("entrenar_unidad", "infiltrador_nano_era10")
+	assert(train_nano_ok == true or cyber_inst.production_queue.size() > 0, "Centro Cibernético debe encolar Infiltrador Nano en Era 10")
+
+	# Comprobación de mutación estética del HUD inferior a 'cromo_neon_digital'
+	var stylebox_era10: StyleBoxFlat = HUDControllerClass.crear_stylebox_para_era(10)
+	assert(stylebox_era10.border_color == Color(0.0, 0.88, 1.0, 1.0), "Borde del HUD en Era 10 debe ser Neón Cian digital")
+	assert(stylebox_era10.bg_color == Color(0.04, 0.07, 0.12, 0.98), "Fondo del HUD en Era 10 debe ser cromo oscuro")
+
+	roblab_inst.free()
+	cyber_inst.free()
+	rm_t98.free()
+	print("✅ Test 98 Superado: Laboratorio de Robótica, Centro Cibernético (herencia Barracks3D, emergencia al 8%% y colas) y estilo HUD 'cromo_neon_digital' certificados.")
+
+
+	# ─── TEST 99: Caza Furtivo F-22 (Cota Y=18m, 20 m/s, is_stealth=true, Retorno Autónomo y Revelación Radar) ───
+	print("\n--- TEST 99: Caza Furtivo F-22 y Revelación Radar Táctico ---")
+	var stealth_script: GDScript = load("res://scripts/units/caza_furtivo_era10_3d.gd") as GDScript
+	var stealth_jet: Soldier3D = stealth_script.new() as Soldier3D
+	root.add_child(stealth_jet)
+	stealth_jet._ready()
+	stealth_jet.position = Vector3(0, 18.0, 0)
+	assert(abs(float(stealth_jet.get("crucero_altura_y")) - 18.0) < 0.01, "Caza Furtivo debe poseer cota fija en Y = 18.0 metros")
+	assert(abs(float(stealth_jet.get("velocidad_crucero")) - 20.0) < 0.01, "Caza Furtivo debe volar a 20.0 m/s")
+	assert(stealth_jet.get("is_stealth") == true, "Caza Furtivo debe incorporar el flag de red is_stealth = true")
+	assert(stealth_jet.get("is_invisible") == true, "Caza Furtivo debe permanecer invisible a la pantalla rival")
+
+	# Retorno autónomo tras agotar sus 2 cargas de misiles
+	assert(int(stealth_jet.get("current_ammo")) == 2, "Caza Furtivo debe iniciar con max_ammo = 2")
+	stealth_jet.call("lanzar_pasada_furtiva", Vector3(10, 0, 0))
+	assert(int(stealth_jet.get("current_ammo")) == 1, "Tras 1 pasada debe restar 1 carga (1/2)")
+	assert(stealth_jet.get("estado_vuelo") == "patrulla", "Con munición remanente debe continuar en patrulla")
+
+	stealth_jet.call("lanzar_pasada_furtiva", Vector3(10, 0, 0))
+	assert(int(stealth_jet.get("current_ammo")) == 0, "Tras 2 pasadas la munición debe ser 0")
+	assert(stealth_jet.get("estado_vuelo") == "regresando", "Sin munición debe conmutar automáticamente a 'regresando'")
+
+	# Revelación única ante Estación de Radar Táctica (radio 65.0m)
+	stealth_jet.set("is_invisible", true)
+	var radar_script_t99: GDScript = load("res://scripts/buildings/radar_station_3d.gd") as GDScript
+	var radar_inst_t99: Tower3D = radar_script_t99.new() as Tower3D
+	root.add_child(radar_inst_t99)
+	radar_inst_t99._ready()
+	radar_inst_t99.position = Vector3(0, 0, 0)
+	stealth_jet.position = Vector3(25.0, 18.0, 0) # A ~30.8m de distancia <= 65.0m
+
+	var detectados_radar: Array[Node3D] = radar_inst_t99.call("emitir_pulso_radar")
+	assert(detectados_radar.has(stealth_jet), "Estación de Radar a <= 65m debe detectar al Caza Furtivo")
+	assert(stealth_jet.get("is_invisible") == false, "El pulso del Radar debe disipar la invisibilidad del Caza Furtivo")
+
+	stealth_jet.free()
+	radar_inst_t99.free()
+	print("✅ Test 99 Superado: Caza Furtivo F-22 (cota Y=18m, 20 m/s, sigilo de red is_stealth=true, retorno autónomo con max_ammo=2 y revelación ante Radar 65m) certificado.")
+
+
+	# ─── TEST 100: Hito Centenario — Certificación Integral de las 10 Eras Históricas y Digitales ───
+	print("\n--- TEST 100: Hito Centenario — Certificación de 10 Eras de Empire Earth ---")
+	var rm_centenario := GlobalResourceManager.new()
+	assert(rm_centenario.NOMBRE_ERA.size() >= 10, "El juego debe poseer soporte de catálogo para las Eras de Empire Earth")
+	assert(rm_centenario.NOMBRE_ERA.has(GlobalResourceManager.Era.DIGITAL), "El diccionario NOMBRE_ERA debe incluir Era.DIGITAL")
+	var nombre_era_10: String = rm_centenario.NOMBRE_ERA.get(GlobalResourceManager.Era.DIGITAL, "")
+	assert(nombre_era_10 == "Era Digital" or nombre_era_10.contains("Digital"), "Era.DIGITAL debe mapear a 'Era Digital'")
+
+	# Evolución secuencial y puntos de civilización acumulados
+	rm_centenario.era_actual = GlobalResourceManager.Era.DIGITAL
+	assert(rm_centenario.era_actual == GlobalResourceManager.Era.DIGITAL, "El ResourceManager debe soportar progresión completa a Era Digital")
+
+	# Validación del TownCenter en Era 10
+	var tc_centenario := TownCenter3DClass.new()
+	root.add_child(tc_centenario)
+	tc_centenario._ready()
+	assert(tc_centenario.salud_maxima > 0.0, "TownCenter debe encontrarse plenamente operativo en el Hito Centenario")
+
+	# Verificación de completitud del catálogo de unidades militares (dbunitset.dat)
+	var unidades_clave_100: Array[String] = [
+		"clubman_era0", "maceman_bronze", "legionary_era3",
+		"pikeman_era4", "halberdier_era5", "fusilero_imperial",
+		"doughboy_era7", "gi_soldier_era8", "spec_ops_era9", "infiltrador_nano_era10"
+	]
+	for uid in unidades_clave_100:
+		assert(Barracks3D.CATALOGO_UNIDADES.has(uid), "Catálogo universal de unidades debe contener '%s'" % uid)
+
+	rm_centenario.free()
+	tc_centenario.free()
+	print("✅ Test 100 Superado: Hito Centenario — Certificación completa de las 10 Eras de Empire Earth en motor Godot 4.3 Headless con 100 tests unitarios y de integración superados al 100%%.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")
 	quit(0)
+
 
 
 

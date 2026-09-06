@@ -806,6 +806,76 @@ func _setup_stats() -> void:
 			speed = 8.0
 			era_entrenada = 9
 
+		# ────────────────────────────────────────────────────────────
+		# ERA 10 — EDAD DIGITAL (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"infiltrador_nano_era10", "infiltrador_nano":
+			unit_name = "Infiltrador Nanotecnológico"
+			attack_type = "melee"
+			weapon_type = "sword"
+			impact_type = "PIERCE"
+			is_invisible = true
+			_salud_base = 260.0
+			salud_maxima = 260.0
+			salud_actual = 260.0
+			_daño_base = 40.0
+			daño = 40.0
+			rango_ataque = 2.5
+			velocidad_ataque = 0.8
+			speed = 5.6
+			era_entrenada = 10
+
+		"soldado_emp_era10", "soldado_emp":
+			unit_name = "Soldado de Pulso EMP"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "SHOCK"
+			projectile_type = "bullet"
+			_salud_base = 250.0
+			salud_maxima = 250.0
+			salud_actual = 250.0
+			_daño_base = 30.0
+			daño = 30.0
+			rango_ataque = 18.0
+			velocidad_ataque = 1.2
+			speed = 4.8
+			era_entrenada = 10
+
+		"cyborg_militar_era10", "cyborg_militar":
+			unit_name = "Cyborg Militar Pesado"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			is_slow_immune = true
+			_salud_base = 400.0
+			salud_maxima = 400.0
+			salud_actual = 400.0
+			_daño_base = 28.0
+			daño = 28.0
+			rango_ataque = 20.0
+			velocidad_ataque = 0.125 # 8 disparos por segundo
+			speed = 4.6
+			era_entrenada = 10
+
+		"caza_furtivo_era10", "caza_furtivo":
+			unit_name = "Caza Furtivo F-22"
+			attack_type = "ranged"
+			weapon_type = "missile"
+			impact_type = "EXPLOSIVE"
+			projectile_type = "rocket"
+			is_stealth = true
+			is_invisible = true
+			_salud_base = 280.0
+			salud_maxima = 280.0
+			salud_actual = 280.0
+			_daño_base = 65.0
+			daño = 65.0
+			rango_ataque = 28.0
+			velocidad_ataque = 2.0
+			speed = 20.0
+			era_entrenada = 10
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:
@@ -813,7 +883,7 @@ func configurar_unidad(id: String) -> void:
 	_setup_stats()
 
 func _physics_process(_delta: float) -> void:
-	if is_stunned:
+	if is_stunned or is_disabled:
 		velocity = Vector3.ZERO
 		move_and_slide()
 		return

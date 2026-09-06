@@ -1,0 +1,27 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/units/caza_furtivo_era10_3d.gd" id="1_stealth"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_stealth"]
+size = Vector3(4.8, 0.8, 5.2)
+
+[sub_resource type="PrismMesh" id="PrismMesh_stealth"]
+size = Vector3(2.4, 0.6, 5.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_stealth"]
+albedo_color = Color(0.08, 0.09, 0.11, 1.0)
+metallic = 0.9
+roughness = 0.2
+
+[node name="CazaFurtivoEra10" type="CharacterBody3D"]
+collision_layer = 4
+collision_mask = 7
+script = ExtResource("1_stealth")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_stealth")
+
+[node name="StealthFuselage" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0, 0, 0)
+mesh = SubResource("PrismMesh_stealth")
+surface_material_override/0 = SubResource("StandardMaterial3D_stealth")

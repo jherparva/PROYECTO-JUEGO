@@ -92,7 +92,8 @@ func request_gather_slot(villager: Node3D) -> Dictionary:
 			return {"has_slot": true, "slot_pos": slot_p, "wait_pos": slot_p}
 		elif assigned_villager != villager:
 			# Otro aldeano intenta usurpar la granja mientras el titular va a depositar
-			var wait_ang: float = randf() * TAU
+			var v_id: int = abs(villager.get_instance_id()) if is_instance_valid(villager) else randi()
+			var wait_ang: float = float(v_id % 8) * (TAU / 8.0) + 0.35
 			var wait_p := global_position + Vector3(cos(wait_ang), 0.0, sin(wait_ang)) * 5.2
 			return {
 				"has_slot": false,
@@ -103,7 +104,8 @@ func request_gather_slot(villager: Node3D) -> Dictionary:
 
 	# Si ya está ocupada por otro aldeano activo
 	if is_occupied and is_instance_valid(assigned_villager) and assigned_villager != villager:
-		var wait_ang: float = randf() * TAU
+		var v_id: int = abs(villager.get_instance_id()) if is_instance_valid(villager) else randi()
+		var wait_ang: float = float(v_id % 8) * (TAU / 8.0) + 0.35
 		var wait_p := global_position + Vector3(cos(wait_ang), 0.0, sin(wait_ang)) * 5.2
 		return {
 			"has_slot": false,

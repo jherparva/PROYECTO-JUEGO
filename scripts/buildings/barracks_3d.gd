@@ -129,6 +129,18 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 7.0, "era_min": 8, "era_max": 9,
 		"scene_path": "res://scenes/units/hazmat_worker_era8_3d.tscn"
 	},
+	"spec_ops_era9": {
+		"name": "Operador SpecOps", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 120, "iron": 90, "gold": 70},
+		"train_time": 9.0, "era_min": 9, "era_max": 10,
+		"scene_path": "res://scenes/units/spec_ops_era9_3d.tscn"
+	},
+	"anti_tank_soldier_era9": {
+		"name": "Soldado Anti-Tanque", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 100, "iron": 120, "gold": 80},
+		"train_time": 10.0, "era_min": 9, "era_max": 10,
+		"scene_path": "res://scenes/units/anti_tank_soldier_era9_3d.tscn"
+	},
 	"soldado_asalto": {
 		"name": "Soldado de Asalto Táctico", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 130, "iron": 100},
@@ -374,6 +386,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "siege", "cost": {"iron": 800, "gold": 1000},
 		"train_time": 45.0, "era_min": 8, "era_max": 9,
 		"scene_path": "res://scenes/buildings/NukeSilo_Era8_3d.tscn"
+	},
+	"m1_abrams_tank": {
+		"name": "Tanque M1 Abrams", "building_type": "factory",
+		"type": "siege", "cost": {"iron": 320, "gold": 220},
+		"train_time": 18.0, "era_min": 9, "era_max": 10,
+		"scene_path": "res://scenes/units/m1_abrams_tank_3d.tscn"
+	},
+	"caza_reaccion_era9": {
+		"name": "Caza F-15 Jet", "building_type": "airbase",
+		"type": "aircraft", "cost": {"iron": 220, "gold": 200},
+		"train_time": 16.0, "era_min": 9, "era_max": 10,
+		"scene_path": "res://scenes/units/caza_reaccion_era9_3d.tscn"
+	},
+	"helicoptero_apache_era9": {
+		"name": "Helicóptero Apache", "building_type": "airbase",
+		"type": "aircraft", "cost": {"iron": 190, "gold": 170},
+		"train_time": 15.0, "era_min": 9, "era_max": 10,
+		"scene_path": "res://scenes/units/helicoptero_apache_era9_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

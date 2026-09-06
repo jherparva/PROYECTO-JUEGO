@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://anti_tank_soldier_era9_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/anti_tank_soldier_era9_3d.gd" id="1_at9"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_at9"]
+radius = 0.42
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_at9_body"]
+radius = 0.38
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_at9_mat"]
+albedo_color = Color(0.28, 0.32, 0.24, 1)
+
+[node name="AntiTank_Soldier_Era9" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_at9")
+unit_id = "anti_tank_soldier_era9"
+unit_name = "Soldado Anti-Tanque"
+attack_type = "ranged"
+weapon_type = "missile"
+impact_type = "PIERCE"
+projectile_type = "rocket"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_at9")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.25, 1.35, -1.0)
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("CapsuleMesh_at9_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_at9_mat")

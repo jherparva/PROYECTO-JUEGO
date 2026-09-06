@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://m1_abrams_tank_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/m1_abrams_tank_3d.gd" id="1_ab9"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ab9"]
+size = Vector3(2.8, 2.0, 5.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ab9_body"]
+size = Vector3(2.6, 1.1, 4.8)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ab9_mat"]
+albedo_color = Color(0.68, 0.62, 0.48, 1)
+
+[node name="M1Abrams_Tank" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_ab9")
+unit_id = "m1_abrams_tank"
+unit_name = "Tanque M1 Abrams"
+attack_type = "ranged"
+weapon_type = "cannon"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("BoxShape3D_ab9")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.6)
+
+[node name="ChassisMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("BoxMesh_ab9_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_ab9_mat")

@@ -378,6 +378,29 @@ static func calcular_dano(
 			if is_truck_or_mechanized:
 				final_damage *= 1.50
 
+		# Multiplicador oficial Era 9: AntiTank_Soldier_Era9 (x2.5) contra vehículos y tanques blindados
+		var is_antitank: bool = (att_id == "anti_tank_soldier_era9" or "antitank" in att_name or "anti_tank" in att_name or attacker.is_in_group("antitanks"))
+		if is_antitank:
+			var is_veh_or_tank: bool = (
+				target.get("is_vehicle") == true or target.get("is_tank") == true or
+				target.is_in_group("vehicles_3d") or target.is_in_group("tanks") or
+				target.is_in_group("shermans") or target.is_in_group("abrams") or
+				"tank" in target.name.to_lower() or "tanque" in target.name.to_lower()
+			)
+			if is_veh_or_tank:
+				final_damage *= 2.5
+
+		# Multiplicador oficial Era 9: M1Abrams_Tank (x2.5) contra estructuras y edificios
+		var is_abrams: bool = (att_id == "m1_abrams_tank" or "abrams" in att_name or attacker.is_in_group("abrams"))
+		if is_abrams:
+			var is_bld_struct: bool = (
+				target.is_in_group("buildings") or target.is_in_group("buildings_3d") or
+				target.is_in_group("walls") or target.is_in_group("walls_3d") or
+				"building" in target.name.to_lower() or "wall" in target.name.to_lower()
+			)
+			if is_bld_struct:
+				final_damage *= 2.5
+
 	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):
 		final_damage = target.call("aplicar_mitigacion_testudo", final_damage, weapon_str)

@@ -719,6 +719,93 @@ func _setup_stats() -> void:
 			speed = 12.0
 			era_entrenada = 8
 
+		# ────────────────────────────────────────────────────────────
+		# ERA 9 — EDAD ATÓMICA / MODERNA (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"spec_ops_era9":
+			unit_name = "Operador SpecOps"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			has_thermal_vision = true
+			_salud_base = 230.0
+			salud_maxima = 230.0
+			salud_actual = 230.0
+			_daño_base = 35.0
+			daño = 35.0
+			rango_ataque = 24.0
+			velocidad_ataque = 0.9
+			speed = 5.0
+			era_entrenada = 9
+
+		"anti_tank_soldier_era9":
+			unit_name = "Soldado Anti-Tanque"
+			attack_type = "ranged"
+			weapon_type = "missile"
+			impact_type = "PIERCE"
+			projectile_type = "rocket"
+			_salud_base = 220.0
+			salud_maxima = 220.0
+			salud_actual = 220.0
+			_daño_base = 45.0
+			daño = 45.0
+			rango_ataque = 16.0
+			velocidad_ataque = 2.0
+			speed = 4.2
+			era_entrenada = 9
+
+		"m1_abrams_tank":
+			unit_name = "Tanque M1 Abrams"
+			attack_type = "ranged"
+			weapon_type = "cannon"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			is_cavalry = true
+			is_tank = true
+			is_stun_immune = true
+			_salud_base = 520.0
+			salud_maxima = 520.0
+			salud_actual = 520.0
+			_daño_base = 80.0
+			daño = 80.0
+			rango_ataque = 24.0
+			velocidad_ataque = 2.0
+			speed = 5.5
+			era_entrenada = 9
+
+		"caza_reaccion_era9":
+			unit_name = "Caza F-15 Jet"
+			attack_type = "ranged"
+			weapon_type = "missile"
+			impact_type = "EXPLOSIVE"
+			projectile_type = "rocket"
+			_salud_base = 260.0
+			salud_maxima = 260.0
+			salud_actual = 260.0
+			_daño_base = 60.0
+			daño = 60.0
+			rango_ataque = 28.0
+			velocidad_ataque = 1.0
+			speed = 18.0
+			era_entrenada = 9
+
+		"helicoptero_apache_era9":
+			unit_name = "Helicóptero Apache"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 320.0
+			salud_maxima = 320.0
+			salud_actual = 320.0
+			_daño_base = 25.0
+			daño = 25.0
+			rango_ataque = 20.0
+			velocidad_ataque = 0.6
+			speed = 8.0
+			era_entrenada = 9
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:

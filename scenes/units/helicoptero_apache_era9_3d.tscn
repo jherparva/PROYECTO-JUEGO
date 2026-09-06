@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://helicoptero_apache_era9_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/helicoptero_apache_era9_3d.gd" id="1_ap9"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ap9"]
+size = Vector3(5.2, 1.8, 4.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ap9_fuse"]
+size = Vector3(1.1, 0.9, 4.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ap9_mat"]
+albedo_color = Color(0.22, 0.25, 0.2, 1)
+
+[node name="Helicoptero_Apache_Era9" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_ap9")
+unit_id = "helicoptero_apache_era9"
+unit_name = "Helicóptero Apache"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("BoxShape3D_ap9")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.3, -1.8)
+
+[node name="FuselageMesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ap9_fuse")
+surface_material_override/0 = SubResource("StandardMaterial3D_ap9_mat")

@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3 uid="uid://airbase_modern_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/buildings/airbase_modern_3d.gd" id="1_ab9m"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ab9m"]
+size = Vector3(16.0, 5.0, 22.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ab9m_runway"]
+size = Vector3(8.0, 0.15, 20.0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ab9m_mat"]
+albedo_color = Color(0.24, 0.25, 0.28, 1)
+
+[node name="Airbase_Modern_3D" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 3
+script = ExtResource("1_ab9m")
+building_name = "Base Aérea Moderna"
+building_type = "airbase"
+salud_maxima = 2600.0
+salud_actual = 2600.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("BoxShape3D_ab9m")
+
+[node name="RunwayMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.08, 0)
+mesh = SubResource("BoxMesh_ab9m_runway")
+surface_material_override/0 = SubResource("StandardMaterial3D_ab9m_mat")

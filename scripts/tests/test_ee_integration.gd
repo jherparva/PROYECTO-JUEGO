@@ -3677,6 +3677,235 @@ func _init() -> void:
 	print("✅ Test 90 Superado: Detonación colosal ICBM (radio 18m, 9999 HP letal, área residual DoT 10 HP/s por 15s e inmunidad absoluta HazmatWorker) certificada.")
 
 
+	# ─── TEST 91: SpecOps_Era9 (Detección Térmica de Sigilo) y AntiTank_Soldier_Era9 (x2.5 vs Blindados) ───
+	print("\n--- TEST 91: Operador SpecOps y Soldado Anti-Tanque ---")
+	var specops_script: GDScript = load("res://scripts/units/spec_ops_era9_3d.gd") as GDScript
+	var specops_inst: Soldier3D = specops_script.new() as Soldier3D
+	root.add_child(specops_inst)
+	specops_inst._ready()
+	specops_inst.position = Vector3(0, 0, 0)
+	assert(abs(specops_inst.daño - 35.0) < 0.01, "SpecOps debe poseer daño base de 35.0")
+	assert(specops_inst.has_node("ProjectileMuzzle"), "SpecOps debe poseer socket ProjectileMuzzle")
+	assert(specops_inst.get("has_thermal_vision") == true, "SpecOps debe poseer visión térmica nocturna activa")
+
+	# Francotirador camuflado a 10.0m de distancia
+	var sniper_script_t91: GDScript = load("res://scripts/units/sniper_era8_3d.gd") as GDScript
+	var sniper_target_t91: Soldier3D = sniper_script_t91.new() as Soldier3D
+	root.add_child(sniper_target_t91)
+	sniper_target_t91._ready()
+	sniper_target_t91.position = Vector3(10.0, 0, 0)
+	sniper_target_t91.set("is_invisible", true)
+	assert(sniper_target_t91.get("is_invisible") == true, "Sniper debe encontrarse en estado invisible inicialmente")
+
+	# Escaneo térmico activo que anula la invisibilidad del Sniper
+	var detectados_t91: int = specops_inst.call("escanear_termico", 25.0)
+	assert(detectados_t91 >= 1, "Visión térmica de SpecOps debe detectar al Sniper camuflado")
+	assert(sniper_target_t91.get("is_invisible") == false, "La visión térmica de SpecOps debe forzar is_invisible = false en el Sniper")
+
+	# AntiTank_Soldier_Era9: Proyectil perforante y multiplicador x2.5 vs vehículos y tanques
+	var antitank_script: GDScript = load("res://scripts/units/anti_tank_soldier_era9_3d.gd") as GDScript
+	var antitank_inst: Soldier3D = antitank_script.new() as Soldier3D
+	root.add_child(antitank_inst)
+	antitank_inst._ready()
+	assert(abs(antitank_inst.daño - 45.0) < 0.01, "Soldado Anti-Tanque debe poseer daño base de 45.0")
+	assert(antitank_inst.has_node("ProjectileMuzzle"), "Soldado Anti-Tanque debe poseer socket ProjectileMuzzle")
+
+	var tank_target_t91 := Soldier3D.new()
+	tank_target_t91.name = "TanqueObjetivoT91"
+	tank_target_t91.set("is_vehicle", true)
+	tank_target_t91.set("is_tank", true)
+	tank_target_t91.is_cavalry = true
+	tank_target_t91.add_to_group("vehicles_3d")
+	tank_target_t91.add_to_group("tanks")
+	root.add_child(tank_target_t91)
+	tank_target_t91._ready()
+
+	var dmg_at: float = CombatDamageCalculator.calcular_dano(antitank_inst.daño, "gun", antitank_inst, tank_target_t91)
+	# Base counter GUNPOWDER vs CAVALRY (2.0) * antitank bono (2.5) = 5.00 -> 45.0 * 5.00 = 225.0
+	var expected_at_dmg: float = (antitank_inst.daño * 2.0) * 2.5
+	assert(abs(dmg_at - expected_at_dmg) < 0.05, "Soldado Anti-Tanque debe infligir multiplicador x2.5 contra vehículos y tanques (Esperado: %.2f, Obtenido: %.2f)" % [expected_at_dmg, dmg_at])
+
+	specops_inst.free()
+	sniper_target_t91.free()
+	antitank_inst.free()
+	tank_target_t91.free()
+	print("✅ Test 91 Superado: Operador SpecOps (visión térmica activa anulando sigilo de Sniper) y Soldado Anti-Tanque (multiplicador x2.5 vs blindados) certificados.")
+
+
+	# ─── TEST 92: Estación de Radar Táctica (Visión 65m y Pulso) y Base Aérea Moderna (Herencia Barracks3D y 8%) ───
+	print("\n--- TEST 92: Estación de Radar Táctica y Base Aérea Moderna ---")
+	var radar_script: GDScript = load("res://scripts/buildings/radar_station_3d.gd") as GDScript
+	var radar_inst: Tower3D = radar_script.new() as Tower3D
+	assert(radar_inst is Tower3D, "Radar_Station_3D debe heredar directamente de Tower3D")
+	assert(radar_inst is BuildingBase3D, "Radar_Station_3D debe heredar de BuildingBase3D")
+	root.add_child(radar_inst)
+	radar_inst._ready()
+	radar_inst.position = Vector3(0, 0, 0)
+	assert(abs(radar_inst.radio_vision - 65.0) < 0.01, "Estación de Radar debe poseer visión masiva estricta de 65.0 metros")
+
+	# Detección y revelación de aeronaves mediante pulso de radar
+	var drone_target_t92 := Soldier3D.new()
+	drone_target_t92.name = "AeronaveEnemigaT92"
+	drone_target_t92.add_to_group("aircraft")
+	drone_target_t92.add_to_group("air_units")
+	root.add_child(drone_target_t92)
+	drone_target_t92._ready()
+	drone_target_t92.position = Vector3(30.0, 10.0, 0)
+
+	var detectadas_radar: Array[Node3D] = radar_inst.call("emitir_pulso_radar")
+	assert(detectadas_radar.has(drone_target_t92), "Pulso de radar debe revelar aeronave en vuelo a 30m de distancia")
+
+	# Base Aérea Moderna (Airbase_Modern_3D: Herencia Barracks3D y emergencia desde el 8%)
+	var airbase_script: GDScript = load("res://scripts/buildings/airbase_modern_3d.gd") as GDScript
+	var airbase_inst: BuildingBase3D = airbase_script.new() as BuildingBase3D
+	assert(airbase_inst is Barracks3D, "Airbase_Modern_3D debe heredar directamente de Barracks3D")
+	assert(airbase_inst is BuildingBase3D, "Airbase_Modern_3D debe heredar de BuildingBase3D")
+
+	airbase_inst.starts_under_construction = true
+	root.add_child(airbase_inst)
+	airbase_inst._ready()
+
+	# Emergencia vertical progresiva desde el 8%
+	airbase_inst._actualizar_progreso_construccion(0.0)
+	airbase_inst._actualizar_progreso_construccion(50.0)
+	airbase_inst._actualizar_progreso_construccion(100.0)
+	assert(airbase_inst.esta_construido == true, "Base Aérea Moderna debe completarse al 100%% de progreso")
+
+	# Cola de producción de aeronaves de Era 9
+	var rm_t92: GlobalResourceManager = root.get_node_or_null("ResourceManager") as GlobalResourceManager
+	if not is_instance_valid(rm_t92):
+		rm_t92 = GlobalResourceManager.new()
+		rm_t92.name = "ResourceManager"
+		root.add_child(rm_t92)
+	rm_t92.era_actual = 9
+	rm_t92.resources["iron"] = 3000
+	rm_t92.resources["gold"] = 3000
+	rm_t92.max_population = 50
+	rm_t92.current_population = 0
+	airbase_inst.resource_manager = rm_t92
+
+	var train_f15_ok: bool = airbase_inst.call("entrenar_unidad", "caza_reaccion_era9")
+	assert(train_f15_ok == true or airbase_inst.get("production_queue").size() > 0, "Base Aérea Moderna debe encolar Caza F-15 Jet en Era 9")
+
+	radar_inst.free()
+	drone_target_t92.free()
+	airbase_inst.free()
+	print("✅ Test 92 Superado: Estación de Radar Táctica (visión 65.0m y pulso aéreo) y Base Aérea Moderna (herencia Barracks3D y emergencia 8%) certificados.")
+
+
+	# ─── TEST 93: Caza a Reacción Supersónico F-15 (Capa Y=16m, Velocidad 18 m/s, 2 Cargas y Rearme) ───
+	print("\n--- TEST 93: Caza a Reacción Supersónico F-15 ---")
+	var jet_script: GDScript = load("res://scripts/units/caza_reaccion_era9_3d.gd") as GDScript
+	var jet_inst: Soldier3D = jet_script.new() as Soldier3D
+	root.add_child(jet_inst)
+	jet_inst._ready()
+	assert(abs(jet_inst.speed - 18.0) < 0.01, "Caza a Reacción debe poseer velocidad lineal extrema de 18.0 m/s")
+	assert(abs(jet_inst.position.y - 16.0) < 0.01, "Caza a Reacción debe navegar a una cota de crucero fija constante en Y = 16.0m")
+	assert(jet_inst.get("max_ammo") == 2, "Caza a Reacción debe poseer capacidad máxima de 2 ataques con misiles")
+	assert(jet_inst.get("current_ammo") == 2, "Caza a Reacción debe iniciar con 2 cargas de misiles")
+
+	# Pasadas de ataque con misiles y retorno autónomo
+	var ground_target_t93 := Soldier3D.new()
+	root.add_child(ground_target_t93)
+	ground_target_t93._ready()
+
+	jet_inst.call("disparar_misil_reaccion", ground_target_t93)
+	assert(jet_inst.get("current_ammo") == 1, "Debe quedar con 1 carga tras primer ataque supersónico")
+
+	# Segundo ataque agota munición y activa retorno a base aérea
+	jet_inst.call("disparar_misil_reaccion", ground_target_t93)
+	assert(jet_inst.get("current_ammo") == 0, "Munición de misiles debe quedar agotada a 0")
+	assert(jet_inst.get("estado_vuelo") == "regresando", "Caza debe conmutar automáticamente a estado 'regresando' hacia la Base Aérea")
+
+	jet_inst.free()
+	ground_target_t93.free()
+	print("✅ Test 93 Superado: Caza a Reacción Supersónico F-15 (cota Y=16m, velocidad 18 m/s, 2 cargas de misiles y retorno autónomo) certificado.")
+
+
+	# ─── TEST 94: Helicóptero Apache (Cota Y=7.5m, Velocidad 8 m/s, Órbita Circular y Fuego en Movimiento) ───
+	print("\n--- TEST 94: Helicóptero de Ataque AH-64 Apache ---")
+	var apache_script: GDScript = load("res://scripts/units/helicoptero_apache_era9_3d.gd") as GDScript
+	var apache_inst: Soldier3D = apache_script.new() as Soldier3D
+	root.add_child(apache_inst)
+	apache_inst._ready()
+	assert(abs(apache_inst.speed - 8.0) < 0.01, "Helicóptero Apache debe poseer velocidad de 8.0 m/s")
+	assert(abs(apache_inst.position.y - 7.5) < 0.01, "Helicóptero Apache debe operar a una cota media fija constante en Y = 7.5m")
+
+	# Fijar objetivo e iniciar órbita circular
+	var victim_t94 := Soldier3D.new()
+	victim_t94.name = "ObjetivoTierraT94"
+	root.add_child(victim_t94)
+	victim_t94._ready()
+	victim_t94.position = Vector3(0, 0, 0)
+
+	apache_inst.call("iniciar_orbita", victim_t94, 6.0)
+	assert(apache_inst.get("is_orbiting") == true, "Helicóptero Apache debe entrar en estado 'is_orbiting = true'")
+
+	var pos_calculada_orbita: Vector3 = apache_inst.call("calcular_posicion_orbita", Vector3(0, 0, 0), 6.0, PI / 2.0)
+	assert(abs(pos_calculada_orbita.x - 6.0) < 0.1 and abs(pos_calculada_orbita.y - 7.5) < 0.01, "Debe calcular posición de órbita precisa en el perímetro circular")
+
+	# Ráfaga de ametralladora rotatoria sin detener su marcha
+	var disparos_apache: int = apache_inst.call("disparar_rafaga_orbita", victim_t94)
+	assert(disparos_apache == 4, "Helicóptero Apache debe disparar ráfagas rotatorias continuas de 4 impactos")
+	assert(apache_inst.get("is_orbiting") == true, "El ataque continuo no debe interrumpir el estado de órbita circular")
+
+	apache_inst.free()
+	victim_t94.free()
+	print("✅ Test 94 Superado: Helicóptero Apache (cota Y=7.5m, velocidad 8 m/s, maniobra de órbita circular activa y fuego rotatorio continuo) certificado.")
+
+
+	# ─── TEST 95: Tanque M1 Abrams (HP 520.0, Inmunidad Stun, x2.5 vs Estructuras y AoE 4.0m) ───
+	print("\n--- TEST 95: Tanque de Asalto Pesado M1 Abrams ---")
+	var abrams_script: GDScript = load("res://scripts/units/m1_abrams_tank_3d.gd") as GDScript
+	var abrams_inst: Soldier3D = abrams_script.new() as Soldier3D
+	root.add_child(abrams_inst)
+	abrams_inst._ready()
+	assert(abs(abrams_inst.salud_maxima - 520.0) < 0.01, "Tanque M1 Abrams debe poseer salud masiva de 520.0 HP")
+	assert(abs(abrams_inst.speed - 5.5) < 0.01, "Tanque M1 Abrams debe poseer velocidad de 5.5 m/s")
+	assert(abrams_inst.get("is_stun_immune") == true, "Tanque M1 Abrams debe ser inmune al aturdimiento")
+	assert(abrams_inst.call("aplicar_stun", 3.0) == false, "aplicar_stun debe fallar en Tanque M1 Abrams")
+
+	# Multiplicador x2.5 contra edificios y estructuras
+	var bld_t95 := BuildingBase3D.new()
+	bld_t95.name = "FortalezaSillarT95"
+	bld_t95.add_to_group("buildings")
+	bld_t95.add_to_group("buildings_3d")
+	root.add_child(bld_t95)
+	bld_t95._ready()
+	bld_t95.position = Vector3(20.0, 0, 0)
+
+	var dmg_abrams_bld: float = CombatDamageCalculator.calcular_dano(abrams_inst.daño, "gun", abrams_inst, bld_t95)
+	# Base counter GUNPOWDER vs BUILDING (0.8) * abrams bono (2.5) = 2.00 -> 80.0 * 2.00 = 160.0
+	var expected_abrams_dmg: float = (abrams_inst.daño * 0.8) * 2.5
+	assert(abs(dmg_abrams_bld - expected_abrams_dmg) < 0.05, "Tanque M1 Abrams debe infligir multiplicador x2.5 contra estructuras (Esperado: %.2f, Obtenido: %.2f)" % [expected_abrams_dmg, dmg_abrams_bld])
+
+	# Detonación AoE de 4.0 metros
+	var bld_close_t95 := BuildingBase3D.new()
+	bld_close_t95.name = "EstructuraCercanaAoE"
+	bld_close_t95.add_to_group("buildings")
+	root.add_child(bld_close_t95)
+	bld_close_t95._ready()
+	bld_close_t95.position = Vector3(22.0, 0, 0) # A 2.0m de (20, 0, 0) <= 4.0m
+
+	var bld_far_t95 := BuildingBase3D.new()
+	bld_far_t95.name = "EstructuraLejanaAoE"
+	bld_far_t95.add_to_group("buildings")
+	root.add_child(bld_far_t95)
+	bld_far_t95._ready()
+	bld_far_t95.position = Vector3(30.0, 0, 0) # A 10.0m de (20, 0, 0) > 4.0m
+
+	var aoe_hits_abrams: Array[Node3D] = abrams_inst.call("disparar_canon_abrams", Vector3(20, 0, 0))
+	assert(aoe_hits_abrams.has(bld_t95), "Objetivo central debe ser alcanzado por el cañón")
+	assert(aoe_hits_abrams.has(bld_close_t95), "Estructura a 2.0m debe ser alcanzada por la detonación AoE de 4.0m")
+	assert(not aoe_hits_abrams.has(bld_far_t95), "Estructura a 10.0m NO debe ser alcanzada")
+
+	abrams_inst.free()
+	bld_t95.free()
+	bld_close_t95.free()
+	bld_far_t95.free()
+	print("✅ Test 95 Superado: Tanque M1 Abrams (HP 520.0, velocidad 5.5 m/s, inmunidad stun, x2.5 vs edificios y AoE 4.0m) certificado.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")

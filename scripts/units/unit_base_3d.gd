@@ -394,6 +394,9 @@ func aplicar_supresion(duracion: float = 2.0) -> void:
 var is_radiation_immune: bool = false
 var is_invisible: bool = false
 var is_civilian: bool = false
+var is_tank: bool = false
+var is_orbiting: bool = false
+var has_thermal_vision: bool = false
 
 var is_on_fire: bool = false
 var damage_modifier: float = 1.0

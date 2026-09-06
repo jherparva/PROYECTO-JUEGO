@@ -1,0 +1,37 @@
+[gd_scene load_steps=5 format=3 uid="uid://spec_ops_era9_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/spec_ops_era9_3d.gd" id="1_sp9"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_sp9"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_sp9_body"]
+radius = 0.35
+height = 1.7
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sp9_mat"]
+albedo_color = Color(0.12, 0.14, 0.15, 1)
+
+[node name="SpecOps_Era9" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_sp9")
+unit_id = "spec_ops_era9"
+unit_name = "Operador SpecOps"
+attack_type = "ranged"
+weapon_type = "gun"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_sp9")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.2, -0.8)
+
+[node name="BodyMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("CapsuleMesh_sp9_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_sp9_mat")

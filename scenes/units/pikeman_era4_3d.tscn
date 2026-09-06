@@ -1,0 +1,41 @@
+[gd_scene load_steps=6 format=3 uid="uid://pikeman_era4_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/pikeman_era4_3d.gd" id="1_pk4"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_pk4"]
+radius = 0.4
+height = 1.8
+
+[sub_resource type="BoxMesh" id="BoxMesh_torso"]
+size = Vector3(0.6, 0.9, 0.4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_torso"]
+albedo_color = Color(0.6, 0.2, 0.2, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_pike"]
+top_radius = 0.04
+bottom_radius = 0.04
+height = 3.4
+
+[node name="Pikeman_Era4" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_pk4")
+unit_id = "pikeman_era4"
+unit_name = "Piquero Medieval"
+attack_type = "melee"
+weapon_type = "melee_pierce"
+impact_type = "MELEE_PIERCE"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_pk4")
+
+[node name="PikemanTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+mesh = SubResource("BoxMesh_torso")
+surface_material_override/0 = SubResource("StandardMaterial3D_torso")
+
+[node name="LongPike" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.422618, 0.906308, 0, -0.906308, 0.422618, 0.25, 0.8, -1.0)
+mesh = SubResource("CylinderMesh_pike")

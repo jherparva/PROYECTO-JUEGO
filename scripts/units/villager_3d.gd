@@ -14,6 +14,7 @@ extends "res://scripts/units/unit_base_3d.gd"
 @export var MAX_CARGA: int = 15
 ## Cantidad de recursos extraídos por segundo (valor base para Era PREHISTORICA).
 @export var gather_rate: float = 1.0
+@export var gathering_speed_modifier: float = 1.0
 
 @export_group("Construction")
 ## HP de edificio construido o reparado por segundo.

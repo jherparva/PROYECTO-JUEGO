@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://caballero_pesado_era4_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/caballero_pesado_3d.gd" id="1_kn4"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_kn4"]
+radius = 0.6
+height = 2.0
+
+[sub_resource type="BoxMesh" id="BoxMesh_horse"]
+size = Vector3(0.9, 1.2, 2.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_horse"]
+albedo_color = Color(0.35, 0.22, 0.14, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_rider"]
+size = Vector3(0.65, 0.8, 0.6)
+
+[node name="Caballero_Pesado" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_kn4")
+unit_id = "caballero_pesado"
+unit_name = "Caballero Pesado"
+attack_type = "melee"
+weapon_type = "melee_shock"
+impact_type = "MELEE_SHOCK"
+is_cavalry = true
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("CapsuleShape3D_kn4")
+
+[node name="HorseBody" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("BoxMesh_horse")
+surface_material_override/0 = SubResource("StandardMaterial3D_horse")
+
+[node name="KnightTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.6, -0.1)
+mesh = SubResource("BoxMesh_rider")

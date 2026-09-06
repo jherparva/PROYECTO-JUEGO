@@ -26,6 +26,7 @@ enum Postura {
 @export var weapon_type: String = "spear"
 @export var impact_type: String = "NONE"
 @export var civilizacion: String = ""
+@export var is_cavalry: bool = false
 
 # Backup de atributos base para escalado por Eras
 var _salud_base: float = 120.0
@@ -319,6 +320,84 @@ func _setup_stats() -> void:
 			velocidad_ataque = 1.8
 			speed = 5.6
 			era_entrenada = 3
+
+		"caballero_pesado":
+			unit_name = "Caballero Pesado"
+			attack_type = "melee"
+			weapon_type = "melee_shock"
+			impact_type = "MELEE_SHOCK"
+			is_cavalry = true
+			_salud_base = 280.0
+			salud_maxima = 280.0
+			salud_actual = 280.0
+			_daño_base = 32.0
+			daño = 32.0
+			rango_ataque = 3.6
+			velocidad_ataque = 0.95
+			speed = 6.0
+			era_entrenada = 4
+
+		"pikeman_era4":
+			unit_name = "Piquero Medieval"
+			attack_type = "melee"
+			weapon_type = "melee_pierce"
+			impact_type = "MELEE_PIERCE"
+			_salud_base = 180.0
+			salud_maxima = 180.0
+			salud_actual = 180.0
+			_daño_base = 20.0
+			daño = 20.0
+			rango_ataque = 2.8
+			velocidad_ataque = 0.9
+			speed = 4.8
+			era_entrenada = 4
+
+		"crossbowman_era4":
+			unit_name = "Ballestero Medieval"
+			attack_type = "ranged"
+			weapon_type = "arrow"
+			impact_type = "PIERCE"
+			projectile_type = "bolt"
+			_salud_base = 140.0
+			salud_maxima = 140.0
+			salud_actual = 140.0
+			_daño_base = 22.0
+			daño = 22.0
+			rango_ataque = 12.0
+			velocidad_ataque = 1.5
+			speed = 4.4
+			era_entrenada = 4
+
+		"longbowman_era4":
+			unit_name = "Arquero de Tiro Largo"
+			attack_type = "ranged"
+			weapon_type = "arrow"
+			impact_type = "ARROW"
+			projectile_type = "arrow"
+			_salud_base = 130.0
+			salud_maxima = 130.0
+			salud_actual = 130.0
+			_daño_base = 15.0
+			daño = 15.0
+			rango_ataque = 16.0
+			velocidad_ataque = 1.2
+			speed = 4.5
+			era_entrenada = 4
+
+		"trabuquete_contrapeso":
+			unit_name = "Trabuquete de Contrapeso"
+			attack_type = "ranged"
+			weapon_type = "siege_stone"
+			projectile_type = "fire_stone"
+			_salud_base = 320.0
+			salud_maxima = 320.0
+			salud_actual = 320.0
+			_daño_base = 120.0
+			daño = 120.0
+			rango_ataque = 45.0
+			velocidad_ataque = 4.0
+			speed = 2.5
+			era_entrenada = 4
 
 	_guard_position = global_position
 

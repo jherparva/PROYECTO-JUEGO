@@ -1,0 +1,40 @@
+[gd_scene load_steps=6 format=3 uid="uid://crossbowman_era4_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/crossbowman_era4_3d.gd" id="1_cb4"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_cb4"]
+radius = 0.35
+height = 1.75
+
+[sub_resource type="BoxMesh" id="BoxMesh_cb_torso"]
+size = Vector3(0.55, 0.85, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cb_torso"]
+albedo_color = Color(0.28, 0.45, 0.32, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_cb_prop"]
+size = Vector3(0.5, 0.15, 0.7)
+
+[node name="Crossbowman_Era4" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_cb4")
+unit_id = "crossbowman_era4"
+unit_name = "Ballestero Medieval"
+attack_type = "ranged"
+weapon_type = "arrow"
+impact_type = "PIERCE"
+projectile_type = "bolt"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.875, 0)
+shape = SubResource("CapsuleShape3D_cb4")
+
+[node name="CrossbowmanTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+mesh = SubResource("BoxMesh_cb_torso")
+surface_material_override/0 = SubResource("StandardMaterial3D_cb_torso")
+
+[node name="CrossbowProp" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.3, 0.8, -0.4)
+mesh = SubResource("BoxMesh_cb_prop")

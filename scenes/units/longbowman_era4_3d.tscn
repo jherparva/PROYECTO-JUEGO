@@ -1,0 +1,42 @@
+[gd_scene load_steps=6 format=3 uid="uid://longbowman_era4_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/longbowman_era4_3d.gd" id="1_lb4"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_lb4"]
+radius = 0.35
+height = 1.7
+
+[sub_resource type="BoxMesh" id="BoxMesh_lb_torso"]
+size = Vector3(0.5, 0.8, 0.35)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lb_torso"]
+albedo_color = Color(0.65, 0.22, 0.22, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_lb_prop"]
+top_radius = 0.02
+bottom_radius = 0.02
+height = 1.8
+
+[node name="Longbowman_Era4" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_lb4")
+unit_id = "longbowman_era4"
+unit_name = "Arquero de Tiro Largo"
+attack_type = "ranged"
+weapon_type = "arrow"
+impact_type = "ARROW"
+projectile_type = "arrow"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("CapsuleShape3D_lb4")
+
+[node name="ArcherTorso" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.8, 0)
+mesh = SubResource("BoxMesh_lb_torso")
+surface_material_override/0 = SubResource("StandardMaterial3D_lb_torso")
+
+[node name="LongbowProp" type="MeshInstance3D" parent="."]
+transform = Transform3D(0.984808, -0.173648, 0, 0.167731, 0.951251, -0.258819, 0.0449435, 0.254887, 0.965926, -0.35, 0.9, 0)
+mesh = SubResource("CylinderMesh_lb_prop")

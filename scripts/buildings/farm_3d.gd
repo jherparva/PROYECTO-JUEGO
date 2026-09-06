@@ -16,6 +16,7 @@ signal resource_extracted(amount: int, remaining: int)
 @export var max_food_amount: int = 2000
 @export var current_food_amount: int = 2000
 @export var reseed_cost: Dictionary = {"wood": 50}
+@export var gathering_speed_modifier: float = 1.0
 
 # ─── Control de Ocupación Estricta (1 Aldeano Máximo) y Reserva Temporal ──────
 var assigned_villager: Node3D = null

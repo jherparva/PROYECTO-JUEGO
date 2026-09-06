@@ -1,0 +1,37 @@
+[gd_scene load_steps=6 format=3 uid="uid://church_era4_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/buildings/church_era4_3d.gd" id="1_ch4"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_ch4"]
+size = Vector3(5.0, 7.5, 8.0)
+
+[sub_resource type="BoxMesh" id="BoxMesh_nave"]
+size = Vector3(4.5, 3.8, 7.0)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nave"]
+albedo_color = Color(0.68, 0.65, 0.60, 1)
+roughness = 0.85
+
+[sub_resource type="BoxMesh" id="BoxMesh_tower"]
+size = Vector3(2.2, 7.2, 2.2)
+
+[node name="Church_Era4" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 3
+script = ExtResource("1_ch4")
+building_name = "Iglesia Románica"
+max_health = 950.0
+current_health = 950.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.75, 0)
+shape = SubResource("BoxShape3D_ch4")
+
+[node name="ChurchNave" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.9, 0)
+mesh = SubResource("BoxMesh_nave")
+surface_material_override/0 = SubResource("StandardMaterial3D_nave")
+
+[node name="BellTower" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.6, -2.8)
+mesh = SubResource("BoxMesh_tower")

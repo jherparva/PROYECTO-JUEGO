@@ -69,6 +69,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 7.5, "era_min": 3, "era_max": 5,
 		"scene_path": "res://scenes/units/legionary_era3_3d.tscn"
 	},
+	"pikeman_era4": {
+		"name": "Piquero Medieval", "building_type": "barracks",
+		"type": "melee", "cost": {"food": 60, "wood": 30, "iron": 20},
+		"train_time": 6.5, "era_min": 4, "era_max": 6,
+		"scene_path": "res://scenes/units/pikeman_era4_3d.tscn"
+	},
 	"halberdier": {
 		"name": "Halabardero Imperial", "building_type": "barracks",
 		"type": "melee", "cost": {"food": 90, "iron": 50},
@@ -131,6 +137,18 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 8.0, "era_min": 4, "era_max": 6,
 		"scene_path": "res://scenes/units/archer_3d.tscn"
 	},
+	"crossbowman_era4": {
+		"name": "Ballestero Medieval", "building_type": "archery_range",
+		"type": "ranged", "cost": {"wood": 50, "iron": 40},
+		"train_time": 7.0, "era_min": 4, "era_max": 6,
+		"scene_path": "res://scenes/units/crossbowman_era4_3d.tscn"
+	},
+	"longbowman_era4": {
+		"name": "Arquero de Tiro Largo", "building_type": "archery_range",
+		"type": "ranged", "cost": {"wood": 60, "gold": 25},
+		"train_time": 7.5, "era_min": 4, "era_max": 6,
+		"scene_path": "res://scenes/units/longbowman_era4_3d.tscn"
+	},
 	"fusilero": {
 		"name": "Fusilero de Asalto", "building_type": "archery_range",
 		"type": "ranged", "cost": {"food": 120, "iron": 80},
@@ -167,7 +185,7 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"name": "Caballero Pesado Acorazado", "building_type": "stable",
 		"type": "cavalry", "cost": {"food": 150, "iron": 80},
 		"train_time": 12.0, "era_min": 4, "era_max": 6,
-		"scene_path": "res://scenes/units/soldier_3d.tscn"
+		"scene_path": "res://scenes/units/caballero_pesado_3d.tscn"
 	},
 	"carro_primitivo": {
 		"name": "Carro de Guerra Primitivo", "building_type": "stable",
@@ -230,6 +248,12 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "siege", "cost": {"wood": 130, "iron": 65},
 		"train_time": 12.0, "era_min": 3, "era_max": 5,
 		"scene_path": "res://scenes/units/balista_torsion_era3_3d.tscn"
+	},
+	"trabuquete_contrapeso": {
+		"name": "Trabuquete de Contrapeso", "building_type": "siege_workshop",
+		"type": "siege", "cost": {"wood": 200, "iron": 100, "gold": 100},
+		"train_time": 16.0, "era_min": 4, "era_max": 6,
+		"scene_path": "res://scenes/units/trabuquete_contrapeso_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

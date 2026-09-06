@@ -2625,10 +2625,196 @@ func _init() -> void:
 	print("✅ Test 65 Superado: Trirreme Romano con espolón de bronce delantero y daño crítico fulminante verificado.")
 
 
+	# ─── TEST 66: Caballero Pesado (6.0 m/s, MELEE_SHOCK, x1.50 vs Arqueros) y Piquero Medieval (x2.0 vs Caballería) ───
+	print("\n--- TEST 66: Caballero Pesado y Piquero Medieval (Counters) ---")
+	var knight_script: GDScript = load("res://scripts/units/caballero_pesado_3d.gd") as GDScript
+	var knight_inst: Soldier3D = knight_script.new() as Soldier3D
+	root.add_child(knight_inst)
+	knight_inst._ready()
+	assert(knight_inst.is_cavalry == true, "Caballero Pesado debe tener is_cavalry = true")
+	assert(abs(knight_inst.speed - 6.0) < 0.01, "Caballero Pesado debe tener velocidad 6.0 m/s")
+	assert(knight_inst.impact_type == "MELEE_SHOCK", "Caballero Pesado debe tener impacto MELEE_SHOCK")
+
+	var pikeman_script: GDScript = load("res://scripts/units/pikeman_era4_3d.gd") as GDScript
+	var pikeman_inst: Soldier3D = pikeman_script.new() as Soldier3D
+	root.add_child(pikeman_inst)
+	pikeman_inst._ready()
+	assert(pikeman_inst.impact_type == "MELEE_PIERCE", "Piquero debe tener impacto MELEE_PIERCE")
+
+	# Piquero contra Caballero Pesado (x2.0 multiplier sobre base counter)
+	var dmg_pike_vs_knight: float = CombatDamageCalculator.calcular_dano(pikeman_inst.daño, pikeman_inst.weapon_type, pikeman_inst, knight_inst)
+	# Base counter PIERCE vs CAVALRY (1.8) * piquero multiplicador (2.0) = 3.6
+	var expected_pike_dmg: float = (pikeman_inst.daño * 1.8) * 2.0
+	assert(abs(dmg_pike_vs_knight - expected_pike_dmg) < 0.05, "Piquero debe aplicar x2.0 contra caballería (Esperado: %.2f, Obtenido: %.2f)" % [expected_pike_dmg, dmg_pike_vs_knight])
+
+	# Caballero contra Arquero de Infantería (x1.50 multiplier)
+	var archer_target_t66: Soldier3D = Soldier3D.new()
+	archer_target_t66.name = "ArqueroInfanteriaTest"
+	archer_target_t66.add_to_group("archers")
+	root.add_child(archer_target_t66)
+	archer_target_t66._ready()
+
+	var dmg_knight_vs_archer: float = CombatDamageCalculator.calcular_dano(knight_inst.daño, knight_inst.weapon_type, knight_inst, archer_target_t66)
+	# Base counter SHOCK vs INFANTRY (1.5) * caballero multiplicador (1.50) = 2.25
+	var expected_knight_dmg: float = (knight_inst.daño * 1.5) * 1.50
+	assert(abs(dmg_knight_vs_archer - expected_knight_dmg) < 0.05, "Caballero Pesado debe aplicar x1.50 contra arqueros de infantería (Esperado: %.2f, Obtenido: %.2f)" % [expected_knight_dmg, dmg_knight_vs_archer])
+
+	knight_inst.free()
+	pikeman_inst.free()
+	archer_target_t66.free()
+	print("✅ Test 66 Superado: Caballero Pesado (6.0 m/s, x1.50 vs arqueros) y Piquero (x2.0 vs caballería) certificados.")
+
+
+	# ─── TEST 67: Ballestero Medieval (Perforación 35% Armadura) y Arquero Largo Inglés (19m y +20% Daño) ───
+	print("\n--- TEST 67: Ballestero Medieval (35% Perforación) y Arquero Largo Inglés (19m) ---")
+	var xbow_script: GDScript = load("res://scripts/units/crossbowman_era4_3d.gd") as GDScript
+	var xbow_inst: Soldier3D = xbow_script.new() as Soldier3D
+	root.add_child(xbow_inst)
+	xbow_inst._ready()
+	assert(xbow_inst.has_method("calcular_perforacion_ballesta"), "Ballestero debe tener la función calcular_perforacion_ballesta()")
+	var armor_reducida_t67: float = xbow_inst.call("calcular_perforacion_ballesta", 100.0)
+	assert(abs(armor_reducida_t67 - 65.0) < 0.01, "Ballestero debe ignorar el 35%% de armadura del objetivo (Esperado: 65.0, Obtenido: %.1f)" % armor_reducida_t67)
+
+	var longbow_script: GDScript = load("res://scripts/units/longbowman_era4_3d.gd") as GDScript
+	var longbow_inst: Soldier3D = longbow_script.new() as Soldier3D
+	root.add_child(longbow_inst)
+	longbow_inst._ready()
+	assert(abs(longbow_inst.rango_ataque - 16.0) < 0.01, "Arquero Largo debe tener alcance base de 16.0m")
+
+	# Aplicar bono de facción inglesa
+	longbow_inst.call("aplicar_bono_ingles")
+	assert(abs(longbow_inst.rango_ataque - 19.0) < 0.01, "Arquero Largo Inglés debe alcanzar 19.0m de rango")
+	assert(abs(longbow_inst.daño - 18.0) < 0.01, "Arquero Largo Inglés debe tener +20%% de daño balístico (18.0)")
+
+	xbow_inst.free()
+	longbow_inst.free()
+	print("✅ Test 67 Superado: Ballestero (35% perforación armadura) y Arquero Largo Inglés (19m alcance, +20% daño) certificados.")
+
+
+	# ─── TEST 68: Molino de Viento (+15% Velocidad de Recolección en Granjas <= 14m) ───
+	print("\n--- TEST 68: Molino de Viento (+15% Recolección Granjas <= 14m) ---")
+	var windmill_script: GDScript = load("res://scripts/buildings/windmill_era4_3d.gd") as GDScript
+	var windmill_inst: BuildingBase3D = windmill_script.new() as BuildingBase3D
+	root.add_child(windmill_inst)
+	windmill_inst._ready()
+	windmill_inst.position = Vector3(0, 0, 0)
+
+	var farm_close_t68: Farm3D = Farm3D.new()
+	farm_close_t68.name = "GranjaCercana"
+	root.add_child(farm_close_t68)
+	farm_close_t68._ready()
+	farm_close_t68.position = Vector3(8.0, 0, 0) # 8m <= 14m
+
+	var villager_farm_t68: Villager3D = Villager3D.new()
+	villager_farm_t68.name = "AldeanoGranjero"
+	root.add_child(villager_farm_t68)
+	villager_farm_t68._ready()
+	farm_close_t68.assigned_villager = villager_farm_t68
+
+	var farm_far_t68: Farm3D = Farm3D.new()
+	farm_far_t68.name = "GranjaLejana"
+	root.add_child(farm_far_t68)
+	farm_far_t68._ready()
+	farm_far_t68.position = Vector3(25.0, 0, 0) # 25m > 14m
+
+	# Aplicar bufo agrícola
+	var granjas_afectadas: Array[Node3D] = windmill_inst.call("aplicar_bufo_agricola")
+	assert(granjas_afectadas.has(farm_close_t68), "Granja a 8m debe recibir bufo agrícola")
+	assert(not granjas_afectadas.has(farm_far_t68), "Granja a 25m NO debe recibir bufo agrícola")
+	var f_mod: float = float(farm_close_t68.gathering_speed_modifier)
+	assert(abs(f_mod - 1.15) < 0.01, "Granja cercana debe tener gathering_speed_modifier = 1.15 (+15%)")
+	var v_mod: float = float(villager_farm_t68.gathering_speed_modifier)
+	assert(abs(v_mod - 1.15) < 0.01, "Aldeano asignado debe tener gathering_speed_modifier = 1.15 (+15%)")
+
+	windmill_inst.free()
+	farm_close_t68.free()
+	villager_farm_t68.free()
+	farm_far_t68.free()
+	print("✅ Test 68 Superado: Molino de Viento con bufo macroeconómico de +15% a granjas <= 14m certificado.")
+
+
+	# ─── TEST 69: Trabuquete de Contrapeso (Despliegue Obligatorio 3.0s y AoE 5.0m vs Edificios) ───
+	print("\n--- TEST 69: Trabuquete de Contrapeso (Despliegue 3s y AoE 5m vs Edificios) ---")
+	var trebuchet_script: GDScript = load("res://scripts/units/trabuquete_contrapeso_3d.gd") as GDScript
+	var trebuchet_inst: Soldier3D = trebuchet_script.new() as Soldier3D
+	root.add_child(trebuchet_inst)
+	trebuchet_inst._ready()
+	trebuchet_inst.position = Vector3(0, 0, 0)
+	assert(abs(trebuchet_inst.rango_ataque - 45.0) < 0.01, "Trabuquete debe tener rango extra-largo de 45.0m")
+
+	# 1. No debe poder disparar sin desplegar
+	var fire_without_deploy: bool = trebuchet_inst.call("disparar_trabuquete", Vector3(20, 0, 0))
+	assert(fire_without_deploy == false, "Trabuquete NO debe poder disparar sin estar desplegado")
+
+	# 2. Iniciar despliegue
+	trebuchet_inst.call("desplegar")
+	assert(trebuchet_inst.get("is_deploying") == true, "Trabuquete debe marcar is_deploying = true")
+	assert(abs(trebuchet_inst.speed - 0.0) < 0.01, "Velocidad durante despliegue debe ser 0.0")
+
+	# Simular paso de los 3.0s de anclaje
+	trebuchet_inst._process(3.1)
+	assert(trebuchet_inst.get("is_deployed") == true, "Trabuquete debe completar despliegue tras 3.0s (is_deployed = true)")
+
+	# 3. Disparo con daño de área AoE de 5.0m contra edificios
+	var bld_target_close_t69: BuildingBase3D = BuildingBase3D.new()
+	bld_target_close_t69.name = "CastilloEnemigo"
+	bld_target_close_t69.add_to_group("buildings")
+	bld_target_close_t69.add_to_group("buildings_3d")
+	bld_target_close_t69.salud_actual = 1000.0
+	bld_target_close_t69.salud_maxima = 1000.0
+	root.add_child(bld_target_close_t69)
+	bld_target_close_t69.position = Vector3(22.0, 0, 0) # A 2m del impacto en Vector3(20, 0, 0) <= 5m
+
+	var bld_target_far_t69: BuildingBase3D = BuildingBase3D.new()
+	bld_target_far_t69.name = "CuartelLejano"
+	bld_target_far_t69.add_to_group("buildings")
+	bld_target_far_t69.add_to_group("buildings_3d")
+	bld_target_far_t69.salud_actual = 1000.0
+	bld_target_far_t69.salud_maxima = 1000.0
+	root.add_child(bld_target_far_t69)
+	bld_target_far_t69.position = Vector3(30.0, 0, 0) # A 10m del impacto > 5m
+
+	var fire_deployed_success: bool = trebuchet_inst.call("disparar_trabuquete", Vector3(20, 0, 0))
+	assert(fire_deployed_success == true, "Trabuquete desplegado debe disparar exitosamente")
+	assert(bld_target_close_t69.salud_actual < 1000.0, "Castillo cercano debe recibir daño AoE de 5m")
+	assert(bld_target_far_t69.salud_actual == 1000.0, "Cuartel lejano a 10m NO debe ser afectado por el AoE de 5m")
+
+	trebuchet_inst.free()
+	bld_target_close_t69.free()
+	bld_target_far_t69.free()
+	print("✅ Test 69 Superado: Trabuquete de Contrapeso (despliegue 3s, velocidad 0, 45m rango y AoE 5m vs edificios) certificado.")
+
+
+	# ─── TEST 70: Iglesia Románica y Gran Catedral Gótica (Maravilla Era 4 / Cronómetro 10 Minutos) ───
+	print("\n--- TEST 70: Iglesia Románica y Gran Catedral Gótica (Maravilla Era 4) ---")
+	var church_script: GDScript = load("res://scripts/buildings/church_era4_3d.gd") as GDScript
+	var church_inst: BuildingBase3D = church_script.new() as BuildingBase3D
+	assert(church_inst is Temple3D, "Church_Era4 debe heredar directamente de Temple3D")
+	assert(church_inst is BuildingBase3D, "Church_Era4 debe heredar de BuildingBase3D")
+	assert(church_inst.get("max_faith_points") >= 350.0, "Iglesia Románica debe tener al menos 350 puntos de fe")
+	church_inst.free()
+
+	var cathedral_script: GDScript = load("res://scripts/buildings/wonder_catedral_gotica_era4.gd") as GDScript
+	var cathedral_inst: Wonder3D = cathedral_script.new() as Wonder3D
+	assert(cathedral_inst is Wonder3D, "Wonder_Catedral_Gotica_Era4 debe heredar directamente de Wonder3D")
+	assert(cathedral_inst is BuildingBase3D, "Wonder_Catedral_Gotica_Era4 debe heredar de BuildingBase3D")
+	assert(cathedral_inst.salud_maxima >= 3500.0, "Gran Catedral Gótica debe tener 3500 HP")
+
+	root.add_child(cathedral_inst)
+	cathedral_inst._ready()
+	cathedral_inst.call("rpc_iniciar_cronometro_maravilla", 600.0)
+	assert(cathedral_inst.get("is_wonder_active") == true, "Cronómetro de Maravilla Era 4 debe estar activo")
+	assert(abs(float(cathedral_inst.get("wonder_time_left")) - 600.0) < 0.01, "Cronómetro de Maravilla Era 4 debe iniciar en 10 minutos (600s)")
+
+	cathedral_inst.free()
+	print("✅ Test 70 Superado: Iglesia Románica (herencia Temple3D) y Gran Catedral Gótica (Maravilla Era 4 con cronómetro de 600s) certificados.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")
 	quit(0)
+
 
 
 

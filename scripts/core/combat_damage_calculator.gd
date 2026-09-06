@@ -139,6 +139,7 @@ const VISION_BONUS_METROS:  float  = 2.0
 
 # --- Conversion de Strings a Enums --------------------------------------------
 const WEAPON_STRING_MAP: Dictionary = {
+	"melee_pierce": WeaponType.MELEE_PIERCE,
 	"melee":       WeaponType.MELEE_SHOCK,
 	"melee_shock": WeaponType.MELEE_SHOCK,
 	"bludgeoning": WeaponType.MELEE_SHOCK,
@@ -247,6 +248,31 @@ static func calcular_dano(
 			if is_building_struct:
 				final_damage *= 3.0
 
+		# Multiplicador oficial Era 4: Caballero_Pesado (x1.50) contra arqueros de infantería
+		var is_caballero: bool = (att_id == "caballero_pesado" or "caballero_pesado" in att_name or attacker.is_in_group("heavy_knights"))
+		if is_caballero:
+			var is_archer_infantry: bool = (
+				target.is_in_group("archers") or target.is_in_group("archer") or
+				"archer" in target.name.to_lower() or "arquero" in target.name.to_lower() or
+				"crossbowman" in target.name.to_lower() or "longbowman" in target.name.to_lower() or
+				str(target.get("weapon_type")).to_lower() == "arrow" or
+				str(target.get("impact_type")).to_lower() == "arrow"
+			)
+			if is_archer_infantry:
+				final_damage *= 1.50
+
+		# Multiplicador oficial Era 4: Pikeman_Era4 (x2.0) contra caballería y carros ecuestres
+		var is_pikeman: bool = (att_id == "pikeman_era4" or "pikeman" in att_name or attacker.is_in_group("pikemen"))
+		if is_pikeman:
+			var is_cavalry_target: bool = (
+				target.get("is_cavalry") == true or target.is_in_group("cavalry") or
+				target.is_in_group("heavy_cavalry") or target.is_in_group("chariots") or
+				"knight" in target.name.to_lower() or "caballero" in target.name.to_lower() or
+				"cavalry" in target.name.to_lower()
+			)
+			if is_cavalry_target:
+				final_damage *= 2.0
+
 	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):
 		final_damage = target.call("aplicar_mitigacion_testudo", final_damage, weapon_str)
@@ -298,6 +324,9 @@ static func _resolver_armor_type(target: Node) -> ArmorType:
 		var at_val = target.get("armor_type")
 		if at_val is int:
 			return at_val as ArmorType
+
+	if target.get("is_cavalry") == true or target.is_in_group("cavalry") or target.is_in_group("heavy_cavalry"):
+		return ArmorType.CAVALRY
 
 	for group_name: String in ARMOR_STRING_MAP:
 		if target.is_in_group(group_name):

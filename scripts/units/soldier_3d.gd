@@ -633,6 +633,92 @@ func _setup_stats() -> void:
 			speed = 9.5
 			era_entrenada = 7
 
+		# ────────────────────────────────────────────────────────────
+		# ERA 8 — EDAD ATÓMICA / SEGUNDA GUERRA MUNDIAL (dbunitset.dat)
+		# ────────────────────────────────────────────────────────────
+		"gi_soldier_era8":
+			unit_name = "Soldado GI WWII"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 210.0
+			salud_maxima = 210.0
+			salud_actual = 210.0
+			_daño_base = 32.0
+			daño = 32.0
+			rango_ataque = 22.0
+			velocidad_ataque = 0.85
+			speed = 4.6
+			era_entrenada = 8
+
+		"sniper_era8":
+			unit_name = "Tirador de Élite WWII"
+			attack_type = "ranged"
+			weapon_type = "sniper"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 140.0
+			salud_maxima = 140.0
+			salud_actual = 140.0
+			_daño_base = 65.0
+			daño = 65.0
+			rango_ataque = 30.0
+			velocidad_ataque = 2.2
+			speed = 4.2
+			era_entrenada = 8
+
+		"hazmat_worker_era8":
+			unit_name = "Técnico Biológico Hazmat"
+			attack_type = "melee"
+			weapon_type = "none"
+			impact_type = "NONE"
+			is_radiation_immune = true
+			is_civilian = true
+			_salud_base = 160.0
+			salud_maxima = 160.0
+			salud_actual = 160.0
+			_daño_base = 0.0
+			daño = 0.0
+			rango_ataque = 0.0
+			velocidad_ataque = 1.0
+			speed = 4.8
+			era_entrenada = 8
+
+		"tanque_sherman_t34":
+			unit_name = "Tanque Sherman T-34"
+			attack_type = "ranged"
+			weapon_type = "cannon"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			is_cavalry = true
+			is_stun_immune = true
+			_salud_base = 380.0
+			salud_maxima = 380.0
+			salud_actual = 380.0
+			_daño_base = 55.0
+			daño = 55.0
+			rango_ataque = 22.0
+			velocidad_ataque = 1.8
+			speed = 5.2
+			era_entrenada = 8
+
+		"caza_helice_era8":
+			unit_name = "Caza Monoplano P-51"
+			attack_type = "ranged"
+			weapon_type = "gun"
+			impact_type = "GUN"
+			projectile_type = "bullet"
+			_salud_base = 220.0
+			salud_maxima = 220.0
+			salud_actual = 220.0
+			_daño_base = 42.0
+			daño = 42.0
+			rango_ataque = 26.0
+			velocidad_ataque = 1.0
+			speed = 12.0
+			era_entrenada = 8
+
 	_guard_position = global_position
 
 func configurar_unidad(id: String) -> void:

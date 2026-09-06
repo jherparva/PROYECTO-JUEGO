@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3 uid="uid://nuke_silo_era8_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/buildings/nuke_silo_era8_3d.gd" id="1_ns8"]
+
+[sub_resource type="CylinderShape3D" id="CylinderShape3D_ns8"]
+height = 5.0
+radius = 4.5
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_ns8_base"]
+top_radius = 4.2
+bottom_radius = 4.5
+height = 1.2
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ns8_mat"]
+albedo_color = Color(0.35, 0.36, 0.38, 1)
+
+[node name="NukeSilo_Era8_3D" type="StaticBody3D"]
+collision_layer = 1
+collision_mask = 3
+script = ExtResource("1_ns8")
+building_name = "Silo de Misiles ICBM WWII"
+building_type = "nuke_silo"
+salud_maxima = 3200.0
+salud_actual = 3200.0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("CylinderShape3D_ns8")
+
+[node name="SiloConcreteBase" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.6, 0)
+mesh = SubResource("CylinderMesh_ns8_base")
+surface_material_override/0 = SubResource("StandardMaterial3D_ns8_mat")

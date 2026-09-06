@@ -3425,6 +3425,258 @@ func _init() -> void:
 	print("✅ Test 85 Superado: Biplano Fokker (capa aérea Y=10m, velocidad 9.5 m/s, pasadas de ametrallamiento y retorno autónomo por rearme) certificado.")
 
 
+	# ─── TEST 86: Sniper WWII (Rango 30m, Sigilo en Idle y x3.0 vs Civiles/Sacerdotes) y HazmatWorker (Inmunidad DoT) ───
+	print("\n--- TEST 86: Sniper WWII y Técnico Hazmat ---")
+	var sniper_script: GDScript = load("res://scripts/units/sniper_era8_3d.gd") as GDScript
+	var sniper_inst: Soldier3D = sniper_script.new() as Soldier3D
+	root.add_child(sniper_inst)
+	sniper_inst._ready()
+	sniper_inst.position = Vector3(0, 0, 0)
+	assert(abs(sniper_inst.rango_ataque - 30.0) < 0.01, "Sniper debe poseer rango masivo de 30.0 metros")
+	assert(sniper_inst.has_node("ProjectileMuzzle"), "Sniper debe poseer socket ProjectileMuzzle")
+	assert(sniper_inst.is_invisible == true, "Sniper debe iniciar en estado invisible en Idle")
+
+	# Revelación de malla al abrir fuego
+	var target_civil_t86: Soldier3D = Soldier3D.new()
+	target_civil_t86.name = "AldeanoCivilT86"
+	target_civil_t86.add_to_group("villagers")
+	target_civil_t86.add_to_group("infantry_3d")
+	root.add_child(target_civil_t86)
+	target_civil_t86._ready()
+	target_civil_t86.salud_actual = 500.0
+
+	var dmg_sniper_vs_civil: float = sniper_inst.call("disparar_sniper", target_civil_t86)
+	assert(sniper_inst.is_invisible == false, "Sniper debe revelarse al abrir fuego")
+	# Base counter GUN vs INFANTRY (1.2) * sniper bono civil/sacerdote (3.0) = 3.6 -> 65.0 * 3.6 = 234.0
+	var expected_sniper_dmg: float = (sniper_inst.daño * 1.2) * 3.0
+	assert(abs(dmg_sniper_vs_civil - expected_sniper_dmg) < 0.05, "Sniper debe infligir multiplicador crítico x3.0 contra aldeanos civiles (Esperado: %.2f, Obtenido: %.2f)" % [expected_sniper_dmg, dmg_sniper_vs_civil])
+
+	# HazmatWorker_Era8: Inmunidad absoluta DoT y capacidad de descontaminación
+	var hazmat_script: GDScript = load("res://scripts/units/hazmat_worker_era8_3d.gd") as GDScript
+	var hazmat_inst: Soldier3D = hazmat_script.new() as Soldier3D
+	root.add_child(hazmat_inst)
+	hazmat_inst._ready()
+	assert(hazmat_inst.is_radiation_immune == true, "HazmatWorker debe poseer is_radiation_immune = true")
+	assert(hazmat_inst.is_civilian == true, "HazmatWorker debe ser unidad civil no combatiente")
+	var zonas_limpias: int = hazmat_inst.call("descontaminar_zona", Vector3.ZERO, 15.0)
+	assert(zonas_limpias >= 0, "HazmatWorker debe ejecutar descontaminar_zona sin errores")
+
+	sniper_inst.free()
+	target_civil_t86.free()
+	hazmat_inst.free()
+	print("✅ Test 86 Superado: Sniper WWII (rango 30m, sigilo en Idle y crítico x3.0 vs civiles) y Técnico Hazmat (inmunidad DoT y descontaminación) certificados.")
+
+
+	# ─── TEST 87: Caza Monoplano P-51 (Capa Aérea Y=12.0m, Velocidad 12 m/s, Ametrallamiento Suelo y Retorno por Munición) ───
+	print("\n--- TEST 87: Caza Monoplano P-51 (Vuelo Y=12m, 12 m/s y Ametrallamiento Suelo) ---")
+	var caza_script: GDScript = load("res://scripts/units/caza_helice_era8_3d.gd") as GDScript
+	var caza_inst: Soldier3D = caza_script.new() as Soldier3D
+	root.add_child(caza_inst)
+	caza_inst._ready()
+	assert(abs(caza_inst.speed - 12.0) < 0.01, "Caza Monoplano debe poseer velocidad lineal de 12.0 m/s")
+	assert(abs(caza_inst.position.y - 12.0) < 0.01, "Caza Monoplano debe navegar a una cota fija constante en Y = 12.0m")
+	assert(caza_inst.get("max_ammo") == 4, "Caza Monoplano debe soportar max_ammo = 4")
+	assert(caza_inst.get("current_ammo") == 4, "Caza Monoplano debe iniciar con 4 cargas de munición")
+
+	# Pasadas de ametrallamiento en tierra
+	var ground_target_t87 := Soldier3D.new()
+	root.add_child(ground_target_t87)
+	ground_target_t87._ready()
+	ground_target_t87.position = Vector3(0, 0, 0)
+
+	caza_inst.call("ametrallar_objetivo", ground_target_t87)
+	assert(caza_inst.get("current_ammo") == 3, "Debe restar munición a 3 tras primer ametrallamiento")
+	caza_inst.call("ametrallar_objetivo", ground_target_t87)
+	assert(caza_inst.get("current_ammo") == 2, "Debe restar munición a 2 tras segundo ametrallamiento")
+	caza_inst.call("ametrallar_objetivo", ground_target_t87)
+	assert(caza_inst.get("current_ammo") == 1, "Debe restar munición a 1 tras tercer ametrallamiento")
+
+	# Cuarto ametrallamiento agota munición y activa retorno autónomo al aeródromo
+	caza_inst.call("ametrallar_objetivo", ground_target_t87)
+	assert(caza_inst.get("current_ammo") == 0, "Munición debe quedar agotada a 0")
+	assert(caza_inst.get("estado_vuelo") == "regresando", "Caza debe conmutar automáticamente a estado 'regresando' hacia la base")
+
+	caza_inst.free()
+	ground_target_t87.free()
+	print("✅ Test 87 Superado: Caza Monoplano P-51 (vuelo Y=12m, velocidad 12 m/s, pasadas de ametrallamiento y retorno autónomo con max_ammo=4) certificado.")
+
+
+	# ─── TEST 88: Tanque Sherman T-34 (HP 380.0, Inmunidad Stun, x1.50 vs Transports) y GI Soldier (Daño GUN 32.0, x1.25) ───
+	print("\n--- TEST 88: Tanque Sherman T-34 y Soldado GI WWII ---")
+	var sherman_script: GDScript = load("res://scripts/units/tanque_sherman_t34_3d.gd") as GDScript
+	var sherman_inst: Soldier3D = sherman_script.new() as Soldier3D
+	root.add_child(sherman_inst)
+	sherman_inst._ready()
+	assert(abs(sherman_inst.salud_maxima - 380.0) < 0.01, "Tanque Sherman debe poseer 380.0 HP")
+	assert(abs(sherman_inst.speed - 5.2) < 0.01, "Tanque Sherman debe poseer velocidad de 5.2 m/s")
+	assert(sherman_inst.get("is_stun_immune") == true, "Tanque Sherman debe poseer inmunidad al aturdimiento")
+	assert(sherman_inst.call("aplicar_stun", 2.0) == false, "aplicar_stun debe fallar en Tanque Sherman")
+
+	# Multiplicador x1.50 vs transportes/mecanizados de la era anterior
+	var truck_target_t88 := Soldier3D.new()
+	truck_target_t88.name = "CamionTransporteT88"
+	truck_target_t88.add_to_group("transports")
+	truck_target_t88.is_cavalry = true
+	root.add_child(truck_target_t88)
+	truck_target_t88._ready()
+
+	var dmg_sherman_vs_truck: float = CombatDamageCalculator.calcular_dano(sherman_inst.daño, "gun", sherman_inst, truck_target_t88)
+	# Base counter GUNPOWDER vs CAVALRY (2.0) * sherman bono (1.50) = 3.00 -> 55.0 * 3.00 = 165.0
+	var expected_sherman_dmg: float = (sherman_inst.daño * 2.0) * 1.50
+	assert(abs(dmg_sherman_vs_truck - expected_sherman_dmg) < 0.05, "Tanque Sherman debe aplicar multiplicador x1.50 vs unidades mecanizadas/transporte (Esperado: %.2f, Obtenido: %.2f)" % [expected_sherman_dmg, dmg_sherman_vs_truck])
+
+	# Soldado GI WWII (Infantería Moderna: Daño 32.0, ProjectileMuzzle y x1.25 vs infantería pasada)
+	var gi_script: GDScript = load("res://scripts/units/gi_soldier_era8_3d.gd") as GDScript
+	var gi_inst: Soldier3D = gi_script.new() as Soldier3D
+	root.add_child(gi_inst)
+	gi_inst._ready()
+	assert(abs(gi_inst.daño - 32.0) < 0.01, "Soldado GI debe poseer daño base de 32.0")
+	assert(gi_inst.has_node("ProjectileMuzzle"), "Soldado GI debe poseer socket ProjectileMuzzle")
+
+	var past_inf_t88 := Soldier3D.new()
+	past_inf_t88.name = "InfanteriaPasadaT88"
+	past_inf_t88.add_to_group("infantry_3d")
+	root.add_child(past_inf_t88)
+	past_inf_t88._ready()
+
+	var dmg_gi_vs_past: float = CombatDamageCalculator.calcular_dano(gi_inst.daño, "gun", gi_inst, past_inf_t88)
+	# Base counter GUN vs INFANTRY (1.2) * gi bono (1.25) = 1.50 -> 32.0 * 1.50 = 48.0
+	var expected_gi_dmg: float = (gi_inst.daño * 1.2) * 1.25
+	assert(abs(dmg_gi_vs_past - expected_gi_dmg) < 0.05, "Soldado GI debe aplicar multiplicador x1.25 contra infantería ligera de eras previas (Esperado: %.2f, Obtenido: %.2f)" % [expected_gi_dmg, dmg_gi_vs_past])
+
+	sherman_inst.free()
+	truck_target_t88.free()
+	gi_inst.free()
+	past_inf_t88.free()
+	print("✅ Test 88 Superado: Tanque Sherman T-34 (HP 380, velocidad 5.2 m/s, inmunidad stun y x1.50 vs camiones) y Soldado GI (daño 32.0, x1.25 vs infantería pasada) certificados.")
+
+
+	# ─── TEST 89: Herencia Limpia de Aeródromo WWII y Silo Nuclear (Barracks3D, Emergencia 8% y Colas) ───
+	print("\n--- TEST 89: Aeródromo Moderno WWII y Silo de Misiles ICBM ---")
+	var airfield_wwii_script: GDScript = load("res://scripts/buildings/airfield_wwii_3d.gd") as GDScript
+	var airfield_wwii_inst: BuildingBase3D = airfield_wwii_script.new() as BuildingBase3D
+	assert(airfield_wwii_inst is Barracks3D, "Airfield_WWII_3D debe heredar directamente de Barracks3D")
+	assert(airfield_wwii_inst is BuildingBase3D, "Airfield_WWII_3D debe heredar de BuildingBase3D")
+
+	airfield_wwii_inst.starts_under_construction = true
+	root.add_child(airfield_wwii_inst)
+	airfield_wwii_inst._ready()
+
+	# Emergencia vertical desde el 8%
+	airfield_wwii_inst._actualizar_progreso_construccion(0.0)
+	airfield_wwii_inst._actualizar_progreso_construccion(50.0)
+	airfield_wwii_inst._actualizar_progreso_construccion(100.0)
+	assert(airfield_wwii_inst.esta_construido == true, "Aeródromo WWII debe completarse al 100%% de progreso")
+
+	# Cola de producción de Caza Monoplano P-51
+	var rm_t89: GlobalResourceManager = root.get_node_or_null("ResourceManager") as GlobalResourceManager
+	if not is_instance_valid(rm_t89):
+		rm_t89 = GlobalResourceManager.new()
+		rm_t89.name = "ResourceManager"
+		root.add_child(rm_t89)
+	rm_t89.era_actual = 8
+	rm_t89.resources["iron"] = 2000
+	rm_t89.resources["gold"] = 2000
+	rm_t89.resources["wood"] = 1000
+	rm_t89.max_population = 50
+	rm_t89.current_population = 0
+	airfield_wwii_inst.resource_manager = rm_t89
+
+	var train_caza_ok: bool = airfield_wwii_inst.call("entrenar_unidad", "caza_helice_era8")
+	assert(train_caza_ok == true or airfield_wwii_inst.get("production_queue").size() > 0, "Aeródromo WWII debe encolar Caza Monoplano P-51 en Era 8")
+
+	# Silo Nuclear ICBM
+	var nuke_silo_script: GDScript = load("res://scripts/buildings/nuke_silo_era8_3d.gd") as GDScript
+	var nuke_silo_inst: BuildingBase3D = nuke_silo_script.new() as BuildingBase3D
+	assert(nuke_silo_inst is Barracks3D, "NukeSilo_Era8_3D debe heredar directamente de Barracks3D")
+	assert(nuke_silo_inst is BuildingBase3D, "NukeSilo_Era8_3D debe heredar de BuildingBase3D")
+
+	nuke_silo_inst.starts_under_construction = true
+	root.add_child(nuke_silo_inst)
+	nuke_silo_inst._ready()
+
+	nuke_silo_inst._actualizar_progreso_construccion(0.0)
+	nuke_silo_inst._actualizar_progreso_construccion(100.0)
+	assert(nuke_silo_inst.esta_construido == true, "Silo Nuclear debe completarse al 100%% de progreso")
+
+	nuke_silo_inst.resource_manager = rm_t89
+	var train_nuke_ok: bool = nuke_silo_inst.call("entrenar_unidad", "misil_nuclear_icbm")
+	assert(train_nuke_ok == true or nuke_silo_inst.get("production_queue").size() > 0, "Silo Nuclear debe encolar Misil ICBM en Era 8")
+
+	airfield_wwii_inst.free()
+	nuke_silo_inst.free()
+	print("✅ Test 89 Superado: Herencia limpia de Aeródromo WWII y Silo Nuclear desde Barracks3D, emergencia 8% y colas de producción certificadas.")
+
+
+	# ─── TEST 90: Detonación Colosal ICBM (Radio 18m, 9999 HP Letal, Zona DoT 10 HP/s e Inmunidad Hazmat) ───
+	print("\n--- TEST 90: Detonación Colosal ICBM y Área Residual Radioactiva ---")
+	var nuke_silo_t90: BuildingBase3D = nuke_silo_script.new() as BuildingBase3D
+	root.add_child(nuke_silo_t90)
+	nuke_silo_t90._ready()
+
+	# Víctima cercana dentro de los 18m (a 6.0m de origen)
+	var vic_close_t90 := Soldier3D.new()
+	vic_close_t90.name = "SoldadoCercanoICBM"
+	root.add_child(vic_close_t90)
+	vic_close_t90._ready()
+	vic_close_t90.salud_actual = 500.0
+	vic_close_t90.position = Vector3(6.0, 0, 0)
+
+	# Víctima lejana fuera de los 18m (a 28.0m de origen)
+	var vic_far_t90 := Soldier3D.new()
+	vic_far_t90.name = "SoldadoLejanoICBM"
+	root.add_child(vic_far_t90)
+	vic_far_t90._ready()
+	vic_far_t90.salud_actual = 500.0
+	vic_far_t90.position = Vector3(28.0, 0, 0)
+
+	# Disparar misil ICBM hacia Vector3(0, 0, 0)
+	var det_res: Dictionary = nuke_silo_t90.call("disparar_misil_icbm", Vector3(0, 0, 0))
+	assert(abs(float(nuke_silo_t90.get("radio_detonacion")) - 18.0) < 0.01, "Silo debe poseer radio de detonación de 18.0 metros")
+	assert(abs(float(nuke_silo_t90.get("dano_letal")) - 9999.0) < 0.01, "Silo debe infligir daño letal instantáneo de 9999.0 HP")
+
+	# Comprobación del daño letal instantáneo
+	assert(vic_close_t90.salud_actual == 0.0, "Unidad a 6.0m debe recibir muerte instantánea con 9999 HP de daño")
+	assert(vic_far_t90.salud_actual == 500.0, "Unidad a 28.0m no debe sufrir daño fuera del radio de 18.0m")
+
+	# Área residual radioactiva DoT (10 HP/s por 15.0s)
+	var zona_rad_node = det_res.get("zona_radioactiva")
+	assert(is_instance_valid(zona_rad_node), "El disparo del ICBM debe desplegar la zona residual radioactiva")
+	assert(abs(float(zona_rad_node.get("duracion_restante")) - 15.0) < 0.01, "Área radioactiva debe durar 15.0 segundos")
+	assert(abs(float(zona_rad_node.get("dps_radiacion")) - 10.0) < 0.01, "Área radioactiva debe infligir 10.0 HP/s")
+
+	# Unidad normal sufre 10 HP/s
+	var norm_soldier_t90 := Soldier3D.new()
+	norm_soldier_t90.name = "SoldadoComunRadioactivo"
+	root.add_child(norm_soldier_t90)
+	norm_soldier_t90._ready()
+	norm_soldier_t90.salud_actual = 100.0
+
+	var dmg_recibido_norm: float = zona_rad_node.call("procesar_dano_unidad", norm_soldier_t90)
+	assert(abs(dmg_recibido_norm - 10.0) < 0.01, "Unidad convencional debe recibir 10 HP/s de daño radioactivo")
+	assert(abs(norm_soldier_t90.salud_actual - 90.0) < 0.01, "Salud de unidad convencional debe decrecer en 10 HP")
+
+	# HazmatWorker_Era8 posee inmunidad absoluta y no sufre daño (0 HP)
+	var hazmat_t90: Soldier3D = hazmat_script.new() as Soldier3D
+	root.add_child(hazmat_t90)
+	hazmat_t90._ready()
+	hazmat_t90.salud_actual = 160.0
+	assert(hazmat_t90.is_radiation_immune == true, "HazmatWorker debe poseer is_radiation_immune = true")
+
+	var dmg_recibido_hazmat: float = zona_rad_node.call("procesar_dano_unidad", hazmat_t90)
+	assert(dmg_recibido_hazmat == 0.0, "HazmatWorker debe mitigar el 100%% del daño radioactivo (0 de daño recibido)")
+	assert(abs(hazmat_t90.salud_actual - 160.0) < 0.01, "Salud de HazmatWorker no debe verse alterada en la zona radioactiva")
+
+	nuke_silo_t90.free()
+	vic_close_t90.free()
+	vic_far_t90.free()
+	norm_soldier_t90.free()
+	hazmat_t90.free()
+	if is_instance_valid(zona_rad_node):
+		zona_rad_node.free()
+	print("✅ Test 90 Superado: Detonación colosal ICBM (radio 18m, 9999 HP letal, área residual DoT 10 HP/s por 15s e inmunidad absoluta HazmatWorker) certificada.")
+
+
 	print("\n========================================================")
 	print(" ⭐ TODOS LOS TESTS COMPLETADOS SATISFACTORIAMENTE (100%) ")
 	print("========================================================\n")

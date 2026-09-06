@@ -173,11 +173,14 @@ const WEAPON_STRING_MAP: Dictionary = {
 	"gatling":    WeaponType.GUNPOWDER,
 	"musket":     WeaponType.GUNPOWDER,
 	"rifle":      WeaponType.GUNPOWDER,
+	"sniper":     WeaponType.GUNPOWDER,
 	"machinegun": WeaponType.GUNPOWDER,
 	"bomb":       WeaponType.EXPLOSIVE,
 	"grenade":    WeaponType.EXPLOSIVE,
 	"rocket":     WeaponType.EXPLOSIVE,
 	"missile":    WeaponType.EXPLOSIVE,
+	"nuclear":    WeaponType.EXPLOSIVE,
+	"icbm":       WeaponType.EXPLOSIVE,
 	"plasma":     WeaponType.ENERGY,
 	"laser":      WeaponType.ENERGY,
 	"ion":        WeaponType.ENERGY,
@@ -341,6 +344,39 @@ static func calcular_dano(
 			)
 			if is_building_target_st:
 				final_damage *= 2.5
+
+		# Multiplicador oficial Era 8: GISoldier_Era8 (x1.25) contra infantería ligera de eras anteriores
+		var is_gi: bool = (att_id == "gi_soldier_era8" or "gi_soldier" in att_name or attacker.is_in_group("gi_soldiers"))
+		if is_gi:
+			var is_past_infantry: bool = (
+				(target.is_in_group("infantry_3d") or target.is_in_group("military_units")) and
+				not target.is_in_group("gi_soldiers") and not "gi_soldier" in target.name.to_lower()
+			)
+			if is_past_infantry:
+				final_damage *= 1.25
+
+		# Multiplicador oficial Era 8: Sniper_Era8 (x3.0) contra civiles y sacerdotes
+		var is_sniper: bool = (att_id == "sniper_era8" or "sniper" in att_name or attacker.is_in_group("snipers"))
+		if is_sniper:
+			var is_civil_or_priest: bool = (
+				target.is_in_group("villagers") or target.is_in_group("priests") or
+				target.is_in_group("prophets") or "villager" in target.name.to_lower() or
+				"priest" in target.name.to_lower() or "aldeano" in target.name.to_lower() or
+				"sacerdote" in target.name.to_lower()
+			)
+			if is_civil_or_priest:
+				final_damage *= 3.0
+
+		# Multiplicador oficial Era 8: Tanque_Sherman_T34 (x1.50) contra camiones e infantería mecanizada
+		var is_sherman: bool = (att_id == "tanque_sherman_t34" or "sherman" in att_name or "t34" in att_name or attacker.is_in_group("shermans"))
+		if is_sherman:
+			var is_truck_or_mechanized: bool = (
+				target.is_in_group("transports") or target.is_in_group("transports_3d") or
+				target.is_in_group("camiones") or "camion" in target.name.to_lower() or
+				"truck" in target.name.to_lower()
+			)
+			if is_truck_or_mechanized:
+				final_damage *= 1.50
 
 	# Mitigación táctica Testudo del Legionario Romano contra proyectiles
 	if is_instance_valid(target) and target.has_method("aplicar_mitigacion_testudo"):

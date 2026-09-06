@@ -111,6 +111,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"train_time": 9.0, "era_min": 7, "era_max": 8,
 		"scene_path": "res://scenes/units/doughboy_era7_3d.tscn"
 	},
+	"gi_soldier_era8": {
+		"name": "Soldado GI WWII", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 110, "iron": 80, "gold": 40},
+		"train_time": 8.0, "era_min": 8, "era_max": 9,
+		"scene_path": "res://scenes/units/gi_soldier_era8_3d.tscn"
+	},
+	"sniper_era8": {
+		"name": "Tirador de Élite WWII", "building_type": "barracks",
+		"type": "ranged", "cost": {"food": 120, "iron": 100, "gold": 80},
+		"train_time": 11.0, "era_min": 8, "era_max": 9,
+		"scene_path": "res://scenes/units/sniper_era8_3d.tscn"
+	},
+	"hazmat_worker_era8": {
+		"name": "Técnico Biológico Hazmat", "building_type": "barracks",
+		"type": "civilian", "cost": {"food": 90, "gold": 60},
+		"train_time": 7.0, "era_min": 8, "era_max": 9,
+		"scene_path": "res://scenes/units/hazmat_worker_era8_3d.tscn"
+	},
 	"soldado_asalto": {
 		"name": "Soldado de Asalto Táctico", "building_type": "barracks",
 		"type": "ranged", "cost": {"food": 130, "iron": 100},
@@ -338,6 +356,24 @@ const CATALOGO_UNIDADES: Dictionary = {
 		"type": "aircraft", "cost": {"wood": 150, "iron": 120, "gold": 140},
 		"train_time": 15.0, "era_min": 7, "era_max": 8,
 		"scene_path": "res://scenes/units/biplano_fokker_era7_3d.tscn"
+	},
+	"tanque_sherman_t34": {
+		"name": "Tanque Sherman T-34", "building_type": "factory",
+		"type": "siege", "cost": {"iron": 260, "gold": 160},
+		"train_time": 16.0, "era_min": 8, "era_max": 9,
+		"scene_path": "res://scenes/units/tanque_sherman_t34_3d.tscn"
+	},
+	"caza_helice_era8": {
+		"name": "Caza Monoplano P-51", "building_type": "airfield",
+		"type": "aircraft", "cost": {"iron": 160, "gold": 150, "wood": 80},
+		"train_time": 14.0, "era_min": 8, "era_max": 9,
+		"scene_path": "res://scenes/units/caza_helice_era8_3d.tscn"
+	},
+	"misil_nuclear_icbm": {
+		"name": "Misil Nuclear ICBM", "building_type": "nuke_silo",
+		"type": "siege", "cost": {"iron": 800, "gold": 1000},
+		"train_time": 45.0, "era_min": 8, "era_max": 9,
+		"scene_path": "res://scenes/buildings/NukeSilo_Era8_3d.tscn"
 	},
 	"ariete_primitivo": {
 		"name": "Ariete de Tronco Primitivo", "building_type": "siege_workshop",

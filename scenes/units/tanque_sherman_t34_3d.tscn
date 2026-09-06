@@ -1,0 +1,35 @@
+[gd_scene load_steps=5 format=3 uid="uid://tanque_sherman_t34_3d_01"]
+
+[ext_resource type="Script" path="res://scripts/units/tanque_sherman_t34_3d.gd" id="1_sh8"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_sh8"]
+size = Vector3(2.6, 2.0, 4.4)
+
+[sub_resource type="BoxMesh" id="BoxMesh_sh8_body"]
+size = Vector3(2.4, 1.1, 4.2)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sh8_mat"]
+albedo_color = Color(0.3, 0.35, 0.25, 1)
+
+[node name="Tanque_Sherman_T34" type="CharacterBody3D"]
+collision_layer = 2
+collision_mask = 3
+script = ExtResource("1_sh8")
+unit_id = "tanque_sherman_t34"
+unit_name = "Tanque Sherman T-34"
+attack_type = "ranged"
+weapon_type = "cannon"
+impact_type = "GUN"
+projectile_type = "bullet"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.0, 0)
+shape = SubResource("BoxShape3D_sh8")
+
+[node name="ProjectileMuzzle" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.4, -2.4)
+
+[node name="ChassisMesh" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0)
+mesh = SubResource("BoxMesh_sh8_body")
+surface_material_override/0 = SubResource("StandardMaterial3D_sh8_mat")

@@ -391,6 +391,10 @@ func aplicar_supresion(duracion: float = 2.0) -> void:
 		is_suppressed = false
 		_speed = orig_speed
 
+var is_radiation_immune: bool = false
+var is_invisible: bool = false
+var is_civilian: bool = false
+
 var is_on_fire: bool = false
 var damage_modifier: float = 1.0
 
